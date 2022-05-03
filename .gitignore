@@ -3,3 +3,10 @@
 *.a
 *.o
 *.out
+
+cs_ssa
+
+*.output
+*.tab.c
+*.tab.h
+scan.c
