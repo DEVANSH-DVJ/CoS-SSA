@@ -1,0 +1,46 @@
+listpaths
+=========
+
+For usage, please give the comment "listpaths --help". The default input 
+is stdin and the default output is sdtout. Thus the command 
+"listpaths < in.1" works.
+
+A sample input is provided in file in.1 and the corresponding output for
+options "-l 25 -d 4 -p" is provided in the file out.1.
+
+The input is a collection of procedures. The structure of a procedure is
+
+ Start NAME StatementList EdgeList End
+
+There must be exactly one procedure with the name "main".
+
+
+There are three kinds of statements:
+
+        Assignment with binary  expression (or +,-,*,/) on  the RHS. The
+        operands on the RHS may be integers or variables.
+
+        Copy  statements. The  operands on  the  RHS may  be integer  or
+        variable.
+
+        Call statements for parameterless procedures.
+
+Each statement  is preceded  by a  statement label  ending with  a ":"..
+Label must be greater than 0 Label  0 is reserved for empty call string.
+(i.e. call to the main by the OS)                                      .
+
+Each edge in the edge list is provided as "n -> m".
+
+Comments begin with "//" and extend up tp the end of the line.
+
+Disclaimers:
+
+        - It is assumed  that the nodes listed with  the statements and
+          the  edges  provided,  are consistent with  each  other. The
+          program does not try to check this as of now                 
+
+        - It is assumed that the node labels are mutually exclusive even
+          across procedures. No check for this has been made.
+
+	
+
