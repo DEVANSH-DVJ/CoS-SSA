@@ -1,0 +1,50 @@
+============================
+Begin Procedure main
+----------------------------
+Node 1: a = b + c	 | Successor nodes: 2, 
+Node 2: a = b	 | Successor nodes: 3, 
+Node 3: call P	 | Successor nodes: 4, 
+Node 4: b = a	 | Successor nodes: 5, 
+Node 5: a = 10	 | Successor nodes: 
+----------------------------
+End Procedure main
+============================
+============================
+Begin Procedure P
+----------------------------
+Node 6: x = y + 1	 | Successor nodes: 7, 
+Node 7: x = y	 | Successor nodes: 8, 
+Node 8: call P	 | Successor nodes: 9, 
+Node 9: x = w	 | Successor nodes: 
+----------------------------
+End Procedure P
+============================
+---------------------------------------------------
+Listing all traces upto length=25 and call depth=4
+Each line in a trace has the format "[call_string] node_number: statement" 
+---------------------------------------------------
+Path #1
+  [] 1: a = b + c
+  [] 2: a = b
+    [3] 6: x = y + 1
+    [3] 7: x = y
+      [3.8] 6: x = y + 1
+      [3.8] 7: x = y
+        [3.8.8] 6: x = y + 1
+        [3.8.8] 7: x = y
+          [3.8.8.8] 6: x = y + 1
+          [3.8.8.8] 7: x = y
+            [3.8.8.8.8] 6: x = y + 1
+            [3.8.8.8.8] 7: x = y
+              [3.8.8.8.8.8] 6: x = y + 1
+              [3.8.8.8.8.8] 7: x = y
+              [3.8.8.8.8.8] 8: call P
+              [3.8.8.8.8.8] 9: x = w
+            [3.8.8.8.8] 9: x = w
+          [3.8.8.8] 9: x = w
+        [3.8.8] 9: x = w
+      [3.8] 9: x = w
+    [3] 9: x = w
+  [] 4: b = a
+  [] 5: a = 10
+

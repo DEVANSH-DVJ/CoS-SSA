@@ -1,0 +1,8 @@
+- rename the program to list_paths
+- better error messages
+- check that the numbers included in edge list exist as node labels
+- check that all nodes are included in the edge list either as successors or precedessors
+
+
+
+
