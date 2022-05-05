@@ -5,9 +5,5 @@
 *.out
 
 cs_ssa
-listpaths
-
-*.output
-*.tab.c
-*.tab.h
-scan.c
+y.*
+lex.*
