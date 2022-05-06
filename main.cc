@@ -7,6 +7,8 @@
 
 using namespace std;
 
+#include "argparse.hh"
+
 #include "y.tab.h"
 
 extern int yylex(void);
@@ -24,7 +26,32 @@ void cleanup(const char *msg) {
 }
 
 int main(int argc, char **argv) {
+
+  // Default arguments
+  struct arguments arguments;
+
+  arguments.visualize = 0;
+
+  argp_parse(&argp, argc, argv, 0, 0, &arguments);
+
+  char *input_file = (char *)arguments.input_file.c_str();
+
+  FILE *in_file = fopen(input_file, "r");
+  if (in_file == NULL) {
+    printf("Error opening file: %s\n", input_file);
+    exit(1);
+  }
+
+  FILE *out_file = fopen("/dev/null", "w");
+  yyset_in(in_file);
+  yyset_out(out_file);
+
   yyparse();
+
+  if (arguments.visualize) {
+    cout << "Visualizing..." << endl;
+  }
+
   fclose(yyout);
 
   exit(0);
