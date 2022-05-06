@@ -10,7 +10,7 @@ all: $(TGT)
 $(TGT): $(OBJ)
 	$(CPP) $(OBJ) -o $(TGT) -ly -ll
 
-main.o: main.cc y.tab.h
+main.o: main.cc argparse.hh y.tab.h
 	$(CPP) -c main.cc
 
 y.tab.o y.tab.h: parse.y
