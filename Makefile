@@ -1,7 +1,7 @@
 
 CPP=g++
 TGT=cs_ssa
-OBJ=main.o lex.yy.o y.tab.o error.o program.o procedure.o node.o opd.o
+OBJ=main.o lex.yy.o y.tab.o error.o program.o procedure.o edge.o node.o opd.o
 YACC=bison
 LEX=flex
 
@@ -29,6 +29,9 @@ program.o: program.cc program.hh procedure.o
 
 procedure.o: procedure.cc procedure.hh node.o
 	$(CPP) -c procedure.cc
+
+edge.o: edge.cc edge.hh node.o
+	$(CPP) -c edge.cc
 
 node.o: node.cc node.hh opd.o
 	$(CPP) -c node.cc
