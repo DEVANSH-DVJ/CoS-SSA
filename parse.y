@@ -61,25 +61,49 @@
 /* Program */
 Program
   : ProcList
+  {
+    $$ = new Program($1);
+  }
 ;
 
 ProcList
   : Proc
+  {
+    $$ = new list<Procedure *>();
+    $$->push_back($1);
+  }
   | ProcList Proc
+  {
+    $$ = $1;
+    $$->push_back($2);
+  }
 ;
 
 /* Procedure */
 
 Proc
   : StartStmt StmtList EndStmt EdgeList
+  {
+    string proc_name = ((TerminalNode *)$1)->name;
+    $$ = new Procedure(proc_name);
+    ((TerminalNode *)$3)->name = proc_name;
+    $$->stmts->push_back($1);
+    $$->stmts->splice($$->stmts->end(), *$2);
+    $$->stmts->push_back($3);
+  }
 ;
 
-StartStmt
-  : NUM COLON START ID
-;
-
-EndStmt
-  : NUM COLON END
+StmtList
+  : Stmt
+  {
+    $$ = new list<Node *>();
+    $$->push_back($1);
+  }
+  | StmtList Stmt
+  {
+    $$ = $1;
+    $$->push_back($2);
+  }
 ;
 
 EdgeList
@@ -87,17 +111,35 @@ EdgeList
   | Edges EOS
 ;
 
-StmtList
-  : Stmt
-  | StmtList Stmt
+/* Statements */
+
+StartStmt
+  : NUM COLON START ID
+  {
+    $$ = new TerminalNode($1, start_stmt, *$4);
+  }
 ;
 
-/* Statements */
+EndStmt
+  : NUM COLON END
+  {
+    $$ = new TerminalNode($1, end_stmt, "");
+  }
+;
 
 Stmt
   : NUM COLON ID ASSIGN Opd OP Opd
+  {
+    $$ = new ExprNode($1, *$6, new VarOpd(*$3), $5, $7);
+  }
   | NUM COLON ID ASSIGN Opd
+  {
+    $$ = new CopyNode($1, new VarOpd(*$3), $5);
+  }
   | NUM COLON CALL ID
+  {
+    $$ = new CallNode($1, *$4);
+  }
 ;
 
 /* Edges */
@@ -115,7 +157,13 @@ Edge
 
 Opd
   : NUM
+  {
+    $$ = new IntOpd($1);
+  }
   | ID
+  {
+    $$ = new VarOpd(*$1);
+  }
 ;
 
 %%
