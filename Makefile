@@ -1,7 +1,7 @@
 
 CPP=g++
 TGT=cs_ssa
-OBJ=main.o lex.yy.o y.tab.o
+OBJ=main.o lex.yy.o y.tab.o error.o
 YACC=bison
 LEX=flex
 
@@ -20,6 +20,9 @@ y.tab.o y.tab.h: parse.y
 lex.yy.o: scan.l y.tab.h
 	$(LEX) --yylineno scan.l
 	$(CPP) -c lex.yy.c
+
+error.o: error.cc error.hh
+	$(CPP) -c error.cc
 
 clean:
 	rm -f $(TGT)
