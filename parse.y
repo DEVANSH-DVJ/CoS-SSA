@@ -6,6 +6,7 @@
   #include "program.hh"
   #include "procedure.hh"
   #include "node.hh"
+  #include "edge.hh"
 
   using namespace std;
 
@@ -24,6 +25,8 @@
   Procedure *procedure;
   list<Node *> *nodes;
   Node *node;
+  list<Edge *> *edges;
+  Edge *edge;
   Opd *opd;
 }
 
@@ -51,9 +54,12 @@
 %type <procedures> ProcList
 %type <procedure> Proc
 %type <nodes> StmtList
+%type <edges> EdgeList
 %type <node> StartStmt
 %type <node> EndStmt
 %type <node> Stmt
+%type <edges> Edges
+%type <edge> Edge
 %type <opd> Opd
 
 %%
@@ -108,7 +114,13 @@ StmtList
 
 EdgeList
   : EOS
+  {
+    $$ = new list<Edge *>();
+  }
   | Edges EOS
+  {
+    $$ = $1;
+  }
 ;
 
 /* Statements */
@@ -146,11 +158,22 @@ Stmt
 
 Edges
   : Edge
+  {
+    $$ = new list<Edge *>();
+    $$->push_back($1);
+  }
   | Edges COMMA Edge
+  {
+    $$ = $1;
+    $$->push_back($3);
+  }
 ;
 
 Edge
   : NUM ARROW NUM
+  {
+    $$ = new Edge($1, $3);
+  }
 ;
 
 /* Operand */

@@ -7,6 +7,7 @@
     #include "program.hh"
     #include "procedure.hh"
     #include "node.hh"
+    #include "edge.hh"
     #include "y.tab.h"
 
 %}
