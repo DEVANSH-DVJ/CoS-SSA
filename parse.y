@@ -7,8 +7,6 @@
 
   extern int yylex(void);
 
-  extern FILE *yyout;
-  extern char *yytext;
   extern int yylineno;
   extern int yyerror(const char *);
   extern void cleanup(const char *);
@@ -16,21 +14,24 @@
 %}
 %union{
   string *name;
-  int num;
+  int value;
 }
-
 
 %token EOS
 %token COLON
 %token ARROW
 %token COMMA
+
 %token CALL
 %token START
 %token END
+
 %token ASSIGN
 %token <name> OP
+
 %token <name> ID
-%token <num> NUM
+%token <value> NUM
+
 %token UNKNOWN
 
 %left '+' '-'
@@ -38,6 +39,7 @@
 
 %%
 
+/* Program */
 Program
   : ProcList
 ;
@@ -47,11 +49,23 @@ ProcList
   | ProcList Proc
 ;
 
+/* Procedure */
+
 Proc
+  : StartStmt StmtList EndStmt EdgeList
+;
+
+StartStmt
   : NUM COLON START ID
-  StmtList
-  NUM COLON END
-  EdgeList EOS
+;
+
+EndStmt
+  : NUM COLON END
+;
+
+EdgeList
+  : EOS
+  | Edges EOS
 ;
 
 StmtList
@@ -59,21 +73,15 @@ StmtList
   | StmtList Stmt
 ;
 
+/* Statements */
+
 Stmt
   : NUM COLON ID ASSIGN Opd OP Opd
   | NUM COLON ID ASSIGN Opd
   | NUM COLON CALL ID
 ;
 
-Opd
-  : NUM
-  | ID
-;
-
-EdgeList
-  : /*EMPTY*/
-  | Edges
-;
+/* Edges */
 
 Edges
   : Edge
@@ -82,6 +90,13 @@ Edges
 
 Edge
   : NUM ARROW NUM
+;
+
+/* Operand */
+
+Opd
+  : NUM
+  | ID
 ;
 
 %%

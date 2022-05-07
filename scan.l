@@ -38,7 +38,7 @@ ignore [ \t\n]
   /* Identifiers */
 
 "=" { return ASSIGN; }
-{operator} { yylval.name= new string(yytext); return OP; }
+{operator} { yylval.name = new string(yytext); return OP; }
 
   /* Identifiers */
 
@@ -46,7 +46,7 @@ ignore [ \t\n]
 
   /* Constants */
 
-{digit}+ { yylval.num = atoi(yytext); return NUM; }
+{digit}+ { yylval.value = atoi(yytext); return NUM; }
 
   /* Rest */
 
