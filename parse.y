@@ -16,6 +16,8 @@
   extern int yyerror(const char *);
   extern void cleanup(const char *);
 
+  extern bool viz;
+
 %}
 %union{
   string *name;
@@ -69,6 +71,7 @@ Program
   : ProcList
   {
     $$ = new Program($1);
+    $$->finish(viz);
   }
 ;
 

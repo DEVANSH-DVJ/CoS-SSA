@@ -20,6 +20,8 @@ extern void yyset_in(FILE *);
 extern void yyset_out(FILE *);
 extern FILE *yyout;
 
+bool viz;
+
 void cleanup(const char *msg) {
   cerr << msg << endl;
 
@@ -50,11 +52,14 @@ int main(int argc, char **argv) {
   yyset_in(in_file);
   yyset_out(out_file);
 
-  yyparse();
-
   if (arguments.visualize) {
+    viz = true;
     cout << "Visualizing..." << endl;
+  } else {
+    viz = false;
   }
+
+  yyparse();
 
   fclose(yyout);
 
