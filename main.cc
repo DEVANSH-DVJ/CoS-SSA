@@ -9,6 +9,9 @@ using namespace std;
 
 #include "argparse.hh"
 
+#include "program.hh"
+#include "procedure.hh"
+#include "node.hh"
 #include "y.tab.h"
 
 extern int yylex(void);

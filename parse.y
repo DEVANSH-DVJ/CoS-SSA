@@ -3,6 +3,10 @@
   #include <iostream>
   #include <string>
 
+  #include "program.hh"
+  #include "procedure.hh"
+  #include "node.hh"
+
   using namespace std;
 
   extern int yylex(void);
@@ -15,6 +19,12 @@
 %union{
   string *name;
   int value;
+  Program *program;
+  list<Procedure *> *procedures;
+  Procedure *procedure;
+  list<Node *> *nodes;
+  Node *node;
+  Opd *opd;
 }
 
 %token EOS
@@ -36,6 +46,15 @@
 
 %left '+' '-'
 %left '*' '/'
+
+%type <program> Program
+%type <procedures> ProcList
+%type <procedure> Proc
+%type <nodes> StmtList
+%type <node> StartStmt
+%type <node> EndStmt
+%type <node> Stmt
+%type <opd> Opd
 
 %%
 

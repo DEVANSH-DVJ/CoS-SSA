@@ -4,6 +4,9 @@
 
     #include <string>
 
+    #include "program.hh"
+    #include "procedure.hh"
+    #include "node.hh"
     #include "y.tab.h"
 
 %}
