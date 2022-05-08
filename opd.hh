@@ -21,7 +21,7 @@ public:
   Opd(OpdType type);
   ~Opd();
 
-  virtual void visualize() = 0;
+  virtual string to_str() = 0;
 };
 
 class IntOpd : public Opd {
@@ -31,7 +31,7 @@ public:
   IntOpd(int value);
   ~IntOpd();
 
-  void visualize();
+  string to_str();
 };
 
 class VarOpd : public Opd {
@@ -41,7 +41,7 @@ public:
   VarOpd(string name);
   ~VarOpd();
 
-  void visualize();
+  string to_str();
 };
 
 #endif

@@ -22,11 +22,12 @@ class Node {
 public:
   int node_num;
   StmtType type;
+  string stmt;
 
   Node(int node_num, StmtType type);
   ~Node();
 
-  virtual void visualize() = 0;
+  void visualize();
 };
 
 class TerminalNode : public Node {
@@ -35,8 +36,6 @@ public:
 
   TerminalNode(int node_num, StmtType type, string name);
   ~TerminalNode();
-
-  void visualize();
 };
 
 class CallNode : public Node {
@@ -45,8 +44,6 @@ public:
 
   CallNode(int node_num, string callee);
   ~CallNode();
-
-  void visualize();
 };
 
 class CopyNode : public Node {
@@ -56,8 +53,6 @@ public:
 
   CopyNode(int node_num, Opd *lhs, Opd *rhs);
   ~CopyNode();
-
-  void visualize();
 };
 
 class ExprNode : public Node {
@@ -69,8 +64,6 @@ public:
 
   ExprNode(int node_num, string op, Opd *lopd, Opd *ropd1, Opd *ropd2);
   ~ExprNode();
-
-  void visualize();
 };
 
 #endif
