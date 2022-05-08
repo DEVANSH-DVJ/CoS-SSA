@@ -1,5 +1,6 @@
 #include "edge.hh"
 
+extern fstream *gv_fd;
 extern void cleanup(const char *);
 
 Edge::Edge(int src_num, int dst_num) {
@@ -12,6 +13,6 @@ Edge::Edge(int src_num, int dst_num) {
 Edge::~Edge() {}
 
 void Edge::visualize() {
-  cout << "Edge from " << this->src->node_num << " to " << this->dst->node_num
-       << endl;
+  *gv_fd << "\t\tnode_" << this->src_num << " -> "
+          << "node_" << this->dst_num << ";" << endl;
 }
