@@ -93,9 +93,15 @@ ProcList
 Proc
   : StartStmt StmtList EndStmt EdgeList
   {
-    string proc_name = ((TerminalNode *)$1)->name;
+    string proc_name;
+    if (((TerminalNode *)$1)->name != ((TerminalNode *)$3)->name) {
+      cleanup("Procedure name mismatch in Start and End statements");
+    } else {
+      proc_name = ((TerminalNode *)$1)->name;
+    }
+
     $$ = new Procedure(proc_name);
-    ((TerminalNode *)$3)->name = proc_name;
+
     $$->stmts->push_back($1);
     $$->stmts->splice($$->stmts->end(), *$2);
     $$->stmts->push_back($3);
@@ -136,9 +142,9 @@ StartStmt
 ;
 
 EndStmt
-  : NUM COLON END
+  : NUM COLON END ID
   {
-    $$ = new TerminalNode($1, end_stmt, "");
+    $$ = new TerminalNode($1, end_stmt, *$4);
   }
 ;
 
