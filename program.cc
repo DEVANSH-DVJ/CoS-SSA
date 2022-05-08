@@ -1,5 +1,6 @@
 #include "program.hh"
 
+extern fstream *gv_fd;
 extern void cleanup(const char *);
 
 Program::Program(list<Procedure *> *procedures) {
@@ -13,11 +14,10 @@ Program::~Program() {
 }
 
 void Program::finish(bool viz) {
-  cout << "Syntax check finished." << endl;
   basic_check();
-  cout << "Semantic check finished." << endl;
-  if (viz)
+  if (viz) {
     visualize();
+  }
 }
 
 void Program::basic_check() {
@@ -28,4 +28,11 @@ void Program::basic_check() {
   }
 }
 
-void Program::visualize() { cout << "Visualization finished." << endl; }
+void Program::visualize() {
+  *gv_fd << "digraph G {" << endl;
+  for (list<Procedure *>::iterator it = procedures->begin();
+       it != procedures->end(); ++it) {
+    (*it)->visualize();
+  }
+  *gv_fd << "}" << endl;
+}
