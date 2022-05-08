@@ -16,6 +16,7 @@ class Program;
 class Program {
 public:
   list<Procedure *> *procedures;
+  list<string> *proc_names;
 
   Program(list<Procedure *> *procedures);
   ~Program();
