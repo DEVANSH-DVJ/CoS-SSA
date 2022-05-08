@@ -93,18 +93,11 @@ ProcList
 Proc
   : StartStmt StmtList EndStmt EdgeList
   {
-    string proc_name;
-    if (((TerminalNode *)$1)->name != ((TerminalNode *)$3)->name) {
-      cleanup("Procedure name mismatch in Start and End statements");
-    } else {
-      proc_name = ((TerminalNode *)$1)->name;
-    }
-
-    $$ = new Procedure(proc_name);
-
-    $$->stmts->push_back($1);
-    $$->stmts->splice($$->stmts->end(), *$2);
-    $$->stmts->push_back($3);
+    $$ = new Procedure();
+    $$->nodes->push_back($1);
+    $$->nodes->splice($$->nodes->end(), *$2);
+    $$->nodes->push_back($3);
+    $$->edges->splice($$->edges->end(), *$4);
   }
 ;
 
