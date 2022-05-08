@@ -21,7 +21,7 @@ void Procedure::basic_check() {
   }
 
   TerminalNode *start_node = (TerminalNode *)*this->nodes->begin();
-  TerminalNode *end_node = (TerminalNode *)*this->nodes->end();
+  TerminalNode *end_node = (TerminalNode *)*this->nodes->rbegin();
 
   if (start_node->type != start_stmt) {
     cleanup("Procedure has no start node.");
@@ -43,14 +43,18 @@ void Procedure::basic_check() {
   for (list<Edge *>::iterator it = this->edges->begin();
        it != this->edges->end(); ++it) {
     Edge *edge = *it;
-    if (edge->src->node_num == end_node->node_num) {
+    if (edge->src_num == end_node->node_num) {
       cleanup("End node can not be source.");
     }
-    if (edge->dst->node_num == start_node->node_num) {
+    if (edge->dst_num == start_node->node_num) {
       cleanup("Start node can not be destination.");
     }
-    edge->src = node_map->find(edge->src->node_num)->second;
-    edge->dst = node_map->find(edge->dst->node_num)->second;
+    if (edge->src_num == edge->dst_num) {
+      cleanup("Edge can not be self-loop.");
+    }
+
+    edge->src = node_map->find(edge->src_num)->second;
+    edge->dst = node_map->find(edge->dst_num)->second;
   }
 }
 
