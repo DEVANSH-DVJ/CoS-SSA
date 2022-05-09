@@ -1,6 +1,6 @@
 #include "node.hh"
 
-extern fstream *gv_fd;
+extern fstream *dot_fd;
 extern void cleanup(const char *);
 
 Node::Node(int node_num, StmtType type) {
@@ -9,7 +9,7 @@ Node::Node(int node_num, StmtType type) {
 }
 Node::~Node() {}
 void Node::visualize() {
-  *gv_fd << "\t\tnode_" << this->node_num << " [shape=box, label=\""
+  *dot_fd << "\t\tnode_" << this->node_num << " [shape=box, label=\""
           << this->node_num << ". " << this->stmt << "\"];" << endl;
 }
 

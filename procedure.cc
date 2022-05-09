@@ -1,6 +1,6 @@
 #include "procedure.hh"
 
-extern fstream *gv_fd;
+extern fstream *dot_fd;
 extern void cleanup(const char *);
 
 Procedure::Procedure() {
@@ -60,8 +60,8 @@ void Procedure::basic_check() {
 }
 
 void Procedure::visualize() {
-  *gv_fd << "\tsubgraph cluster_" << this->name << " {\n";
-  *gv_fd << "\t\tlabel = \"" << this->name << "\";\n";
+  *dot_fd << "\tsubgraph cluster_" << this->name << " {\n";
+  *dot_fd << "\t\tlabel = \"" << this->name << "\";\n";
   for (list<Node *>::iterator it = this->nodes->begin();
        it != this->nodes->end(); ++it) {
     (*it)->visualize();
@@ -70,5 +70,5 @@ void Procedure::visualize() {
        it != this->edges->end(); ++it) {
     (*it)->visualize();
   }
-  *gv_fd << "\t}\n\n";
+  *dot_fd << "\t}\n\n";
 }

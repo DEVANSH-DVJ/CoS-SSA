@@ -1,6 +1,8 @@
 #include "program.hh"
 
-extern fstream *gv_fd;
+extern string dot_file;
+extern string png_file;
+extern fstream *dot_fd;
 extern void cleanup(const char *);
 
 Program::Program(list<Procedure *> *procedures) {
@@ -17,6 +19,7 @@ void Program::finish(bool viz) {
   basic_check();
   if (viz) {
     visualize();
+    system(("dot -Tpng " + dot_file + " -o " + png_file).c_str());
   }
 }
 
@@ -29,10 +32,10 @@ void Program::basic_check() {
 }
 
 void Program::visualize() {
-  *gv_fd << "digraph G {" << endl;
+  *dot_fd << "digraph G {" << endl;
   for (list<Procedure *>::iterator it = procedures->begin();
        it != procedures->end(); ++it) {
     (*it)->visualize();
   }
-  *gv_fd << "}" << endl;
+  *dot_fd << "}" << endl;
 }

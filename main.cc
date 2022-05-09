@@ -23,37 +23,40 @@ extern FILE *yyout;
 bool viz;
 
 string tokens_file = "/dev/null";
-string gv_file = "/dev/null";
+string dot_file = "/dev/null";
+string png_file = "/dev/null";
 
-fstream *gv_fd;
+fstream *dot_fd;
 
 void cleanup(const char *msg) {
   cerr << msg << endl;
 
   yyout = freopen(NULL, "w", yyout);
 
-  gv_fd->close();
-  gv_fd->open(gv_file.c_str(), ios::out | ios::trunc);
+  dot_fd->close();
+  dot_fd->open(dot_file.c_str(), ios::out | ios::trunc);
 
   fclose(yyout);
-  gv_fd->close();
+  dot_fd->close();
 
   exit(1);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **ardot) {
 
   // Default arguments
   struct arguments arguments;
 
   arguments.visualize = 0;
 
-  argp_parse(&argp, argc, argv, 0, 0, &arguments);
+  argp_parse(&argp, argc, ardot, 0, 0, &arguments);
 
   char *input_file = (char *)arguments.input_file.c_str();
 
-  if (arguments.visualize)
-    gv_file = arguments.input_file + ".gv";
+  if (arguments.visualize) {
+    dot_file = arguments.input_file + ".dot";
+    png_file = arguments.input_file + ".png";
+  }
 
   FILE *in_file = fopen(input_file, "r");
   if (in_file == NULL) {
@@ -65,11 +68,10 @@ int main(int argc, char **argv) {
   yyset_in(in_file);
   yyset_out(out_file);
 
-  gv_fd = new fstream(gv_file.c_str(), ios::out | ios::trunc);
+  dot_fd = new fstream(dot_file.c_str(), ios::out | ios::trunc);
 
   if (arguments.visualize) {
     viz = true;
-    cout << "Visualizing..." << endl;
   } else {
     viz = false;
   }
