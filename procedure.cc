@@ -62,6 +62,7 @@ void Procedure::basic_check() {
 void Procedure::visualize() {
   *dot_fd << "\tsubgraph cluster_" << this->name << " {\n";
   *dot_fd << "\t\tlabel = \"" << this->name << "\";\n";
+  *dot_fd << "\t\tmargin = 20;\n";
   for (list<Node *>::iterator it = this->nodes->begin();
        it != this->nodes->end(); ++it) {
     (*it)->visualize();

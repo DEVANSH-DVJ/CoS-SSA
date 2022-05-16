@@ -9,8 +9,8 @@ Node::Node(int node_num, StmtType type) {
 }
 Node::~Node() {}
 void Node::visualize() {
-  *dot_fd << "\t\tnode_" << this->node_num << " [shape=box, label=\""
-          << this->node_num << ". " << this->stmt << "\"];" << endl;
+  *dot_fd << "\t\tnode_" << this->node_num << " [shape=box, xlabel=\""
+          << this->node_num << "\", label=\"" << this->stmt << "\"];" << endl;
 }
 
 TerminalNode::TerminalNode(int node_num, StmtType type, string name)
