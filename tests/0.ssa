@@ -3,8 +3,9 @@ main, P, Q, R, S, T;
 {
   1: START main;
   3: CALL P;
-  4: USEVAR = w;
-  6: z = INPUT;
+  4: w_4_1 = PHI(w_30_1, w_31_1); USEVAR = w_4_1;
+  4: w_4_2 = PHI(w_30_1, w_31_2); USEVAR = w_4_2;
+  6: z_6_1 = INPUT;
   7: CALL Q;
   8: END main;
 
@@ -18,7 +19,7 @@ main, P, Q, R, S, T;
 
 {
   9: START P;
-  10: z = INPUT;
+  10: z_10_1 = INPUT;
   11: CALL R;
   12: CALL S;
   13: END P;
@@ -32,9 +33,9 @@ main, P, Q, R, S, T;
 
 {
   14: START Q;
-  15: z = INPUT;
+  15: z_15_1 = INPUT;
   16: CALL R;
-  17: z = INPUT;
+  17: z_17_1 = INPUT;
   18: CALL S;
   19: END Q;
 
@@ -49,7 +50,7 @@ main, P, Q, R, S, T;
 
 {
   20: START R;
-  21: y = INPUT;
+  21: y_21_1 = INPUT;
   22: CALL T;
   23: END R;
 
@@ -60,7 +61,7 @@ main, P, Q, R, S, T;
 
 {
   24: START S;
-  25: y = INPUT;
+  25: y_25_1 = INPUT;
   26: CALL T;
   27: END S;
 
@@ -71,13 +72,19 @@ main, P, Q, R, S, T;
 
 {
   28: START T;
-  29: x = INPUT;
-  30: w = x + z;
-  31: w = y + z;
+  29: x_29_1 = INPUT;
+  30: w_30_1 = x_29_1 + z_10_1;
+  30: z_30_2 = PHI(z_6_1, z_15_1); w_30_2 = x_29_1 + z_30_2;
+  30: w_30_3 = x_29_1 + z_17_1;
+  31: w_31_1 = y_21_1 + z_10_1;
+  31: w_31_2 = y_25_1 + z_10_1;
+  31: z_31_3 = PHI(z_6_1, z_15_1); w_31_3 = y_21_1 + z_31_3;
+  31: w_31_4 = y_25_1 + z_17_1;
   32: END T;
 
   28->29;
+  28->31;
   29->30;
-  30->31;
+  30->32;
   31->32;
 }
