@@ -28,12 +28,16 @@ ignore [ \t\n]
 ":" { return COLON; }
 "->" { return ARROW; }
 "," { return COMMA; }
+"{" { return LBRACE; }
+"}" { return RBRACE; }
 
   /* Keywords */
 
-"call"|"Call" { return CALL; }
-"start"|"Start" { return START; }
-"end"|"End" { return END; }
+"START" { return START; }
+"END" { return END; }
+"CALL" { return CALL; }
+"INPUT" { return INPUT; }
+"USEVAR" { return USEVAR; }
 
   /* Identifiers */
 

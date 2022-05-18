@@ -22,10 +22,14 @@
 %token COLON
 %token ARROW
 %token COMMA
+%token LBRACE
+%token RBRACE
 
-%token CALL
 %token START
 %token END
+%token CALL
+%token INPUT
+%token USEVAR
 
 %token ASSIGN
 %token <name> OP
@@ -42,12 +46,12 @@
 
 /* Program */
 Program
-  : ProcDefList ProcList
+  : ProcDefList EOS ProcList
 ;
 
 ProcDefList
   : ID
-  | ProcDefList ID
+  | ProcDefList COMMA ID
 ;
 
 ProcList
@@ -58,44 +62,57 @@ ProcList
 /* Procedure */
 
 Proc
-  : StartStmt StmtList EndStmt EdgeList
+  : LBRACE StartNode NodeList EndNode EdgeList RBRACE
 ;
 
-StmtList
-  : Stmt
-  | StmtList Stmt
+NodeList
+  : Node
+  | NodeList Node
 ;
 
 EdgeList
-  : EOS
-  | Edges EOS
+  : Edge
+  | EdgeList Edge
 ;
 
 /* Statements */
 
-StartStmt
-  : NUM COLON START ID
+StartNode
+  : NUM COLON START ID EOS
 ;
 
-EndStmt
-  : NUM COLON END ID
+EndNode
+  : NUM COLON END ID EOS
 ;
 
-Stmt
-  : NUM COLON ID ASSIGN Opd OP Opd
-  | NUM COLON ID ASSIGN Opd
-  | NUM COLON CALL ID
+Node
+  : InputNode
+  | CallNode
+  | UseNode
+  | DepNode
+;
+
+CallNode
+  : NUM COLON CALL ID EOS
+;
+
+InputNode
+  : NUM COLON ID ASSIGN INPUT EOS
+;
+
+UseNode
+  : NUM COLON USEVAR ASSIGN ID EOS
+;
+
+DepNode
+  : NUM COLON ID ASSIGN Opd OP Opd EOS
+  | NUM COLON ID ASSIGN Opd EOS
 ;
 
 /* Edges */
 
-Edges
-  : Edge
-  | Edges COMMA Edge
-;
-
 Edge
-  : NUM ARROW NUM
+  : NUM ARROW NUM EOS
 ;
 
 /* Operand */
