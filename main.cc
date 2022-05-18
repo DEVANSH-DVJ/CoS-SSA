@@ -37,6 +37,8 @@ int main(int argc, char **argv) {
   struct arguments arguments;
 
   arguments.visualize = 0;
+  arguments.input_type = FILE_UNKNOWN;
+  arguments.input_file = "";
 
   argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
@@ -54,8 +56,16 @@ int main(int argc, char **argv) {
   }
 
   FILE *out_file = fopen(tokens_file.c_str(), "w");
-  ssa_set_in(in_file);
-  ssa_set_out(out_file);
+
+  if (arguments.input_type == FILE_CFG) {
+    cfg_set_in(in_file);
+    cfg_set_out(out_file);
+  } else if (arguments.input_type == FILE_SSA) {
+    ssa_set_in(in_file);
+    ssa_set_out(out_file);
+  } else {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Unknown input type");
+  }
 
   dot_fd = new fstream(dot_file.c_str(), ios::out | ios::trunc);
 
@@ -65,9 +75,17 @@ int main(int argc, char **argv) {
     viz = false;
   }
 
-  ssa_parse();
+  if (arguments.input_type == FILE_CFG) {
+    cfg_parse();
+  } else if (arguments.input_type == FILE_SSA) {
+    ssa_parse();
+  }
 
-  fclose(ssa_out);
+  if (arguments.input_type == FILE_CFG) {
+    fclose(cfg_out);
+  } else if (arguments.input_type == FILE_SSA) {
+    fclose(ssa_out);
+  }
 
   exit(0);
 }
