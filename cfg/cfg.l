@@ -1,21 +1,17 @@
 %{
 
+    #include <string>
     using namespace std;
 
-    #include <string>
-
-    #include "program.hh"
-    #include "procedure.hh"
-    #include "node.hh"
-    #include "edge.hh"
-    #include "y.tab.h"
+    #include "cfg.tab.h"
 
 %}
 
 %option noyywrap
+%option prefix="cfg_"
 
 digit [0-9]
-letter [a-zA-Z_]
+letter [a-zA-Z]
 operator [-+*/]
 ignore [ \t\n]
 
@@ -42,15 +38,15 @@ ignore [ \t\n]
   /* Identifiers */
 
 "=" { return ASSIGN; }
-{operator} { yylval.name = new string(yytext); return OP; }
+{operator} { cfg_lval.name = new string(cfg_text); return OP; }
 
   /* Identifiers */
 
-{letter}({letter}|{digit})* { yylval.name = new string(yytext); return ID; }
+{letter}+ { cfg_lval.name = new string(cfg_text); return ID; }
 
   /* Constants */
 
-{digit}+ { yylval.value = atoi(yytext); return NUM; }
+{digit}+ { cfg_lval.value = atoi(cfg_text); return NUM; }
 
   /* Rest */
 
