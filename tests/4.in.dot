@@ -1,13 +1,14 @@
 digraph G {
 	subgraph cluster_main {
 		label = "main";
-		node_1 [shape=box, label="1. Start main"];
-		node_2 [shape=box, label="2. a = 5"];
-		node_3 [shape=box, label="3. Call P"];
-		node_4 [shape=box, label="4. b = z - x"];
-		node_5 [shape=box, label="5. c = b"];
-		node_6 [shape=box, label="6. Call Q"];
-		node_7 [shape=box, label="7. End main"];
+		margin = 20;
+		node_1 [shape=box, xlabel="1", label="Start main"];
+		node_2 [shape=box, xlabel="2", label="a = 5"];
+		node_3 [shape=box, xlabel="3", label="Call P"];
+		node_4 [shape=box, xlabel="4", label="b = z - x"];
+		node_5 [shape=box, xlabel="5", label="c = b"];
+		node_6 [shape=box, xlabel="6", label="Call Q"];
+		node_7 [shape=box, xlabel="7", label="End main"];
 		node_1 -> node_5;
 		node_1 -> node_2;
 		node_2 -> node_3;
@@ -21,10 +22,11 @@ digraph G {
 
 	subgraph cluster_Q {
 		label = "Q";
-		node_8 [shape=box, label="8. Start Q"];
-		node_9 [shape=box, label="9. d = x + y"];
-		node_10 [shape=box, label="10. Call P"];
-		node_11 [shape=box, label="11. End Q"];
+		margin = 20;
+		node_8 [shape=box, xlabel="8", label="Start Q"];
+		node_9 [shape=box, xlabel="9", label="d = x + y"];
+		node_10 [shape=box, xlabel="10", label="Call P"];
+		node_11 [shape=box, xlabel="11", label="End Q"];
 		node_8 -> node_9;
 		node_9 -> node_10;
 		node_10 -> node_11;
@@ -32,9 +34,10 @@ digraph G {
 
 	subgraph cluster_P {
 		label = "P";
-		node_12 [shape=box, label="12. Start P"];
-		node_13 [shape=box, label="13. c = 10"];
-		node_14 [shape=box, label="14. End P"];
+		margin = 20;
+		node_12 [shape=box, xlabel="12", label="Start P"];
+		node_13 [shape=box, xlabel="13", label="c = 10"];
+		node_14 [shape=box, xlabel="14", label="End P"];
 		node_12 -> node_13;
 		node_13 -> node_14;
 	}
