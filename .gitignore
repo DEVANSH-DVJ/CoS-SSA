@@ -8,3 +8,5 @@
 cs_ssa
 cfg.scan.*
 cfg.tab.*
+ssa.scan.*
+ssa.tab.*
