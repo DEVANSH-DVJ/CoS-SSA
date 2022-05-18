@@ -3,7 +3,4 @@
 *.a
 *.o
 *.out
-
-cs_ssa
-y.*
-lex.*
+*.output
