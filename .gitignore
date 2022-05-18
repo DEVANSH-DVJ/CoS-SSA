@@ -4,3 +4,7 @@
 *.o
 *.out
 *.output
+
+cs_ssa
+cfg.scan.*
+cfg.tab.*
