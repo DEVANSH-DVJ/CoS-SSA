@@ -9,6 +9,7 @@ using namespace std;
 
 #include "argparse.hh"
 #include "cfg/cfg.tab.h"
+#include "ssa/ssa.tab.h"
 
 #include "headers.hh"
 
@@ -16,6 +17,11 @@ extern int cfg_lex(void);
 extern void cfg_set_in(FILE *);
 extern void cfg_set_out(FILE *);
 extern FILE *cfg_out;
+
+extern int ssa_lex(void);
+extern void ssa_set_in(FILE *);
+extern void ssa_set_out(FILE *);
+extern FILE *ssa_out;
 
 bool viz;
 
@@ -48,8 +54,8 @@ int main(int argc, char **argv) {
   }
 
   FILE *out_file = fopen(tokens_file.c_str(), "w");
-  cfg_set_in(in_file);
-  cfg_set_out(out_file);
+  ssa_set_in(in_file);
+  ssa_set_out(out_file);
 
   dot_fd = new fstream(dot_file.c_str(), ios::out | ios::trunc);
 
@@ -59,9 +65,9 @@ int main(int argc, char **argv) {
     viz = false;
   }
 
-  cfg_parse();
+  ssa_parse();
 
-  fclose(cfg_out);
+  fclose(ssa_out);
 
   exit(0);
 }
