@@ -1,0 +1,10 @@
+.vscode
+
+*.a
+*.o
+*.out
+*.output
+
+cs_ssa
+parse.tab.*
+scan.c

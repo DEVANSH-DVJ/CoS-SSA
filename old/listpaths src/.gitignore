@@ -1,0 +1,10 @@
+.vscode
+
+*.a
+*.o
+*.out
+*.output
+
+listpaths
+parse.tab.*
+scan.c
