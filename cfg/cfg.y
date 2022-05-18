@@ -18,26 +18,26 @@
 
 %define api.prefix {cfg_}
 
-%token EOS
-%token COLON
-%token ARROW
-%token COMMA
-%token LBRACE
-%token RBRACE
+%token CFG_EOS
+%token CFG_COLON
+%token CFG_ARROW
+%token CFG_COMMA
+%token CFG_LCB
+%token CFG_RCB
 
-%token START
-%token END
-%token CALL
-%token INPUT
-%token USEVAR
+%token CFG_START
+%token CFG_END
+%token CFG_CALL
+%token CFG_INPUT
+%token CFG_USEVAR
 
-%token ASSIGN
-%token <name> OP
+%token CFG_ASSIGN
+%token <name> CFG_OP
 
-%token <name> ID
-%token <value> NUM
+%token <name> CFG_ID
+%token <value> CFG_NUM
 
-%token UNKNOWN
+%token CFG_UNKNOWN
 
 %left '+' '-'
 %left '*' '/'
@@ -46,12 +46,12 @@
 
 /* Program */
 Program
-  : ProcDefList EOS ProcList
+  : ProcDefList CFG_EOS ProcList
 ;
 
 ProcDefList
-  : ID
-  | ProcDefList COMMA ID
+  : CFG_ID
+  | ProcDefList CFG_COMMA CFG_ID
 ;
 
 ProcList
@@ -62,7 +62,7 @@ ProcList
 /* Procedure */
 
 Proc
-  : LBRACE StartNode NodeList EndNode EdgeList RBRACE
+  : CFG_LCB StartNode NodeList EndNode EdgeList CFG_RCB
 ;
 
 NodeList
@@ -78,11 +78,11 @@ EdgeList
 /* Statements */
 
 StartNode
-  : NUM COLON START ID EOS
+  : CFG_NUM CFG_COLON CFG_START CFG_ID CFG_EOS
 ;
 
 EndNode
-  : NUM COLON END ID EOS
+  : CFG_NUM CFG_COLON CFG_END CFG_ID CFG_EOS
 ;
 
 Node
@@ -93,33 +93,33 @@ Node
 ;
 
 CallNode
-  : NUM COLON CALL ID EOS
+  : CFG_NUM CFG_COLON CFG_CALL CFG_ID CFG_EOS
 ;
 
 InputNode
-  : NUM COLON ID ASSIGN INPUT EOS
+  : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN CFG_INPUT CFG_EOS
 ;
 
 UseNode
-  : NUM COLON USEVAR ASSIGN ID EOS
+  : CFG_NUM CFG_COLON CFG_USEVAR CFG_ASSIGN CFG_ID CFG_EOS
 ;
 
 DepNode
-  : NUM COLON ID ASSIGN Opd OP Opd EOS
-  | NUM COLON ID ASSIGN Opd EOS
+  : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_OP Opd CFG_EOS
+  | CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_EOS
 ;
 
 /* Edges */
 
 Edge
-  : NUM ARROW NUM EOS
+  : CFG_NUM CFG_ARROW CFG_NUM CFG_EOS
 ;
 
 /* Operand */
 
 Opd
-  : NUM
-  | ID
+  : CFG_NUM
+  | CFG_ID
 ;
 
 %%
