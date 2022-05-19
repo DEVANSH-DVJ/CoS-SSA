@@ -5,7 +5,7 @@ LEX = flex
 
 TGT = cs_ssa
 
-OBJ = main.o error.o
+BASE_OBJ = main.o error.o program.o procedure.o
 CFG_OBJ = cfg/cfg.scan.o cfg/cfg.tab.o cfg/cfg_node.o cfg/cfg_edge.o
 SSA_OBJ = ssa/ssa.scan.o ssa/ssa.tab.o ssa/ssa_node.o ssa/ssa_edge.o ssa/ssa_meta.o
 DDG_OBJ = ddg/ddg_node.o ddg/ddg_edge.o
@@ -14,14 +14,20 @@ HEADERS = error.hh argparse.hh
 
 all: $(TGT)
 
-$(TGT): $(OBJ) $(CFG_OBJ) $(SSA_OBJ) $(DDG_OBJ)
-	$(CPP) $(OBJ) $(CFG_OBJ) $(SSA_OBJ) $(DDG_OBJ) -o $(TGT) -ly -ll
+$(TGT): $(BASE_OBJ) $(CFG_OBJ) $(SSA_OBJ) $(DDG_OBJ)
+	$(CPP) $(BASE_OBJ) $(CFG_OBJ) $(SSA_OBJ) $(DDG_OBJ) -o $(TGT) -ly -ll
 
 main.o: main.cc error.hh argparse.hh cfg/cfg.tab.hh ssa/ssa.tab.hh
 	$(CPP) -c main.cc
 
 error.o: error.cc error.hh stacktrace.h
 	$(CPP) -c error.cc
+
+program.o: program.cc program.hh procedure.hh
+	$(CPP) -c program.cc
+
+procedure.o: procedure.cc procedure.hh
+	$(CPP) -c procedure.cc
 
 cfg/cfg.tab.cc cfg/cfg.tab.hh: cfg/cfg.y
 	$(YACC) -o cfg/cfg.tab.cc -dv cfg/cfg.y
