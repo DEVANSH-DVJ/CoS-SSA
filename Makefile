@@ -7,7 +7,7 @@ TGT = cs_ssa
 
 OBJ = main.o error.o
 CFG_OBJ = cfg/cfg.scan.o cfg/cfg.tab.o cfg/cfg_node.o cfg/cfg_edge.o
-SSA_OBJ = ssa/ssa.scan.o ssa/ssa.tab.o ssa/ssa_node.o ssa/ssa_edge.o
+SSA_OBJ = ssa/ssa.scan.o ssa/ssa.tab.o ssa/ssa_node.o ssa/ssa_edge.o ssa/ssa_meta.o
 DDG_OBJ = ddg/ddg_node.o ddg/ddg_edge.o
 
 HEADERS = error.hh argparse.hh
