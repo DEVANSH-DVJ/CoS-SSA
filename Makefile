@@ -6,9 +6,13 @@ LEX = flex
 TGT = cs_ssa
 
 BASE_OBJ = main.o error.o program.o procedure.o
+BASE_HEADERS = error.hh program.hh procedure.hh
 CFG_OBJ = cfg/cfg.scan.o cfg/cfg.tab.o cfg/cfg_node.o cfg/cfg_edge.o
+CFG_HEADERS = cfg/cfg_node.hh cfg/cfg_edge.hh
 SSA_OBJ = ssa/ssa.scan.o ssa/ssa.tab.o ssa/ssa_node.o ssa/ssa_edge.o ssa/ssa_meta.o
+SSA_HEADERS = ssa/ssa_node.hh ssa/ssa_edge.hh ssa/ssa_meta.hh
 DDG_OBJ = ddg/ddg_node.o ddg/ddg_edge.o
+DDG_HEADERS = ddg/ddg_node.hh ddg/ddg_edge.hh
 
 HEADERS = error.hh argparse.hh
 
@@ -17,16 +21,16 @@ all: $(TGT)
 $(TGT): $(BASE_OBJ) $(CFG_OBJ) $(SSA_OBJ) $(DDG_OBJ)
 	$(CPP) $(BASE_OBJ) $(CFG_OBJ) $(SSA_OBJ) $(DDG_OBJ) -o $(TGT) -ly -ll
 
-main.o: main.cc error.hh argparse.hh cfg/cfg.tab.hh ssa/ssa.tab.hh
+main.o: main.cc cfg/cfg.tab.hh ssa/ssa.tab.hh $(BASE_HEADERS) $(CFG_HEADERS) $(SSA_HEADERS) $(DDG_HEADERS)
 	$(CPP) -c main.cc
 
 error.o: error.cc error.hh stacktrace.h
 	$(CPP) -c error.cc
 
-program.o: program.cc program.hh procedure.hh
+program.o: program.cc $(BASE_HEADERS) $(CFG_HEADERS) $(SSA_HEADERS) $(DDG_HEADERS)
 	$(CPP) -c program.cc
 
-procedure.o: procedure.cc procedure.hh
+procedure.o: procedure.cc $(BASE_HEADERS) $(CFG_HEADERS) $(SSA_HEADERS) $(DDG_HEADERS)
 	$(CPP) -c procedure.cc
 
 cfg/cfg.tab.cc cfg/cfg.tab.hh: cfg/cfg.y
@@ -41,13 +45,13 @@ ssa/ssa.tab.cc ssa/ssa.tab.hh: ssa/ssa.y
 ssa/ssa.scan.cc: ssa/ssa.l ssa/ssa.tab.hh
 	$(LEX) -o ssa/ssa.scan.cc --yylineno ssa/ssa.l
 
-cfg/%.o: cfg/%.cc
+cfg/%.o: cfg/%.cc $(CFG_HEADERS) $(BASE_HEADERS)
 	$(CPP) -c $< -o $@
 
-ssa/%.o: ssa/%.cc
+ssa/%.o: ssa/%.cc $(SSA_HEADERS) $(BASE_HEADERS)
 	$(CPP) -c $< -o $@
 
-ddg/%.o: ddg/%.cc
+ddg/%.o: ddg/%.cc	$(DDG_HEADERS) $(BASE_HEADERS)
 	$(CPP) -c $< -o $@
 
 clean:
