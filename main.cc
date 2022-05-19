@@ -25,7 +25,8 @@ extern FILE *ssa_out;
 
 bool viz;
 
-string tokens_file = "/dev/null";
+string cfg_file = "/dev/null";
+string ssa_file = "/dev/null";
 string dot_file = "/dev/null";
 string png_file = "/dev/null";
 
@@ -55,17 +56,16 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  FILE *out_file = fopen(tokens_file.c_str(), "w");
-
   if (arguments.input_type == FILE_CFG) {
     cfg_set_in(in_file);
-    cfg_set_out(out_file);
   } else if (arguments.input_type == FILE_SSA) {
     ssa_set_in(in_file);
-    ssa_set_out(out_file);
   } else {
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Unknown input type");
   }
+
+  cfg_set_out(fopen(cfg_file.c_str(), "w"));
+  ssa_set_out(fopen(ssa_file.c_str(), "w"));
 
   dot_fd = new fstream(dot_file.c_str(), ios::out | ios::trunc);
 
