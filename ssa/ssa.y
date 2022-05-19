@@ -90,10 +90,10 @@ EndNode
 ;
 
 Node
-  : InputNode
-  | CallNode
-  | UseNode
-  | DepNode
+  : CallNode
+  | InputNode
+  | UsevarNode
+  | ExprNode
 ;
 
 CallNode
@@ -104,12 +104,12 @@ InputNode
   : MetaNum SSA_COLON Var SSA_ASSIGN SSA_INPUT SSA_EOS
 ;
 
-UseNode
+UsevarNode
   : MetaNum SSA_COLON SSA_USEVAR SSA_ASSIGN Var SSA_EOS
   | MetaNum SSA_COLON PhiStmt SSA_USEVAR SSA_ASSIGN Var SSA_EOS
 ;
 
-DepNode
+ExprNode
   : MetaNum SSA_COLON Var SSA_ASSIGN Opd SSA_OP Opd SSA_EOS
   | MetaNum SSA_COLON PhiStmt Var SSA_ASSIGN Opd SSA_OP Opd SSA_EOS
   | MetaNum SSA_COLON PhiStmt PhiStmt Var SSA_ASSIGN Opd SSA_OP Opd SSA_EOS
