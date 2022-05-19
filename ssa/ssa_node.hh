@@ -24,6 +24,7 @@ class SSA_Node {
 public:
   SSA_NodeType type;
   int node_id;
+
   map<int, SSA_Meta *> metas;
 
   // SSA_Node(SSA_NodeType type, int node_id);

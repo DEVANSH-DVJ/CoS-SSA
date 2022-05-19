@@ -1,6 +1,11 @@
 #ifndef _DDG_NODE_HH_
 #define _DDG_NODE_HH_
 
+#include <iostream>
+#include <string>
+
+using namespace std;
+
 typedef enum {
   DDG_Var,
   DDG_Num,
@@ -13,6 +18,9 @@ public:
   DDG_NodeType type;
   int node_id;
   int meta_id;
+
+  string var_name;
+  int num_value;
 
   // DDG_Node(DDG_NodeType type, int node_id, int meta_id);
   // ~DDG_Node();
