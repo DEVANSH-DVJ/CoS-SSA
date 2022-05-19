@@ -7,9 +7,7 @@ TGT = cs_ssa
 
 OBJ = main.o error.o
 CFG_OBJ = cfg/cfg.scan.o cfg/cfg.tab.o
-CFG_SRC = cfg/cfg.y cfg/cfg.l
 SSA_OBJ = ssa/ssa.scan.o ssa/ssa.tab.o
-SSA_SRC = ssa/ssa.y ssa/ssa.l
 
 HEADERS = error.hh argparse.hh
 
@@ -18,27 +16,29 @@ all: $(TGT)
 $(TGT): $(OBJ) $(CFG_OBJ) $(SSA_OBJ)
 	$(CPP) $(OBJ) $(CFG_OBJ) $(SSA_OBJ) -o $(TGT) -ly -ll
 
-main.o: main.cc $(HEADERS) cfg/cfg.tab.h ssa/ssa.tab.h
+main.o: main.cc error.hh argparse.hh cfg/cfg.tab.hh ssa/ssa.tab.hh
 	$(CPP) -c main.cc
 
 error.o: error.cc error.hh stacktrace.h
 	$(CPP) -c error.cc
 
-cfg/cfg.tab.o cfg/cfg.tab.h: cfg/cfg.y
-	$(YACC) -b cfg/cfg -dv cfg/cfg.y
-	$(CPP) -c cfg/cfg.tab.c -o cfg/cfg.tab.o
+cfg/cfg.tab.cc cfg/cfg.tab.hh: cfg/cfg.y
+	$(YACC) -o cfg/cfg.tab.cc -dv cfg/cfg.y
 
-cfg/cfg.scan.o: cfg/cfg.l cfg/cfg.tab.h
-	$(LEX) --yylineno --outfile=cfg/cfg.scan.c cfg/cfg.l
-	$(CPP) -c cfg/cfg.scan.c -o cfg/cfg.scan.o
+cfg/cfg.scan.cc: cfg/cfg.l cfg/cfg.tab.hh
+	$(LEX) -o cfg/cfg.scan.cc --yylineno cfg/cfg.l
 
-ssa/ssa.tab.o ssa/ssa.tab.h: ssa/ssa.y
-	$(YACC) -b ssa/ssa -dv ssa/ssa.y
-	$(CPP) -c ssa/ssa.tab.c -o ssa/ssa.tab.o
+ssa/ssa.tab.cc ssa/ssa.tab.hh: ssa/ssa.y
+	$(YACC) -o ssa/ssa.tab.cc -dv ssa/ssa.y
 
-ssa/ssa.scan.o: ssa/ssa.l ssa/ssa.tab.h
-	$(LEX) --yylineno --outfile=ssa/ssa.scan.c ssa/ssa.l
-	$(CPP) -c ssa/ssa.scan.c -o ssa/ssa.scan.o
+ssa/ssa.scan.cc: ssa/ssa.l ssa/ssa.tab.hh
+	$(LEX) -o ssa/ssa.scan.cc --yylineno ssa/ssa.l
+
+cfg/%.o: cfg/%.cc
+	$(CPP) -c $< -o $@
+
+ssa/%.o: ssa/%.cc
+	$(CPP) -c $< -o $@
 
 clean:
 	rm -f $(TGT)
