@@ -1,6 +1,7 @@
 %{
 
     #include <string>
+
     using namespace std;
 
     #include "ssa.tab.hh"

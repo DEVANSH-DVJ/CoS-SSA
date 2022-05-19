@@ -1,14 +1,16 @@
 %{
 
   #include <iostream>
+  #include <string>
 
   using namespace std;
+
+  #include "../headers.hh"
 
   extern int ssa_lex(void);
 
   extern int ssa_lineno;
   extern int ssa_error(const char *);
-  extern void cleanup();
 
 %}
 %union{

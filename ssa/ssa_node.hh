@@ -4,10 +4,9 @@
 #include <iostream>
 #include <string>
 
-#include <list>
-#include <map>
-
 using namespace std;
+
+#include "../headers.hh"
 
 #include "ssa_meta.hh"
 
