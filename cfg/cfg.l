@@ -3,7 +3,7 @@
     #include <string>
     using namespace std;
 
-    #include "cfg.tab.h"
+    #include "cfg.tab.hh"
 
 %}
 

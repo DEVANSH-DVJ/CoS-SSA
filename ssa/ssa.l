@@ -3,7 +3,7 @@
     #include <string>
     using namespace std;
 
-    #include "ssa.tab.h"
+    #include "ssa.tab.hh"
 
 %}
 

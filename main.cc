@@ -8,10 +8,10 @@
 using namespace std;
 
 #include "argparse.hh"
-#include "cfg/cfg.tab.h"
-#include "ssa/ssa.tab.h"
+#include "cfg/cfg.tab.hh"
+#include "ssa/ssa.tab.hh"
 
-#include "headers.hh"
+#include "error.hh"
 
 extern int cfg_lex(void);
 extern void cfg_set_in(FILE *);
