@@ -1,14 +1,16 @@
 %{
 
   #include <iostream>
+  #include <string>
 
   using namespace std;
+
+  #include "../headers.hh"
 
   extern int cfg_lex(void);
 
   extern int cfg_lineno;
   extern int cfg_error(const char *);
-  extern void cleanup();
 
 %}
 %union{
