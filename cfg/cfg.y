@@ -86,10 +86,10 @@ EndNode
 ;
 
 Node
-  : InputNode
-  | CallNode
-  | UseNode
-  | DepNode
+  : CallNode
+  | InputNode
+  | UsevarNode
+  | ExprNode
 ;
 
 CallNode
@@ -100,11 +100,11 @@ InputNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN CFG_INPUT CFG_EOS
 ;
 
-UseNode
+UsevarNode
   : CFG_NUM CFG_COLON CFG_USEVAR CFG_ASSIGN CFG_ID CFG_EOS
 ;
 
-DepNode
+ExprNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_OP Opd CFG_EOS
   | CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_EOS
 ;
