@@ -6,6 +6,8 @@
 
 using namespace std;
 
+#include "../headers.hh"
+
 typedef enum {
   DDG_Var,
   DDG_Num,
