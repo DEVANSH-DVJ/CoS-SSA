@@ -11,7 +11,7 @@ using namespace std;
 #include "cfg/cfg.tab.hh"
 #include "ssa/ssa.tab.hh"
 
-#include "error.hh"
+#include "headers.hh"
 
 extern int cfg_lex(void);
 extern void cfg_set_in(FILE *);
