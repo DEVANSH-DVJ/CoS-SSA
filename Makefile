@@ -14,23 +14,23 @@ SSA_HEADERS = ssa/ssa_node.hh ssa/ssa_edge.hh ssa/ssa_meta.hh
 DDG_OBJ = ddg/ddg_node.o ddg/ddg_edge.o
 DDG_HEADERS = ddg/ddg_node.hh ddg/ddg_edge.hh
 
-HEADERS = error.hh argparse.hh
+HEADERS = $(BASE_HEADERS) $(CFG_HEADERS) $(SSA_HEADERS) $(DDG_HEADERS)
 
 all: $(TGT)
 
 $(TGT): $(BASE_OBJ) $(CFG_OBJ) $(SSA_OBJ) $(DDG_OBJ)
 	$(CPP) $(BASE_OBJ) $(CFG_OBJ) $(SSA_OBJ) $(DDG_OBJ) -o $(TGT) -ly -ll
 
-main.o: main.cc cfg/cfg.tab.hh ssa/ssa.tab.hh $(BASE_HEADERS) $(CFG_HEADERS) $(SSA_HEADERS) $(DDG_HEADERS)
+main.o: main.cc argparse.hh cfg/cfg.tab.hh ssa/ssa.tab.hh $(HEADERS)
 	$(CPP) -c main.cc
 
 error.o: error.cc error.hh stacktrace.h
 	$(CPP) -c error.cc
 
-program.o: program.cc $(BASE_HEADERS) $(CFG_HEADERS) $(SSA_HEADERS) $(DDG_HEADERS)
+program.o: program.cc $(HEADERS)
 	$(CPP) -c program.cc
 
-procedure.o: procedure.cc $(BASE_HEADERS) $(CFG_HEADERS) $(SSA_HEADERS) $(DDG_HEADERS)
+procedure.o: procedure.cc $(HEADERS)
 	$(CPP) -c procedure.cc
 
 cfg/cfg.tab.cc cfg/cfg.tab.hh: cfg/cfg.y
@@ -45,13 +45,13 @@ ssa/ssa.tab.cc ssa/ssa.tab.hh: ssa/ssa.y
 ssa/ssa.scan.cc: ssa/ssa.l ssa/ssa.tab.hh
 	$(LEX) -o ssa/ssa.scan.cc --yylineno ssa/ssa.l
 
-cfg/%.o: cfg/%.cc $(CFG_HEADERS) $(BASE_HEADERS)
+cfg/%.o: cfg/%.cc $(HEADERS)
 	$(CPP) -c $< -o $@
 
-ssa/%.o: ssa/%.cc $(SSA_HEADERS) $(BASE_HEADERS)
+ssa/%.o: ssa/%.cc $(HEADERS)
 	$(CPP) -c $< -o $@
 
-ddg/%.o: ddg/%.cc	$(DDG_HEADERS) $(BASE_HEADERS)
+ddg/%.o: ddg/%.cc $(HEADERS)
 	$(CPP) -c $< -o $@
 
 clean:
