@@ -1,12 +1,7 @@
 #ifndef _SSA_NODE_HH_
 #define _SSA_NODE_HH_
 
-#include <iostream>
-#include <string>
-
-using namespace std;
-
-#include "../headers.hh"
+#include <map>
 
 #include "ssa_meta.hh"
 

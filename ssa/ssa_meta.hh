@@ -1,13 +1,6 @@
 #ifndef _SSA_META_HH_
 #define _SSA_META_HH_
 
-#include <iostream>
-#include <string>
-
-using namespace std;
-
-#include "../headers.hh"
-
 typedef enum {
   SSA_Meta_Start,
   SSA_Meta_End,

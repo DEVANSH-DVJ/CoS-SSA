@@ -1,20 +1,13 @@
 #ifndef _PROCEDURE_HH_
 #define _PROCEDURE_HH_
 
-#include <iostream>
 #include <string>
-
-#include <map>
-
-using namespace std;
-
-#include "error.hh"
 
 class Procedure {
 public:
-  string name;
+  std::string name;
 
-  Procedure(string name);
+  Procedure(std::string name);
   ~Procedure();
 };
 

@@ -1,13 +1,6 @@
 #ifndef _CFG_NODE_HH_
 #define _CFG_NODE_HH_
 
-#include <iostream>
-#include <string>
-
-using namespace std;
-
-#include "../headers.hh"
-
 typedef enum {
   CFG_Start,
   CFG_End,
