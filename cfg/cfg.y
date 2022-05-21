@@ -95,12 +95,26 @@ Proc
 
 NodeList
   : Node
+  {
+    $$ = new list<CFG_Node *>();
+    $$->push_back($1);
+  }
   | NodeList Node
+  {
+    $$->push_back($2);
+  }
 ;
 
 EdgeList
   : Edge
+  {
+    $$ = new list<CFG_Edge *>();
+    $$->push_back($1);
+  }
   | EdgeList Edge
+  {
+    $$->push_back($2);
+  }
 ;
 
 /* Statements */
@@ -110,6 +124,7 @@ StartNode
   {
     CFG_Node *node = new CFG_Node(CFG_Start, $1);
     program->cfg_nodes->insert(make_pair($1, node));
+    $$ = node;
   }
 ;
 
@@ -118,14 +133,27 @@ EndNode
   {
     CFG_Node *node = new CFG_Node(CFG_End, $1);
     program->cfg_nodes->insert(make_pair($1, node));
+    $$ = node;
   }
 ;
 
 Node
   : CallNode
+  {
+    $$ = $1;
+  }
   | InputNode
+  {
+    $$ = $1;
+  }
   | UsevarNode
+  {
+    $$ = $1;
+  }
   | ExprNode
+  {
+    $$ = $1;
+  }
 ;
 
 CallNode
@@ -133,6 +161,7 @@ CallNode
   {
     CFG_Node *node = new CFG_Node(CFG_Call, $1);
     program->cfg_nodes->insert(make_pair($1, node));
+    $$ = node;
   }
 ;
 
@@ -141,6 +170,7 @@ InputNode
   {
     CFG_Node *node = new CFG_Node(CFG_Input, $1);
     program->cfg_nodes->insert(make_pair($1, node));
+    $$ = node;
   }
 ;
 
@@ -149,6 +179,7 @@ UsevarNode
   {
     CFG_Node *node = new CFG_Node(CFG_Usevar, $1);
     program->cfg_nodes->insert(make_pair($1, node));
+    $$ = node;
   }
 ;
 
@@ -157,11 +188,13 @@ ExprNode
   {
     CFG_Node *node = new CFG_Node(CFG_Expr, $1);
     program->cfg_nodes->insert(make_pair($1, node));
+    $$ = node;
   }
   | CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_EOS
   {
     CFG_Node *node = new CFG_Node(CFG_Expr, $1);
     program->cfg_nodes->insert(make_pair($1, node));
+    $$ = node;
   }
 ;
 
@@ -176,6 +209,7 @@ Edge
     from->out_edges->insert(make_pair($3, edge));
     to->in_edges->insert(make_pair($1, edge));
     program->cfg_edges->insert(make_pair(make_pair($1, $3), edge));
+    $$ = edge;
   }
 ;
 
