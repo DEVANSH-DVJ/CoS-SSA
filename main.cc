@@ -47,10 +47,8 @@ int main(int argc, char **argv) {
 
   char *input_file = (char *)arguments.input_file.c_str();
 
-  if (arguments.visualize) {
-    dot_file = arguments.input_file + ".dot";
-    png_file = arguments.input_file + ".png";
-  }
+  dot_file = arguments.input_file + ".dot";
+  png_file = arguments.input_file + ".png";
 
   FILE *in_file = fopen(input_file, "r");
   if (in_file == NULL) {
@@ -73,6 +71,10 @@ int main(int argc, char **argv) {
 
   if (arguments.input_type == FILE_CFG) {
     cfg_parse();
+    cout << "CFG nodes: " << program->cfg_nodes->size() << endl;
+    cout << "CFG edges: " << program->cfg_edges->size() << endl;
+    program->visualize_cfg();
+
   } else if (arguments.input_type == FILE_SSA) {
     ssa_parse();
   }
@@ -82,6 +84,9 @@ int main(int argc, char **argv) {
   } else if (arguments.input_type == FILE_SSA) {
     fclose(ssa_out);
   }
+
+  dot_fd->close();
+  system(("dot -Tpng " + dot_file + " -o " + png_file).c_str());
 
   exit(0);
 }

@@ -2,7 +2,6 @@
 #define _HEADERS_HH_
 
 #include "error.hh"
-
 #include "procedure.hh"
 #include "program.hh"
 
