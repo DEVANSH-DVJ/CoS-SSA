@@ -10,6 +10,8 @@ public:
 
   CFG_Edge(CFG_Node *src, CFG_Node *dst);
   ~CFG_Edge();
+
+  void visualize();
 };
 
 #endif

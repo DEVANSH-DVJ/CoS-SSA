@@ -24,6 +24,8 @@ public:
 
   CFG_Node(CFG_NodeType type, int node_id);
   ~CFG_Node();
+
+  void visualize();
 };
 
 #endif
