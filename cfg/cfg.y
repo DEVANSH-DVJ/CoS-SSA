@@ -89,10 +89,18 @@ EdgeList
 
 StartNode
   : CFG_NUM CFG_COLON CFG_START CFG_ID CFG_EOS
+  {
+    CFG_Node *node = new CFG_Node(CFG_Start, $1);
+    program->cfg_nodes->insert(make_pair($1, node));
+  }
 ;
 
 EndNode
   : CFG_NUM CFG_COLON CFG_END CFG_ID CFG_EOS
+  {
+    CFG_Node *node = new CFG_Node(CFG_End, $1);
+    program->cfg_nodes->insert(make_pair($1, node));
+  }
 ;
 
 Node
@@ -104,19 +112,39 @@ Node
 
 CallNode
   : CFG_NUM CFG_COLON CFG_CALL CFG_ID CFG_EOS
+  {
+    CFG_Node *node = new CFG_Node(CFG_Call, $1);
+    program->cfg_nodes->insert(make_pair($1, node));
+  }
 ;
 
 InputNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN CFG_INPUT CFG_EOS
+  {
+    CFG_Node *node = new CFG_Node(CFG_Input, $1);
+    program->cfg_nodes->insert(make_pair($1, node));
+  }
 ;
 
 UsevarNode
   : CFG_NUM CFG_COLON CFG_USEVAR CFG_ASSIGN CFG_ID CFG_EOS
+  {
+    CFG_Node *node = new CFG_Node(CFG_Usevar, $1);
+    program->cfg_nodes->insert(make_pair($1, node));
+  }
 ;
 
 ExprNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_OP Opd CFG_EOS
+  {
+    CFG_Node *node = new CFG_Node(CFG_Expr, $1);
+    program->cfg_nodes->insert(make_pair($1, node));
+  }
   | CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_EOS
+  {
+    CFG_Node *node = new CFG_Node(CFG_Expr, $1);
+    program->cfg_nodes->insert(make_pair($1, node));
+  }
 ;
 
 /* Edges */
