@@ -12,6 +12,8 @@
   extern int cfg_lineno;
   extern int cfg_error(const char *);
 
+  extern Program *program;
+
 %}
 %union{
   string *name;
@@ -53,7 +55,13 @@ Program
 
 ProcDefList
   : CFG_ID
+  {
+    program->procedures->insert(make_pair(*$1, new Procedure(*$1)));
+  }
   | ProcDefList CFG_COMMA CFG_ID
+  {
+    program->procedures->insert(make_pair(*$3, new Procedure(*$3)));
+  }
 ;
 
 ProcList
