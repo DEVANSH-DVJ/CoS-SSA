@@ -22,6 +22,8 @@ public:
 
   Procedure *get_proc(string name);
   CFG_Node *get_cfg_node(int node_id);
+
+  void visualize_cfg();
 };
 
 #endif
