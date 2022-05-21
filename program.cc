@@ -11,3 +11,10 @@ Program::~Program() {
   }
   delete this->procedures;
 }
+
+Procedure *Program::get_proc(string name) {
+  if (this->procedures->find(name) == this->procedures->end()) {
+    CHECK_INPUT_AND_ABORT(false, "Procedure " + name + " not found.");
+  }
+  return this->procedures->find(name)->second;
+}

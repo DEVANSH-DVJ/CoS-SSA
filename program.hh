@@ -12,6 +12,8 @@ public:
 
   Program();
   ~Program();
+
+  Procedure *get_proc(string name);
 };
 
 #endif
