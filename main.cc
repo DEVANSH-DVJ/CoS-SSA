@@ -23,7 +23,7 @@ extern void ssa_set_in(FILE *);
 extern void ssa_set_out(FILE *);
 extern FILE *ssa_out;
 
-bool viz;
+Program *program;
 
 string cfg_file = "/dev/null";
 string ssa_file = "/dev/null";
@@ -42,6 +42,8 @@ int main(int argc, char **argv) {
   arguments.input_file = "";
 
   argp_parse(&argp, argc, argv, 0, 0, &arguments);
+
+  program = new Program();
 
   char *input_file = (char *)arguments.input_file.c_str();
 
@@ -68,12 +70,6 @@ int main(int argc, char **argv) {
   ssa_set_out(fopen(ssa_file.c_str(), "w"));
 
   dot_fd = new fstream(dot_file.c_str(), ios::out | ios::trunc);
-
-  if (arguments.visualize) {
-    viz = true;
-  } else {
-    viz = false;
-  }
 
   if (arguments.input_type == FILE_CFG) {
     cfg_parse();
