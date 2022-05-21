@@ -5,6 +5,7 @@ using namespace std;
 extern fstream *dot_fd;
 
 Program::Program() {
+  this->procs = new list<Procedure *>();
   this->procedures = new map<string, Procedure *>();
   this->cfg_nodes = new map<int, CFG_Node *>();
   this->cfg_edges = new map<pair<int, int>, CFG_Edge *>();
@@ -47,13 +48,9 @@ CFG_Node *Program::get_cfg_node(int node_id) {
 
 void Program::visualize_cfg() {
   *dot_fd << "digraph G {\n";
-  for (map<int, CFG_Node *>::iterator it = this->cfg_nodes->begin();
-       it != this->cfg_nodes->end(); ++it) {
-    it->second->visualize();
-  }
-  for (map<pair<int, int>, CFG_Edge *>::iterator it = this->cfg_edges->begin();
-       it != this->cfg_edges->end(); ++it) {
-    it->second->visualize();
+  for (list<Procedure *>::iterator it = this->procs->begin();
+       it != this->procs->end(); ++it) {
+    (*it)->visualize_cfg();
   }
   *dot_fd << "}\n";
 }

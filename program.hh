@@ -1,10 +1,10 @@
 #ifndef _PROGRAM_HH_
 #define _PROGRAM_HH_
 
+#include <list>
 #include <map>
 #include <utility>
 
-#include "error.hh"
 #include "procedure.hh"
 
 #include "cfg/cfg_edge.hh"
@@ -12,6 +12,7 @@
 
 class Program {
 public:
+  std::list<Procedure *> *procs;
   std::map<string, Procedure *> *procedures;
 
   std::map<int, CFG_Node *> *cfg_nodes;
