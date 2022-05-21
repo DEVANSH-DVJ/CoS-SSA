@@ -8,7 +8,7 @@
 
 class Program {
 public:
-  map<string, Procedure *> procedures;
+  map<string, Procedure *> *procedures;
 
   Program();
   ~Program();
