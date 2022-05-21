@@ -1,11 +1,10 @@
 %{
 
   #include <iostream>
-  #include <string>
-
-  using namespace std;
 
   #include "../headers.hh"
+
+  using namespace std;
 
   extern int cfg_lex(void);
 
@@ -18,6 +17,12 @@
 %union{
   string *name;
   int value;
+
+  list<CFG_Node *> *cfg_node_list;
+  list<CFG_Edge *> *cfg_edge_list;
+
+  CFG_Node *cfg_node;
+  CFG_Edge *cfg_edge;
 }
 
 %define api.prefix {cfg_}
@@ -42,6 +47,19 @@
 %token <value> CFG_NUM
 
 %token CFG_UNKNOWN
+
+%type <cfg_node_list> NodeList
+%type <cfg_edge_list> EdgeList
+
+%type <cfg_node> StartNode
+%type <cfg_node> EndNode
+%type <cfg_node> Node
+%type <cfg_node> CallNode
+%type <cfg_node> InputNode
+%type <cfg_node> UsevarNode
+%type <cfg_node> ExprNode
+
+%type <cfg_edge> Edge
 
 %left '+' '-'
 %left '*' '/'
