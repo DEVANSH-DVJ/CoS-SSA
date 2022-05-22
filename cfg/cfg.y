@@ -123,6 +123,7 @@ NodeList
   }
   | NodeList Node
   {
+    $$ = $1;
     $$->push_back($2);
   }
 ;
@@ -135,6 +136,7 @@ EdgeList
   }
   | EdgeList Edge
   {
+    $$ = $1;
     $$->push_back($2);
   }
 ;
