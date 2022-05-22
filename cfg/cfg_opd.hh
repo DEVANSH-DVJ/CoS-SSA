@@ -4,8 +4,8 @@
 #include <string>
 
 typedef enum {
-  CFG_Num,
-  CFG_Var,
+  CFG_NumOpd,
+  CFG_VarOpd,
 } CFG_OpdType;
 
 class CFG_Opd {

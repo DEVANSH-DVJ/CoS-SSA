@@ -6,12 +6,12 @@
 #include <map>
 
 typedef enum {
-  CFG_Start,
-  CFG_End,
-  CFG_Call,
-  CFG_Input,
-  CFG_Usevar,
-  CFG_Expr,
+  CFG_StartNode,
+  CFG_EndNode,
+  CFG_CallNode,
+  CFG_InputNode,
+  CFG_UsevarNode,
+  CFG_ExprNode,
 } CFG_NodeType;
 
 class CFG_Edge;

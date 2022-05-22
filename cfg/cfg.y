@@ -152,7 +152,7 @@ EdgeList
 StartNode
   : CFG_NUM CFG_COLON CFG_START CFG_ID CFG_EOS
   {
-    CFG_Node *node = new CFG_Node(CFG_Start, $1);
+    CFG_Node *node = new CFG_Node(CFG_StartNode, $1);
     node->parent_proc = *$4;
     node->stmt = "START " + *$4;
 
@@ -165,7 +165,7 @@ StartNode
 EndNode
   : CFG_NUM CFG_COLON CFG_END CFG_ID CFG_EOS
   {
-    CFG_Node *node = new CFG_Node(CFG_End, $1);
+    CFG_Node *node = new CFG_Node(CFG_EndNode, $1);
     node->parent_proc = *$4;
     node->stmt = "END " + *$4;
 
@@ -197,7 +197,7 @@ Node
 CallNode
   : CFG_NUM CFG_COLON CFG_CALL CFG_ID CFG_EOS
   {
-    CFG_Node *node = new CFG_Node(CFG_Call, $1);
+    CFG_Node *node = new CFG_Node(CFG_CallNode, $1);
     node->callee_proc = *$4;
     node->stmt = "CALL " + *$4;
 
@@ -210,8 +210,8 @@ CallNode
 InputNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN CFG_INPUT CFG_EOS
   {
-    CFG_Node *node = new CFG_Node(CFG_Input, $1);
-    node->lopd = new CFG_Opd(CFG_Var, *$3);
+    CFG_Node *node = new CFG_Node(CFG_InputNode, $1);
+    node->lopd = new CFG_Opd(CFG_VarOpd, *$3);
     node->stmt = *$3 + " = INPUT";
 
     program->cfg_nodes->insert(make_pair($1, node));
@@ -223,8 +223,8 @@ InputNode
 UsevarNode
   : CFG_NUM CFG_COLON CFG_USEVAR CFG_ASSIGN CFG_ID CFG_EOS
   {
-    CFG_Node *node = new CFG_Node(CFG_Usevar, $1);
-    node->ropd1 = new CFG_Opd(CFG_Var, *$5);
+    CFG_Node *node = new CFG_Node(CFG_UsevarNode, $1);
+    node->ropd1 = new CFG_Opd(CFG_VarOpd, *$5);
     node->stmt = "USEVAR = " + *$5;
 
     program->cfg_nodes->insert(make_pair($1, node));
@@ -236,8 +236,8 @@ UsevarNode
 ExprNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_OP Opd CFG_EOS
   {
-    CFG_Node *node = new CFG_Node(CFG_Expr, $1);
-    node->lopd = new CFG_Opd(CFG_Var, *$3);
+    CFG_Node *node = new CFG_Node(CFG_ExprNode, $1);
+    node->lopd = new CFG_Opd(CFG_VarOpd, *$3);
     node->ropd1 = $5;
     node->ropd2 = $7;
     node->op = *$6;
@@ -249,8 +249,8 @@ ExprNode
   }
   | CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_EOS
   {
-    CFG_Node *node = new CFG_Node(CFG_Expr, $1);
-    node->lopd = new CFG_Opd(CFG_Var, *$3);
+    CFG_Node *node = new CFG_Node(CFG_ExprNode, $1);
+    node->lopd = new CFG_Opd(CFG_VarOpd, *$3);
     node->ropd1 = $5;
     node->op = "=";
     node->stmt = *$3 + " = " + $5->str;
@@ -282,11 +282,11 @@ Edge
 Opd
   : CFG_NUM
   {
-    $$ = new CFG_Opd(CFG_Num, $1);
+    $$ = new CFG_Opd(CFG_NumOpd, $1);
   }
   | CFG_ID
   {
-    $$ = new CFG_Opd(CFG_Var, *$1);
+    $$ = new CFG_Opd(CFG_VarOpd, *$1);
   }
 ;
 
