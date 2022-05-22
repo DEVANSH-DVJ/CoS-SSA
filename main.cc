@@ -75,6 +75,12 @@ int main(int argc, char **argv) {
     cfg_parse();
     cout << "CFG nodes: " << program->cfg_nodes->size() << endl;
     cout << "CFG edges: " << program->cfg_edges->size() << endl;
+    for (map<string, Procedure *>::iterator it = program->procedures->begin();
+         it != program->procedures->end(); ++it) {
+      cout << "Procedure " << it->first << ":" << endl;
+      cout << "CFG nodes: " << it->second->cfg_nodes->size() << endl;
+      cout << "CFG edges: " << it->second->cfg_edges->size() << endl;
+    }
     program->visualize_cfg();
 
   } else if (arguments.input_type == FILE_SSA) {
