@@ -266,13 +266,11 @@ ExprNode
 Edge
   : CFG_NUM CFG_ARROW CFG_NUM CFG_EOS
   {
-    CFG_Node *from = program->cfg_nodes->find($1)->second;
-    CFG_Node *to = program->cfg_nodes->find($3)->second;
-    CFG_Edge *edge = new CFG_Edge(from, to);
-    edge->edge_id = make_pair($1, $3);
 
-    from->out_edges->insert(make_pair($3, edge));
-    to->in_edges->insert(make_pair($1, edge));
+    CFG_Edge *edge = new CFG_Edge($1, $3);
+
+    edge->src->out_edges->insert(make_pair($3, edge));
+    edge->dst->in_edges->insert(make_pair($1, edge));
     program->cfg_edges->insert(make_pair(make_pair($1, $3), edge));
 
     $$ = edge;
