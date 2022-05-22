@@ -126,7 +126,11 @@ StartNode
   : CFG_NUM CFG_COLON CFG_START CFG_ID CFG_EOS
   {
     CFG_Node *node = new CFG_Node(CFG_Start, $1);
+    node->parent_proc = *$4;
+    node->stmt = "START " + *$4;
+
     program->cfg_nodes->insert(make_pair($1, node));
+
     $$ = node;
   }
 ;
@@ -135,7 +139,11 @@ EndNode
   : CFG_NUM CFG_COLON CFG_END CFG_ID CFG_EOS
   {
     CFG_Node *node = new CFG_Node(CFG_End, $1);
+    node->parent_proc = *$4;
+    node->stmt = "END " + *$4;
+
     program->cfg_nodes->insert(make_pair($1, node));
+
     $$ = node;
   }
 ;
@@ -163,7 +171,11 @@ CallNode
   : CFG_NUM CFG_COLON CFG_CALL CFG_ID CFG_EOS
   {
     CFG_Node *node = new CFG_Node(CFG_Call, $1);
+    node->callee_proc = *$4;
+    node->stmt = "CALL " + *$4;
+
     program->cfg_nodes->insert(make_pair($1, node));
+
     $$ = node;
   }
 ;
@@ -172,7 +184,11 @@ InputNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN CFG_INPUT CFG_EOS
   {
     CFG_Node *node = new CFG_Node(CFG_Input, $1);
+    node->lopd = *$3;
+    node->stmt = *$3 + " = INPUT";
+
     program->cfg_nodes->insert(make_pair($1, node));
+
     $$ = node;
   }
 ;
@@ -181,7 +197,11 @@ UsevarNode
   : CFG_NUM CFG_COLON CFG_USEVAR CFG_ASSIGN CFG_ID CFG_EOS
   {
     CFG_Node *node = new CFG_Node(CFG_Usevar, $1);
+    node->ropd1 = *$5;
+    node->stmt = "USEVAR = " + *$5;
+
     program->cfg_nodes->insert(make_pair($1, node));
+
     $$ = node;
   }
 ;
@@ -190,13 +210,26 @@ ExprNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_OP Opd CFG_EOS
   {
     CFG_Node *node = new CFG_Node(CFG_Expr, $1);
+    node->lopd = *$3;
+    node->ropd1 = *$5;
+    node->ropd2 = *$7;
+    node->op = *$6;
+    node->stmt = *$3 + " = " + *$5 + " " + *$6 + " " + *$7;
+
     program->cfg_nodes->insert(make_pair($1, node));
+
     $$ = node;
   }
   | CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_EOS
   {
     CFG_Node *node = new CFG_Node(CFG_Expr, $1);
+    node->lopd = *$3;
+    node->ropd1 = *$5;
+    node->op = "=";
+    node->stmt = *$3 + " = " + *$5;
+
     program->cfg_nodes->insert(make_pair($1, node));
+
     $$ = node;
   }
 ;
@@ -209,9 +242,12 @@ Edge
     CFG_Node *from = program->cfg_nodes->find($1)->second;
     CFG_Node *to = program->cfg_nodes->find($3)->second;
     CFG_Edge *edge = new CFG_Edge(from, to);
+    edge->edge_id = make_pair($1, $3);
+
     from->out_edges->insert(make_pair($3, edge));
     to->in_edges->insert(make_pair($1, edge));
     program->cfg_edges->insert(make_pair(make_pair($1, $3), edge));
+
     $$ = edge;
   }
 ;
