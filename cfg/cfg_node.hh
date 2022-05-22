@@ -31,10 +31,10 @@ public:
 
   /* Conditionally initialized: post parsing */
   std::string callee_proc;
+  std::string op;
   CFG_Opd *lopd;
   CFG_Opd *ropd1;
   CFG_Opd *ropd2;
-  std::string op;
 
   /* Constructors and Destructor */
   CFG_Node(CFG_NodeType type, int node_id);

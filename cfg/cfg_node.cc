@@ -14,24 +14,24 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id) {
   this->out_edges = new std::map<int, CFG_Edge *>();
 
   this->callee_proc = "";
+  this->op = "";
   this->lopd = NULL;
   this->ropd1 = NULL;
   this->ropd2 = NULL;
-  this->op = "";
 }
 
 CFG_Node::~CFG_Node() {
   delete this->in_edges;
   delete this->out_edges;
-  if (this->lopd != NULL) {
+
+  if (this->lopd != NULL)
     delete this->lopd;
-  }
-  if (this->ropd1 != NULL) {
+
+  if (this->ropd1 != NULL)
     delete this->ropd1;
-  }
-  if (this->ropd2 != NULL) {
+
+  if (this->ropd2 != NULL)
     delete this->ropd2;
-  }
 }
 
 void CFG_Node::visualize() {
