@@ -11,7 +11,7 @@ public:
   CFG_Node *src;
   CFG_Node *dst;
 
-  CFG_Edge(CFG_Node *src, CFG_Node *dst);
+  CFG_Edge(int src_id, int dst_id);
   ~CFG_Edge();
 
   void visualize();
