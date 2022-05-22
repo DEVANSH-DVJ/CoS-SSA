@@ -18,6 +18,8 @@
   string *name;
   int value;
 
+  Procedure *proc;
+
   list<CFG_Node *> *cfg_node_list;
   list<CFG_Edge *> *cfg_edge_list;
 
@@ -48,6 +50,8 @@
 %token <value> CFG_NUM
 
 %token CFG_UNKNOWN
+
+%type <proc> Proc
 
 %type <cfg_node_list> NodeList
 %type <cfg_edge_list> EdgeList
@@ -94,6 +98,21 @@ ProcList
 
 Proc
   : CFG_LCB StartNode NodeList EndNode EdgeList CFG_RCB
+  {
+    string proc_name = $2->parent_proc;
+    if (proc_name != $4->parent_proc)
+      cfg_error("Start node and end node must be in the same procedure");
+
+    Procedure *proc = program->get_proc(proc_name);
+    proc->cfg_nodes->insert(make_pair($2->node_id, $2));
+    proc->cfg_nodes->insert(make_pair($4->node_id, $4));
+    for (list<CFG_Node *>::iterator it = $3->begin(); it != $3->end(); ++it)
+      proc->cfg_nodes->insert(make_pair((*it)->node_id, *it));
+    for (list<CFG_Edge *>::iterator it = $5->begin(); it != $5->end(); ++it)
+      proc->cfg_edges->insert(make_pair((*it)->edge_id, *it));
+
+    $$ = proc;
+  }
 ;
 
 NodeList
