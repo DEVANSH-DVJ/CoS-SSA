@@ -91,7 +91,13 @@ ProcDefList
 
 ProcList
   : Proc
+  {
+    program->procs->push_back($1);
+  }
   | ProcList Proc
+  {
+    program->procs->push_back($2);
+  }
 ;
 
 /* Procedure */
