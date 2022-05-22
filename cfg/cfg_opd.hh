@@ -6,6 +6,8 @@
 typedef enum {
   CFG_NumOpd,
   CFG_VarOpd,
+  CFG_InputOpd,
+  CFG_UsevarOpd,
 } CFG_OpdType;
 
 class CFG_Opd {
@@ -19,6 +21,7 @@ public:
   std::string var_name;
 
   /* Constructors and Destructor */
+  CFG_Opd(CFG_OpdType type);
   CFG_Opd(CFG_OpdType type, int num_value);
   CFG_Opd(CFG_OpdType type, std::string var_name);
   ~CFG_Opd();
