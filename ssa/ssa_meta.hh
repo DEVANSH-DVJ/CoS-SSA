@@ -2,12 +2,12 @@
 #define _SSA_META_HH_
 
 typedef enum {
-  SSA_Meta_Start,
-  SSA_Meta_End,
-  SSA_Meta_Call,
-  SSA_Meta_Input,
-  SSA_Meta_Usevar,
-  SSA_Meta_Expr,
+  SSA_StartMeta,
+  SSA_EndMeta,
+  SSA_CallMeta,
+  SSA_InputMeta,
+  SSA_UsevarMeta,
+  SSA_ExprMeta,
 } SSA_MetaType;
 
 class SSA_Meta {

@@ -6,12 +6,12 @@
 class SSA_Meta;
 
 typedef enum {
-  SSA_Start,
-  SSA_End,
-  SSA_Call,
-  SSA_Input,
-  SSA_Usevar,
-  SSA_Expr,
+  SSA_StartNode,
+  SSA_EndNode,
+  SSA_CallNode,
+  SSA_InputNode,
+  SSA_UsevarNode,
+  SSA_ExprNode,
 } SSA_NodeType;
 
 class SSA_Node {
