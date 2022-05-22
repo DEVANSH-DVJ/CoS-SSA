@@ -11,11 +11,14 @@ typedef enum {
 class CFG_Opd {
 public:
   CFG_OpdType type;
+  std::string str;
 
-  CFG_Opd(CFG_OpdType type);
+  int num_value;
+  std::string var_name;
+
+  CFG_Opd(CFG_OpdType type, int num_value);
+  CFG_Opd(CFG_OpdType type, std::string var_name);
   ~CFG_Opd();
-
-  void to_string();
 };
 
 #endif
