@@ -1,6 +1,10 @@
 #ifndef _SSA_META_HH_
 #define _SSA_META_HH_
 
+#include <utility>
+
+class SSA_Stmt;
+
 typedef enum {
   SSA_StartMeta,
   SSA_EndMeta,
@@ -15,6 +19,8 @@ public:
   SSA_MetaType type;
   int node_id;
   int meta_id;
+
+  std::list<SSA_Stmt*> *stmts;
 
   // SSA_Meta(SSA_MetaType type, int node_id, int meta_id);
   // ~SSA_Meta();
