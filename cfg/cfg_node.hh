@@ -15,6 +15,7 @@ typedef enum {
 } CFG_NodeType;
 
 class CFG_Edge;
+class CFG_Opd;
 
 class CFG_Node {
 public:
@@ -27,9 +28,9 @@ public:
   std::map<int, CFG_Edge *> *out_edges;
 
   std::string callee_proc;
-  std::string lopd;
-  std::string ropd1;
-  std::string ropd2;
+  CFG_Opd *lopd;
+  CFG_Opd *ropd1;
+  CFG_Opd *ropd2;
   std::string op;
 
   CFG_Node(CFG_NodeType type, int node_id);
