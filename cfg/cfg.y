@@ -267,7 +267,7 @@ Opd
 
 %%
 
-int yyerror(const char *msg) {
+int cfg_error(const char *msg) {
   cerr << "Syntax Error: Line " << cfg_lineno << ": " << msg << "\n";
   cleanup();
   return 1;
