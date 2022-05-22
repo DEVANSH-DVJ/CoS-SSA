@@ -6,8 +6,8 @@
 
 #include <string>
 
-#include "cfg/cfg_edge.hh"
-#include "cfg/cfg_node.hh"
+class CFG_Edge;
+class CFG_Node;
 
 class Procedure {
 public:

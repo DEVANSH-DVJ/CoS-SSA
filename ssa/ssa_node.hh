@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "ssa_meta.hh"
+class SSA_Meta;
 
 typedef enum {
   SSA_Start,

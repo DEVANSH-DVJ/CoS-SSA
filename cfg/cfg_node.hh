@@ -5,6 +5,9 @@
 
 #include <map>
 
+class CFG_Edge;
+class CFG_Opd;
+
 typedef enum {
   CFG_StartNode,
   CFG_EndNode,
@@ -13,9 +16,6 @@ typedef enum {
   CFG_UsevarNode,
   CFG_ExprNode,
 } CFG_NodeType;
-
-class CFG_Edge;
-class CFG_Opd;
 
 class CFG_Node {
 public:

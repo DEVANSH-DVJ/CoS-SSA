@@ -1,7 +1,7 @@
 #ifndef _DDG_EDGE_HH_
 #define _DDG_EDGE_HH_
 
-#include "ddg_node.hh"
+class DDG_Node;
 
 class DDG_Edge {
 public:

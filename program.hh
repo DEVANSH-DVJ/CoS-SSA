@@ -5,10 +5,9 @@
 #include <map>
 #include <utility>
 
-#include "procedure.hh"
-
-#include "cfg/cfg_edge.hh"
-#include "cfg/cfg_node.hh"
+class Procedure;
+class CFG_Edge;
+class CFG_Node;
 
 class Program {
 public:
