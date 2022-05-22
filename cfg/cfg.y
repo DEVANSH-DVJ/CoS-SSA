@@ -25,7 +25,7 @@
 
   CFG_Node *cfg_node;
   CFG_Edge *cfg_edge;
-  string *opd;
+  CFG_Opd *opd;
 }
 
 %define api.prefix {cfg_}
@@ -211,7 +211,7 @@ InputNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN CFG_INPUT CFG_EOS
   {
     CFG_Node *node = new CFG_Node(CFG_Input, $1);
-    node->lopd = *$3;
+    node->lopd = new CFG_Opd(CFG_Var, *$3);
     node->stmt = *$3 + " = INPUT";
 
     program->cfg_nodes->insert(make_pair($1, node));
@@ -224,7 +224,7 @@ UsevarNode
   : CFG_NUM CFG_COLON CFG_USEVAR CFG_ASSIGN CFG_ID CFG_EOS
   {
     CFG_Node *node = new CFG_Node(CFG_Usevar, $1);
-    node->ropd1 = *$5;
+    node->ropd1 = new CFG_Opd(CFG_Var, *$5);
     node->stmt = "USEVAR = " + *$5;
 
     program->cfg_nodes->insert(make_pair($1, node));
@@ -237,11 +237,11 @@ ExprNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_OP Opd CFG_EOS
   {
     CFG_Node *node = new CFG_Node(CFG_Expr, $1);
-    node->lopd = *$3;
-    node->ropd1 = *$5;
-    node->ropd2 = *$7;
+    node->lopd = new CFG_Opd(CFG_Var, *$3);
+    node->ropd1 = $5;
+    node->ropd2 = $7;
     node->op = *$6;
-    node->stmt = *$3 + " = " + *$5 + " " + *$6 + " " + *$7;
+    node->stmt = *$3 + " = " + $5->str + " " + *$6 + " " + $7->str;
 
     program->cfg_nodes->insert(make_pair($1, node));
 
@@ -250,10 +250,10 @@ ExprNode
   | CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_EOS
   {
     CFG_Node *node = new CFG_Node(CFG_Expr, $1);
-    node->lopd = *$3;
-    node->ropd1 = *$5;
+    node->lopd = new CFG_Opd(CFG_Var, *$3);
+    node->ropd1 = $5;
     node->op = "=";
-    node->stmt = *$3 + " = " + *$5;
+    node->stmt = *$3 + " = " + $5->str;
 
     program->cfg_nodes->insert(make_pair($1, node));
 
@@ -282,11 +282,11 @@ Edge
 Opd
   : CFG_NUM
   {
-    $$ = new string(to_string($1));
+    $$ = new CFG_Opd(CFG_Num, $1);
   }
   | CFG_ID
   {
-    $$ = $1;
+    $$ = new CFG_Opd(CFG_Var, *$1);
   }
 ;
 
