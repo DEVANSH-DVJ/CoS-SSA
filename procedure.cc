@@ -13,10 +13,9 @@ Procedure::Procedure(string name) {
 Procedure::~Procedure() {}
 
 void Procedure::visualize_cfg() {
-  *dot_fd << "digraph G {\n";
-  *dot_fd << "\tsubgraph cluster_" << this->name << " {\n";
+  *dot_fd << "\n\tsubgraph cluster_" << this->name << " {\n";
   *dot_fd << "\t\tlabel = \"" << this->name << "\";\n";
-  *dot_fd << "\t\tmargin = 20;\n";
+  *dot_fd << "\t\tmargin = 25;\n";
   for (map<int, CFG_Node *>::iterator it = this->cfg_nodes->begin();
        it != this->cfg_nodes->end(); ++it) {
     it->second->visualize();
@@ -25,5 +24,5 @@ void Procedure::visualize_cfg() {
        it != this->cfg_edges->end(); ++it) {
     it->second->visualize();
   }
-  *dot_fd << "}\n";
+  *dot_fd << "\t}\n";
 }
