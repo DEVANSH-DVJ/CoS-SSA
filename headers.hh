@@ -7,6 +7,7 @@
 
 #include "cfg/cfg_edge.hh"
 #include "cfg/cfg_node.hh"
+#include "cfg/cfg_opd.hh"
 
 #include "ddg/ddg_edge.hh"
 #include "ddg/ddg_node.hh"
