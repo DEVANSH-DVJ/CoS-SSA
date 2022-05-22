@@ -106,8 +106,8 @@ Proc
   : CFG_LCB StartNode NodeList EndNode EdgeList CFG_RCB
   {
     string proc_name = $2->parent_proc;
-    if (proc_name != $4->parent_proc)
-      cfg_error("Start node and end node must be in the same procedure");
+    CHECK_INPUT_AND_ABORT(proc_name == $4->parent_proc,
+                          "Start node and end node must be in the same procedure");
 
     Procedure *proc = program->get_proc(proc_name);
     proc->cfg_nodes->insert(make_pair($2->node_id, $2));
