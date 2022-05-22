@@ -23,6 +23,7 @@
 
   CFG_Node *cfg_node;
   CFG_Edge *cfg_edge;
+  string *opd;
 }
 
 %define api.prefix {cfg_}
@@ -60,6 +61,8 @@
 %type <cfg_node> ExprNode
 
 %type <cfg_edge> Edge
+
+%type <opd> Opd
 
 %left '+' '-'
 %left '*' '/'
@@ -217,7 +220,13 @@ Edge
 
 Opd
   : CFG_NUM
+  {
+    $$ = new string(to_string($1));
+  }
   | CFG_ID
+  {
+    $$ = $1;
+  }
 ;
 
 %%
