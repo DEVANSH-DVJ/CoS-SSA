@@ -17,6 +17,6 @@ CFG_Node::~CFG_Node() {
 }
 
 void CFG_Node::visualize() {
-  *dot_fd << "\tnode_" << this->node_id << " [shape=box, label=\"" << this->node_id
-          << "\"];\n";
+  *dot_fd << "\tnode_" << this->node_id << " [shape=box, xlabel=\""
+          << this->node_id << "\", label=\"" << this->stmt << "\"];\n";
 }
