@@ -1,5 +1,7 @@
 #include "../headers.hh"
 
+using namespace std;
+
 CFG_Opd::CFG_Opd(CFG_OpdType type) {
   this->type = type;
 

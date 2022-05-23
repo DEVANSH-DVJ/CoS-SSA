@@ -1,6 +1,7 @@
 %{
 
   #include <iostream>
+  #include <string>
 
   #include "../headers.hh"
 
@@ -269,7 +270,6 @@ ExprNode
 Edge
   : CFG_NUM CFG_ARROW CFG_NUM CFG_EOS
   {
-
     CFG_Edge *edge = new CFG_Edge($1, $3);
 
     edge->src->out_edges->insert(make_pair($3, edge));

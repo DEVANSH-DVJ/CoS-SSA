@@ -1,6 +1,9 @@
 %{
 
+    #include <list>
     #include <string>
+
+    #include "../headers.hh"
 
     using namespace std;
 

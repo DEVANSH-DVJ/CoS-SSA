@@ -4,8 +4,8 @@
 #include <string>
 
 typedef enum {
-  SSA_VarOpd,
   SSA_NumOpd,
+  SSA_VarOpd,
   SSA_InputOpd,
   SSA_UsevarOpd,
 } SSA_OpdType;
