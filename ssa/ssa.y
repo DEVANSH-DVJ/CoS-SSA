@@ -136,38 +136,217 @@ EdgeList
 
 StartNode
   : MetaNum SSA_COLON SSA_START SSA_ID SSA_EOS
+  {
+    SSA_Node *node = new SSA_Node(SSA_StartNode, $1->first);
+    SSA_Meta *meta = new SSA_Meta(SSA_StartMeta, $1->first, $1->second);
+    SSA_Stmt *stmt = new SSA_Stmt(SSA_StartStmt);
+
+    node->metas->insert(make_pair($1->second, meta));
+    node->parent_proc = *$4;
+    meta->stmts->push_back(stmt);
+
+    program->ssa_nodes->insert(make_pair($1->first, node));
+
+    $$ = node;
+  }
 ;
 
 EndNode
   : MetaNum SSA_COLON SSA_END SSA_ID SSA_EOS
+  {
+    SSA_Node *node = new SSA_Node(SSA_EndNode, $1->first);
+    SSA_Meta *meta = new SSA_Meta(SSA_EndMeta, $1->first, $1->second);
+    SSA_Stmt *stmt = new SSA_Stmt(SSA_EndStmt);
+
+    node->metas->insert(make_pair($1->second, meta));
+    node->parent_proc = *$4;
+    meta->stmts->push_back(stmt);
+
+    program->ssa_nodes->insert(make_pair($1->first, node));
+
+    $$ = node;
+  }
 ;
 
 Node
   : CallNode
+  {
+    $$ = $1;
+  }
   | InputNode
+  {
+    $$ = $1;
+  }
   | UsevarNode
+  {
+    $$ = $1;
+  }
   | ExprNode
+  {
+    $$ = $1;
+  }
 ;
 
 CallNode
   : MetaNum SSA_COLON SSA_CALL SSA_ID SSA_EOS
+  {
+    SSA_Node *node = new SSA_Node(SSA_CallNode, $1->first);
+    SSA_Meta *meta = new SSA_Meta(SSA_CallMeta, $1->first, $1->second);
+    SSA_Stmt *stmt = new SSA_Stmt(SSA_CallStmt);
+
+    node->metas->insert(make_pair($1->second, meta));
+    meta->stmts->push_back(stmt);
+    stmt->callee_proc = *$4;
+
+    program->ssa_nodes->insert(make_pair($1->first, node));
+
+    $$ = node;
+  }
 ;
 
 InputNode
   : MetaNum SSA_COLON Var SSA_ASSIGN SSA_INPUT SSA_EOS
+  {
+    SSA_Node *node = new SSA_Node(SSA_InputNode, $1->first);
+    SSA_Meta *meta = new SSA_Meta(SSA_InputMeta, $1->first, $1->second);
+    SSA_Stmt *stmt = new SSA_Stmt(SSA_InputStmt);
+
+    node->metas->insert(make_pair($1->second, meta));
+    meta->stmts->push_back(stmt);
+    stmt->lopd = $3;
+    stmt->ropd1 = new SSA_Opd(SSA_InputOpd, $1->first, 0);
+    stmt->op = "=";
+
+    program->ssa_nodes->insert(make_pair($1->first, node));
+
+    $$ = node;
+  }
 ;
 
 UsevarNode
   : MetaNum SSA_COLON SSA_USEVAR SSA_ASSIGN Var SSA_EOS
+  {
+    SSA_Node *node = new SSA_Node(SSA_UsevarNode, $1->first);
+    SSA_Meta *meta = new SSA_Meta(SSA_UsevarMeta, $1->first, $1->second);
+    SSA_Stmt *stmt = new SSA_Stmt(SSA_UsevarStmt);
+
+    node->metas->insert(make_pair($1->second, meta));
+    meta->stmts->push_back(stmt);
+    stmt->lopd = new SSA_Opd(SSA_UsevarOpd, $1->first, $1->second);
+    stmt->ropd1 = $5;
+    stmt->op = "=";
+
+    program->ssa_nodes->insert(make_pair($1->first, node));
+
+    $$ = node;
+  }
   | MetaNum SSA_COLON PhiStmt SSA_USEVAR SSA_ASSIGN Var SSA_EOS
+  {
+    SSA_Node *node = new SSA_Node(SSA_UsevarNode, $1->first);
+    SSA_Meta *meta = new SSA_Meta(SSA_UsevarMeta, $1->first, $1->second);
+    SSA_Stmt *stmt = new SSA_Stmt(SSA_UsevarStmt);
+
+    node->metas->insert(make_pair($1->second, meta));
+    meta->stmts->push_back($3);
+    meta->stmts->push_back(stmt);
+    stmt->lopd = new SSA_Opd(SSA_UsevarOpd, $1->first, $1->second);
+    stmt->ropd1 = $6;
+    stmt->op = "=";
+
+    program->ssa_nodes->insert(make_pair($1->first, node));
+
+    $$ = node;
+  }
 ;
 
 ExprNode
   : MetaNum SSA_COLON Var SSA_ASSIGN Opd SSA_OP Opd SSA_EOS
+  {
+    SSA_Node *node = new SSA_Node(SSA_ExprNode, $1->first);
+    SSA_Meta *meta = new SSA_Meta(SSA_ExprMeta, $1->first, $1->second);
+    SSA_Stmt *stmt = new SSA_Stmt(SSA_ExprStmt);
+
+    node->metas->insert(make_pair($1->second, meta));
+    meta->stmts->push_back(stmt);
+    stmt->lopd = $3;
+    stmt->ropd1 = $5;
+    stmt->ropd2 = $7;
+    stmt->op = *$6;
+
+    program->ssa_nodes->insert(make_pair($1->first, node));
+
+    $$ = node;
+  }
   | MetaNum SSA_COLON PhiStmt Var SSA_ASSIGN Opd SSA_OP Opd SSA_EOS
+  {
+    SSA_Node *node = new SSA_Node(SSA_ExprNode, $1->first);
+    SSA_Meta *meta = new SSA_Meta(SSA_ExprMeta, $1->first, $1->second);
+    SSA_Stmt *stmt = new SSA_Stmt(SSA_ExprStmt);
+
+    node->metas->insert(make_pair($1->second, meta));
+    meta->stmts->push_back($3);
+    meta->stmts->push_back(stmt);
+    stmt->lopd = $4;
+    stmt->ropd1 = $6;
+    stmt->ropd2 = $8;
+    stmt->op = *$7;
+
+    program->ssa_nodes->insert(make_pair($1->first, node));
+
+    $$ = node;
+  }
   | MetaNum SSA_COLON PhiStmt PhiStmt Var SSA_ASSIGN Opd SSA_OP Opd SSA_EOS
+  {
+    SSA_Node *node = new SSA_Node(SSA_ExprNode, $1->first);
+    SSA_Meta *meta = new SSA_Meta(SSA_ExprMeta, $1->first, $1->second);
+    SSA_Stmt *stmt = new SSA_Stmt(SSA_ExprStmt);
+
+    node->metas->insert(make_pair($1->second, meta));
+    meta->stmts->push_back($3);
+    meta->stmts->push_back($4);
+    meta->stmts->push_back(stmt);
+    stmt->lopd = $5;
+    stmt->ropd1 = $7;
+    stmt->ropd2 = $9;
+    stmt->op = *$8;
+
+    program->ssa_nodes->insert(make_pair($1->first, node));
+
+    $$ = node;
+  }
   | MetaNum SSA_COLON Var SSA_ASSIGN Opd SSA_EOS
+  {
+    SSA_Node *node = new SSA_Node(SSA_ExprNode, $1->first);
+    SSA_Meta *meta = new SSA_Meta(SSA_ExprMeta, $1->first, $1->second);
+    SSA_Stmt *stmt = new SSA_Stmt(SSA_ExprStmt);
+
+    node->metas->insert(make_pair($1->second, meta));
+    meta->stmts->push_back(stmt);
+    stmt->lopd = $3;
+    stmt->ropd1 = $5;
+    stmt->op = "=";
+
+    program->ssa_nodes->insert(make_pair($1->first, node));
+
+    $$ = node;
+  }
   | MetaNum SSA_COLON PhiStmt Var SSA_ASSIGN Opd SSA_EOS
+  {
+    SSA_Node *node = new SSA_Node(SSA_ExprNode, $1->first);
+    SSA_Meta *meta = new SSA_Meta(SSA_ExprMeta, $1->first, $1->second);
+    SSA_Stmt *stmt = new SSA_Stmt(SSA_ExprStmt);
+
+    node->metas->insert(make_pair($1->second, meta));
+    meta->stmts->push_back($3);
+    meta->stmts->push_back(stmt);
+    stmt->lopd = $4;
+    stmt->ropd1 = $6;
+    stmt->op = "=";
+
+    program->ssa_nodes->insert(make_pair($1->first, node));
+
+    $$ = node;
+  }
 ;
 
 PhiStmt
