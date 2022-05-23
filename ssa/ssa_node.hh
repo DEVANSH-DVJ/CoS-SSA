@@ -16,13 +16,20 @@ typedef enum {
 
 class SSA_Node {
 public:
+  /* Always initialized: by constructor */
   SSA_NodeType type;
   int node_id;
 
-  map<int, SSA_Meta *> metas;
+  /* Always initialized: post parsing*/
+  std::string parent_proc;
+  std::map<int, SSA_Meta *> *metas;
 
-  // SSA_Node(SSA_NodeType type, int node_id);
-  // ~SSA_Node();
+  /* Constructors and Destructor */
+  SSA_Node(SSA_NodeType type, int node_id);
+  ~SSA_Node();
+
+  /* Helper functions */
+  void visualize();
 };
 
 #endif
