@@ -108,12 +108,28 @@ Proc
 
 NodeList
   : Node
+  {
+    $$ = new list<SSA_Node *>();
+    $$->push_back($1);
+  }
   | NodeList Node
+  {
+    $$ = $1;
+    $$->push_back($2);
+  }
 ;
 
 EdgeList
   : Edge
+  {
+    $$ = new list<SSA_Edge *>();
+    $$->push_back($1);
+  }
   | EdgeList Edge
+  {
+    $$ = $1;
+    $$->push_back($2);
+  }
 ;
 
 /* Statements */
@@ -156,6 +172,14 @@ ExprNode
 
 PhiStmt
   : Var SSA_ASSIGN SSA_PHI SSA_LRB VarList SSA_RRB SSA_EOS
+  {
+    SSA_Stmt *stmt = new SSA_Stmt(SSA_PhiStmt);
+    stmt->lopd = $1;
+    stmt->ropds = $5;
+    stmt->op = "phi";
+
+    $$ = stmt;
+  }
 ;
 
 VarList
@@ -175,6 +199,15 @@ VarList
 
 Edge
   : SSA_NUM SSA_ARROW SSA_NUM SSA_EOS
+  {
+    SSA_Edge *edge = new SSA_Edge($1, $3);
+
+    edge->src->out_edges->insert(make_pair($3, edge));
+    edge->dst->in_edges->insert(make_pair($1, edge));
+    program->ssa_edges->insert(make_pair(make_pair($1, $3), edge));
+
+    $$ = edge;
+  }
 ;
 
 /* Operand */
