@@ -25,6 +25,15 @@ SSA_Node::~SSA_Node() {
 }
 
 void SSA_Node::visualize() {
-  *dot_fd << "\t\tnode_" << this->node_id << " [shape=box, xlabel=\""
-          << this->node_id << "\", label=\"" << this->metas->size() << "\"];\n";
+  *dot_fd << "\t\tnode_" << this->node_id << " [shape=record, xlabel=\""
+          << this->node_id << "\", label=\"";
+  for (map<int, SSA_Meta *>::iterator it = this->metas->begin();
+       it != this->metas->end(); ++it) {
+    it->second->visualize();
+    if (it != --this->metas->end()) {
+      *dot_fd << " | ";
+    }
+  }
+
+  *dot_fd << "\"];\n";
 }
