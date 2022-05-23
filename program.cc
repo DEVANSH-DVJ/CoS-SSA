@@ -76,3 +76,12 @@ void Program::visualize_cfg() {
   }
   *dot_fd << "}\n";
 }
+
+void Program::visualize_ssa() {
+  *dot_fd << "digraph G {\n";
+  for (list<Procedure *>::iterator it = this->procs->begin();
+       it != this->procs->end(); ++it) {
+    (*it)->visualize_ssa();
+  }
+  *dot_fd << "}\n";
+}

@@ -33,3 +33,18 @@ void Procedure::visualize_cfg() {
   }
   *dot_fd << "\t}\n";
 }
+
+void Procedure::visualize_ssa() {
+  *dot_fd << "\n\tsubgraph cluster_" << this->name << " {\n";
+  *dot_fd << "\t\tlabel = \"" << this->name << "\";\n";
+  *dot_fd << "\t\tmargin = 25;\n";
+  for (map<int, SSA_Node *>::iterator it = this->ssa_nodes->begin();
+       it != this->ssa_nodes->end(); ++it) {
+    it->second->visualize();
+  }
+  for (map<pair<int, int>, SSA_Edge *>::iterator it = this->ssa_edges->begin();
+       it != this->ssa_edges->end(); ++it) {
+    it->second->visualize();
+  }
+  *dot_fd << "\t}\n";
+}

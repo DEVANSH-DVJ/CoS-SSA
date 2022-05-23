@@ -25,6 +25,7 @@ public:
   ~Procedure();
 
   void visualize_cfg();
+  void visualize_ssa();
 };
 
 #endif

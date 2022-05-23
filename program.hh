@@ -30,6 +30,7 @@ public:
   SSA_Node *get_ssa_node(int node_id);
 
   void visualize_cfg();
+  void visualize_ssa();
 };
 
 #endif
