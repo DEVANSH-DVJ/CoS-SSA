@@ -25,6 +25,11 @@ SSA_Stmt::~SSA_Stmt() {
   if (this->ropd2 != NULL)
     delete this->ropd2;
 
-  if (this->ropds != NULL)
+  if (this->ropds != NULL) {
+    for (list<SSA_Opd *>::iterator it = this->ropds->begin();
+         it != this->ropds->end(); ++it)
+      delete *it;
+
     delete this->ropds;
+  }
 }
