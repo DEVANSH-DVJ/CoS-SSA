@@ -39,7 +39,6 @@ int main(int argc, char **argv) {
   // Default arguments
   struct arguments arguments;
 
-  arguments.visualize = 0;
   arguments.input_type = FILE_UNKNOWN;
   arguments.input_file = "";
 

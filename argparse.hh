@@ -9,13 +9,11 @@ using namespace std;
 
 enum short_options {
   OPT_TYPE = 0x80,
-  OPT_VISUALIZE,
 };
 
 enum file_type { FILE_CFG, FILE_SSA, FILE_UNKNOWN };
 
 struct arguments {
-  int visualize;
   file_type input_type;
   string input_file;
 };
@@ -28,7 +26,6 @@ char args_doc[] = "[FILE]";
 
 /* Options visible to user */
 struct argp_option options[] = {{"type", OPT_TYPE, "TYPE", 0, "Type of input"},
-                                {"visualize", OPT_VISUALIZE, 0, 0, "Visualize"},
                                 {0}};
 
 error_t parse_opt(int key, char *arg, struct argp_state *state) {
@@ -47,10 +44,6 @@ error_t parse_opt(int key, char *arg, struct argp_state *state) {
       cout << "Unknown input type: " << arg << endl;
       argp_usage(state);
     }
-    break;
-
-  case OPT_VISUALIZE:
-    arguments->visualize = 1;
     break;
 
   case ARGP_KEY_ARG:
