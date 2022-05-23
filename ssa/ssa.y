@@ -12,10 +12,24 @@
   extern int ssa_lineno;
   extern int ssa_error(const char *);
 
+  extern Program *program;
+
 %}
 %union{
   string *name;
   int value;
+  pair<int, int> *meta_num;
+
+  Procedure *proc;
+
+  list<SSA_Node *> *ssa_node_list;
+  list<SSA_Edge *> *ssa_edge_list;
+  list<SSA_Opd *> *ssa_opd_list;
+
+  SSA_Node *ssa_node;
+  SSA_Edge *ssa_edge;
+  SSA_Stmt *ssa_stmt;
+  SSA_Opd *ssa_opd;
 }
 
 %define api.prefix {ssa_}
@@ -47,6 +61,27 @@
 
 %left '+' '-'
 %left '*' '/'
+
+%type <proc> Proc
+
+%type <ssa_node_list> NodeList
+%type <ssa_edge_list> EdgeList
+
+%type <ssa_node> StartNode
+%type <ssa_node> EndNode
+%type <ssa_node> Node
+%type <ssa_node> CallNode
+%type <ssa_node> InputNode
+%type <ssa_node> UsevarNode
+%type <ssa_node> ExprNode
+%type <ssa_stmt> PhiStmt
+%type <ssa_opd_list> VarList
+
+%type <ssa_edge> Edge
+
+%type <ssa_opd> Opd
+%type <ssa_opd> Var
+%type <meta_num> MetaNum
 
 %%
 
@@ -151,7 +186,7 @@ MetaNum
 
 %%
 
-int yyerror(const char *msg) {
+int ssa_error(const char *msg) {
   cerr << "Syntax Error: Line " << ssa_lineno << ": " << msg << "\n";
   cleanup();
   return 1;
