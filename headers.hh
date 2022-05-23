@@ -15,5 +15,7 @@
 #include "ssa/ssa_edge.hh"
 #include "ssa/ssa_meta.hh"
 #include "ssa/ssa_node.hh"
+#include "ssa/ssa_opd.hh"
+#include "ssa/ssa_stmt.hh"
 
 #endif
