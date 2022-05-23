@@ -92,18 +92,45 @@ Program
 
 ProcDefList
   : SSA_ID
+  {
+    program->procedures->insert(make_pair(*$1, new Procedure(*$1)));
+  }
   | ProcDefList SSA_COMMA SSA_ID
+  {
+    program->procedures->insert(make_pair(*$3, new Procedure(*$3)));
+  }
 ;
 
 ProcList
   : Proc
+  {
+    program->procs->push_back($1);
+  }
   | ProcList Proc
+  {
+    program->procs->push_back($2);
+  }
 ;
 
 /* Procedure */
 
 Proc
   : SSA_LCB StartNode NodeList EndNode EdgeList SSA_RCB
+  {
+    string proc_name = $2->parent_proc;
+    CHECK_INPUT_AND_ABORT(proc_name == $4->parent_proc,
+                          "Start node and end node must be in the same procedure");
+
+    Procedure *proc = program->get_proc(proc_name);
+    proc->ssa_nodes->insert(make_pair($2->node_id, $2));
+    proc->ssa_nodes->insert(make_pair($4->node_id, $4));
+    for (list<SSA_Node *>::iterator it = $3->begin(); it != $3->end(); ++it)
+      proc->ssa_nodes->insert(make_pair((*it)->node_id, *it));
+    for (list<SSA_Edge *>::iterator it = $5->begin(); it != $5->end(); ++it)
+      proc->ssa_edges->insert(make_pair((*it)->edge_id, *it));
+
+    $$ = proc;
+  }
 ;
 
 NodeList
