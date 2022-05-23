@@ -5,11 +5,17 @@ class SSA_Node;
 
 class SSA_Edge {
 public:
+  /* Always initialized: by constructor */
+  std::pair<int, int> edge_id;
   SSA_Node *src;
   SSA_Node *dst;
 
-  // SSA_Edge(SSA_Node *src, SSA_Node *dst);
-  // ~SSA_Edge();
+  /* Constructors and Destructor */
+  SSA_Edge(int src_id, int dst_id);
+  ~SSA_Edge();
+
+  /* Helper functions */
+  void visualize();
 };
 
 #endif
