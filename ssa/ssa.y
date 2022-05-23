@@ -160,7 +160,15 @@ PhiStmt
 
 VarList
   : Var
+  {
+    $$ = new list<SSA_Opd *>();
+    $$->push_back($1);
+  }
   | VarList SSA_COMMA Var
+  {
+    $$ = $1;
+    $$->push_back($3);
+  }
 ;
 
 /* Edges */
@@ -173,15 +181,27 @@ Edge
 
 Opd
   : SSA_NUM
+  {
+    $$ = new SSA_Opd(SSA_NumOpd, 0, 0, $1);
+  }
   | Var
+  {
+    $$ = $1;
+  }
 ;
 
 Var
   : SSA_ID SSA_UNDERSCORE MetaNum
+  {
+    $$ = new SSA_Opd(SSA_VarOpd, $3->first, $3->second, *$1);
+  }
 ;
 
 MetaNum
   : SSA_NUM SSA_UNDERSCORE SSA_NUM
+  {
+    $$ = new pair<int, int>(make_pair($1, $3));
+  }
 ;
 
 %%
