@@ -2,6 +2,8 @@
 
 using namespace std;
 
+extern fstream *dot_fd;
+
 SSA_Meta::SSA_Meta(SSA_MetaType type, int node_id, int meta_id) {
   this->type = type;
   this->node_id = node_id;
@@ -16,4 +18,14 @@ SSA_Meta::~SSA_Meta() {
     delete *it;
   }
   delete this->stmts;
+}
+
+void SSA_Meta::visualize() {
+  for (list<SSA_Stmt *>::iterator it = this->stmts->begin();
+       it != this->stmts->end(); ++it) {
+    *dot_fd << (*it)->stmt;
+    if (it != --this->stmts->end()) {
+      *dot_fd << " \\n ";
+    }
+  }
 }

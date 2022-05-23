@@ -27,6 +27,8 @@ public:
   /* Constructors and Destructor */
   SSA_Meta(SSA_MetaType type, int node_id, int meta_id);
   ~SSA_Meta();
+
+  void visualize();
 };
 
 #endif
