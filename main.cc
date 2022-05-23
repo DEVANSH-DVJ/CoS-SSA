@@ -84,6 +84,15 @@ int main(int argc, char **argv) {
 
   } else if (arguments.input_type == FILE_SSA) {
     ssa_parse();
+    cout << "SSA nodes: " << program->ssa_nodes->size() << endl;
+    cout << "SSA edges: " << program->ssa_edges->size() << endl;
+    for (map<string, Procedure *>::iterator it = program->procedures->begin();
+         it != program->procedures->end(); ++it) {
+      cout << "Procedure " << it->first << ":" << endl;
+      cout << "SSA nodes: " << it->second->ssa_nodes->size() << endl;
+      cout << "SSA edges: " << it->second->ssa_edges->size() << endl;
+    }
+    program->visualize_ssa();
   }
 
   if (arguments.input_type == FILE_CFG) {
