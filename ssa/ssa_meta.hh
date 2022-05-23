@@ -20,7 +20,7 @@ public:
   int node_id;
   int meta_id;
 
-  std::list<SSA_Stmt*> *stmts;
+  std::list<SSA_Stmt *> *stmts;
 
   // SSA_Meta(SSA_MetaType type, int node_id, int meta_id);
   // ~SSA_Meta();
