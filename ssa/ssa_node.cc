@@ -8,6 +8,8 @@ SSA_Node::SSA_Node(SSA_NodeType type, int node_id) {
 
   this->parent_proc = "";
   this->metas = new map<int, SSA_Meta *>();
+  this->in_edges = new map<int, SSA_Edge *>();
+  this->out_edges = new map<int, SSA_Edge *>();
 }
 
 SSA_Node::~SSA_Node() {
@@ -16,4 +18,6 @@ SSA_Node::~SSA_Node() {
     delete it->second;
   }
   delete this->metas;
+  delete this->in_edges;
+  delete this->out_edges;
 }

@@ -3,6 +3,7 @@
 
 #include <map>
 
+class SSA_Edge;
 class SSA_Meta;
 
 typedef enum {
@@ -23,6 +24,8 @@ public:
   /* Always initialized: post parsing*/
   std::string parent_proc;
   std::map<int, SSA_Meta *> *metas;
+  std::map<int, SSA_Edge *> *in_edges;
+  std::map<int, SSA_Edge *> *out_edges;
 
   /* Constructors and Destructor */
   SSA_Node(SSA_NodeType type, int node_id);
