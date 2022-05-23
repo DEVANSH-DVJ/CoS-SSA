@@ -12,15 +12,21 @@ typedef enum {
 
 class SSA_Opd {
 public:
+  /* Always initialized: by constructor */
   SSA_OpdType type;
-  int opd_id;
+  int node_id;
   int meta_id;
+  std::string str;
 
+  /* Conditionally initialized: post parsing */
   int num_value;
   std::string var_name;
 
-  // SSA_Opd(SSA_OpdType type, int opd_id, int meta_id);
-  // ~SSA_Opd();
+  /* Constructors and Destructor */
+  SSA_Opd(SSA_OpdType type, int node_id, int meta_id);
+  SSA_Opd(SSA_OpdType type, int node_id, int meta_id, int num_value);
+  SSA_Opd(SSA_OpdType type, int node_id, int meta_id, std::string var_name);
+  ~SSA_Opd();
 };
 
 #endif
