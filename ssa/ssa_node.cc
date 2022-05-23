@@ -2,6 +2,8 @@
 
 using namespace std;
 
+extern fstream *dot_fd;
+
 SSA_Node::SSA_Node(SSA_NodeType type, int node_id) {
   this->type = type;
   this->node_id = node_id;
@@ -20,4 +22,9 @@ SSA_Node::~SSA_Node() {
   delete this->metas;
   delete this->in_edges;
   delete this->out_edges;
+}
+
+void SSA_Node::visualize() {
+  *dot_fd << "\t\tnode_" << this->node_id << " [shape=box, xlabel=\""
+          << this->node_id << "\", label=\"" << this->metas->size() << "\"];\n";
 }

@@ -12,3 +12,8 @@ SSA_Edge::SSA_Edge(int src_id, int dst_id) {
 }
 
 SSA_Edge::~SSA_Edge() {}
+
+void SSA_Edge::visualize() {
+  *dot_fd << "\t\tnode_" << this->src->node_id << " -> "
+          << "node_" << this->dst->node_id << ";\n";
+}
