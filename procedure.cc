@@ -8,9 +8,16 @@ Procedure::Procedure(string name) {
   this->name = name;
   this->cfg_nodes = new map<int, CFG_Node *>();
   this->cfg_edges = new map<pair<int, int>, CFG_Edge *>();
+  this->ssa_nodes = new map<int, SSA_Node *>();
+  this->ssa_edges = new map<pair<int, int>, SSA_Edge *>();
 }
 
-Procedure::~Procedure() {}
+Procedure::~Procedure() {
+  delete this->cfg_nodes;
+  delete this->cfg_edges;
+  delete this->ssa_nodes;
+  delete this->ssa_edges;
+}
 
 void Procedure::visualize_cfg() {
   *dot_fd << "\n\tsubgraph cluster_" << this->name << " {\n";
