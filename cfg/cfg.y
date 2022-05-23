@@ -229,6 +229,7 @@ UsevarNode
     CFG_Node *node = new CFG_Node(CFG_UsevarNode, $1);
     node->lopd = new CFG_Opd(CFG_UsevarOpd);
     node->ropd1 = new CFG_Opd(CFG_VarOpd, *$5);
+    node->op = "=";
     node->stmt = "USEVAR = " + *$5;
 
     program->cfg_nodes->insert(make_pair($1, node));
