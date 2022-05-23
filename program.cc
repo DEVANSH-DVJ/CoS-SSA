@@ -52,17 +52,17 @@ Procedure *Program::get_proc(string name) {
   return this->procedures->find(name)->second;
 }
 
-CFG_Node *Program::get_cfg_node(int node_id) {
+CFG_Node *Program::get_cfg_node(int node_id, bool abort_if_not_found) {
   if (this->cfg_nodes->find(node_id) == this->cfg_nodes->end()) {
-    CHECK_INPUT_AND_ABORT(false,
+    CHECK_INPUT_AND_ABORT(!abort_if_not_found,
                           "CFG node " + to_string(node_id) + " not found.");
   }
   return this->cfg_nodes->find(node_id)->second;
 }
 
-SSA_Node *Program::get_ssa_node(int node_id) {
+SSA_Node *Program::get_ssa_node(int node_id, bool abort_if_not_found) {
   if (this->ssa_nodes->find(node_id) == this->ssa_nodes->end()) {
-    CHECK_INPUT_AND_ABORT(false,
+    CHECK_INPUT_AND_ABORT(!abort_if_not_found,
                           "SSA node " + to_string(node_id) + " not found.");
   }
   return this->ssa_nodes->find(node_id)->second;
