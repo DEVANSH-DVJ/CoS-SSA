@@ -164,7 +164,9 @@ EdgeList
 StartNode
   : MetaNum SSA_COLON SSA_START SSA_ID SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_StartNode, $1->first);
+    SSA_Node *node = program->get_ssa_node($1->first, false);
+    if (node == NULL)
+      node = new SSA_Node(SSA_StartNode, $1->first);
     SSA_Meta *meta = new SSA_Meta(SSA_StartMeta, $1->first, $1->second);
     SSA_Stmt *stmt = new SSA_Stmt(SSA_StartStmt);
 
@@ -181,7 +183,9 @@ StartNode
 EndNode
   : MetaNum SSA_COLON SSA_END SSA_ID SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_EndNode, $1->first);
+    SSA_Node *node = program->get_ssa_node($1->first, false);
+    if (node == NULL)
+      node = new SSA_Node(SSA_EndNode, $1->first);
     SSA_Meta *meta = new SSA_Meta(SSA_EndMeta, $1->first, $1->second);
     SSA_Stmt *stmt = new SSA_Stmt(SSA_EndStmt);
 
@@ -217,7 +221,9 @@ Node
 CallNode
   : MetaNum SSA_COLON SSA_CALL SSA_ID SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_CallNode, $1->first);
+    SSA_Node *node = program->get_ssa_node($1->first, false);
+    if (node == NULL)
+      node = new SSA_Node(SSA_CallNode, $1->first);
     SSA_Meta *meta = new SSA_Meta(SSA_CallMeta, $1->first, $1->second);
     SSA_Stmt *stmt = new SSA_Stmt(SSA_CallStmt);
 
@@ -234,7 +240,9 @@ CallNode
 InputNode
   : MetaNum SSA_COLON Var SSA_ASSIGN SSA_INPUT SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_InputNode, $1->first);
+    SSA_Node *node = program->get_ssa_node($1->first, false);
+    if (node == NULL)
+      node = new SSA_Node(SSA_InputNode, $1->first);
     SSA_Meta *meta = new SSA_Meta(SSA_InputMeta, $1->first, $1->second);
     SSA_Stmt *stmt = new SSA_Stmt(SSA_InputStmt);
 
@@ -253,7 +261,9 @@ InputNode
 UsevarNode
   : MetaNum SSA_COLON SSA_USEVAR SSA_ASSIGN Var SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_UsevarNode, $1->first);
+    SSA_Node *node = program->get_ssa_node($1->first, false);
+    if (node == NULL)
+      node = new SSA_Node(SSA_UsevarNode, $1->first);
     SSA_Meta *meta = new SSA_Meta(SSA_UsevarMeta, $1->first, $1->second);
     SSA_Stmt *stmt = new SSA_Stmt(SSA_UsevarStmt);
 
@@ -269,7 +279,9 @@ UsevarNode
   }
   | MetaNum SSA_COLON PhiStmt SSA_USEVAR SSA_ASSIGN Var SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_UsevarNode, $1->first);
+    SSA_Node *node = program->get_ssa_node($1->first, false);
+    if (node == NULL)
+      node = new SSA_Node(SSA_UsevarNode, $1->first);
     SSA_Meta *meta = new SSA_Meta(SSA_UsevarMeta, $1->first, $1->second);
     SSA_Stmt *stmt = new SSA_Stmt(SSA_UsevarStmt);
 
@@ -289,7 +301,9 @@ UsevarNode
 ExprNode
   : MetaNum SSA_COLON Var SSA_ASSIGN Opd SSA_OP Opd SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_ExprNode, $1->first);
+    SSA_Node *node = program->get_ssa_node($1->first, false);
+    if (node == NULL)
+      node = new SSA_Node(SSA_ExprNode, $1->first);
     SSA_Meta *meta = new SSA_Meta(SSA_ExprMeta, $1->first, $1->second);
     SSA_Stmt *stmt = new SSA_Stmt(SSA_ExprStmt);
 
@@ -306,7 +320,9 @@ ExprNode
   }
   | MetaNum SSA_COLON PhiStmt Var SSA_ASSIGN Opd SSA_OP Opd SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_ExprNode, $1->first);
+    SSA_Node *node = program->get_ssa_node($1->first, false);
+    if (node == NULL)
+      node = new SSA_Node(SSA_ExprNode, $1->first);
     SSA_Meta *meta = new SSA_Meta(SSA_ExprMeta, $1->first, $1->second);
     SSA_Stmt *stmt = new SSA_Stmt(SSA_ExprStmt);
 
@@ -324,7 +340,9 @@ ExprNode
   }
   | MetaNum SSA_COLON PhiStmt PhiStmt Var SSA_ASSIGN Opd SSA_OP Opd SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_ExprNode, $1->first);
+    SSA_Node *node = program->get_ssa_node($1->first, false);
+    if (node == NULL)
+      node = new SSA_Node(SSA_ExprNode, $1->first);
     SSA_Meta *meta = new SSA_Meta(SSA_ExprMeta, $1->first, $1->second);
     SSA_Stmt *stmt = new SSA_Stmt(SSA_ExprStmt);
 
@@ -343,7 +361,9 @@ ExprNode
   }
   | MetaNum SSA_COLON Var SSA_ASSIGN Opd SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_ExprNode, $1->first);
+    SSA_Node *node = program->get_ssa_node($1->first, false);
+    if (node == NULL)
+      node = new SSA_Node(SSA_ExprNode, $1->first);
     SSA_Meta *meta = new SSA_Meta(SSA_ExprMeta, $1->first, $1->second);
     SSA_Stmt *stmt = new SSA_Stmt(SSA_ExprStmt);
 
@@ -359,7 +379,9 @@ ExprNode
   }
   | MetaNum SSA_COLON PhiStmt Var SSA_ASSIGN Opd SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_ExprNode, $1->first);
+    SSA_Node *node = program->get_ssa_node($1->first, false);
+    if (node == NULL)
+      node = new SSA_Node(SSA_ExprNode, $1->first);
     SSA_Meta *meta = new SSA_Meta(SSA_ExprMeta, $1->first, $1->second);
     SSA_Stmt *stmt = new SSA_Stmt(SSA_ExprStmt);
 
