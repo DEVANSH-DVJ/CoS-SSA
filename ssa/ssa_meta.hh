@@ -16,14 +16,17 @@ typedef enum {
 
 class SSA_Meta {
 public:
+  /* Always initialized: by constructor */
   SSA_MetaType type;
   int node_id;
   int meta_id;
 
+  /* Always initialized: post parsing*/
   std::list<SSA_Stmt *> *stmts;
 
-  // SSA_Meta(SSA_MetaType type, int node_id, int meta_id);
-  // ~SSA_Meta();
+  /* Constructors and Destructor */
+  SSA_Meta(SSA_MetaType type, int node_id, int meta_id);
+  ~SSA_Meta();
 };
 
 #endif
