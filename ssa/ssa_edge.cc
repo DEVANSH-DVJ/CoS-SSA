@@ -6,8 +6,8 @@ extern fstream *dot_fd;
 extern Program *program;
 
 SSA_Edge::SSA_Edge(int src_id, int dst_id) {
-  this->src = program->get_ssa_node(src_id);
-  this->dst = program->get_ssa_node(dst_id);
+  this->src = program->get_ssa_node(src_id, true);
+  this->dst = program->get_ssa_node(dst_id, true);
   this->edge_id = make_pair(src_id, dst_id);
 }
 

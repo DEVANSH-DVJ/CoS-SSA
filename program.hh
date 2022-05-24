@@ -26,8 +26,8 @@ public:
   ~Program();
 
   Procedure *get_proc(string name);
-  CFG_Node *get_cfg_node(int node_id, bool abort_if_not_found = true);
-  SSA_Node *get_ssa_node(int node_id, bool abort_if_not_found = true);
+  CFG_Node *get_cfg_node(int node_id, bool abort_if_not_found);
+  SSA_Node *get_ssa_node(int node_id, bool abort_if_not_found);
 
   void visualize_cfg();
   void visualize_ssa();
