@@ -278,8 +278,8 @@ Edge
   {
     CFG_Edge *edge = new CFG_Edge($1, $3);
 
-    edge->get_src()->out_edges->insert(make_pair($3, edge));
-    edge->get_dst()->in_edges->insert(make_pair($1, edge));
+    edge->get_src()->add_out_edge(edge, $3);
+    edge->get_dst()->add_in_edge(edge, $1);
     program->cfg_edges->insert(make_pair(make_pair($1, $3), edge));
 
     $$ = edge;
