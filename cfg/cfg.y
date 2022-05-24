@@ -116,7 +116,7 @@ Proc
     for (list<CFG_Node *>::iterator it = $3->begin(); it != $3->end(); ++it)
       proc->cfg_nodes->insert(make_pair((*it)->node_id, *it));
     for (list<CFG_Edge *>::iterator it = $5->begin(); it != $5->end(); ++it)
-      proc->cfg_edges->insert(make_pair((*it)->edge_id, *it));
+      proc->cfg_edges->insert(make_pair((*it)->get_edge_id(), *it));
 
     $$ = proc;
   }
@@ -273,8 +273,8 @@ Edge
   {
     CFG_Edge *edge = new CFG_Edge($1, $3);
 
-    edge->src->out_edges->insert(make_pair($3, edge));
-    edge->dst->in_edges->insert(make_pair($1, edge));
+    edge->get_src()->out_edges->insert(make_pair($3, edge));
+    edge->get_dst()->in_edges->insert(make_pair($1, edge));
     program->cfg_edges->insert(make_pair(make_pair($1, $3), edge));
 
     $$ = edge;
