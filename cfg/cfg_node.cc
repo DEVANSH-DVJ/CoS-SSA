@@ -84,7 +84,7 @@ CFG_Node::~CFG_Node() {
     delete this->ropd2;
 }
 
-void CFG_Node::visualize() {
+void CFG_Node::visualize() const {
   *dot_fd << "\t\tnode_" << this->node_id << " [shape=box, xlabel=\""
           << this->node_id << "\", label=\"" << this->stmt << "\"];\n";
 }
@@ -94,13 +94,13 @@ void CFG_Node::set_parent_proc(std::string parent_proc) {
   this->parent_proc = parent_proc;
 }
 
-void CFG_Node::add_in_edge(CFG_Edge *edge, int from_node_id) {
+void CFG_Node::add_in_edge(CFG_Edge *edge, int from_node_id) const {
   CHECK_INVARIANT(this->in_edges->find(from_node_id) == this->in_edges->end(),
                   "Edge already exists");
   this->in_edges->insert(make_pair(from_node_id, edge));
 }
 
-void CFG_Node::add_out_edge(CFG_Edge *edge, int to_node_id) {
+void CFG_Node::add_out_edge(CFG_Edge *edge, int to_node_id) const {
   CHECK_INVARIANT(this->out_edges->find(to_node_id) == this->out_edges->end(),
                   "Edge already exists");
   this->out_edges->insert(make_pair(to_node_id, edge));
