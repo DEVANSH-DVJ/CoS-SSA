@@ -5,6 +5,11 @@ using namespace std;
 extern fstream *dot_fd;
 
 CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt) {
+  if (type != CFG_StartNode && type != CFG_EndNode) {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,
+                    "Incorrect constructor for CFG_Node");
+  }
+
   this->type = type;
   this->node_id = node_id;
 
@@ -22,6 +27,11 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt) {
 
 CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt,
                    std::string callee_proc) {
+  if (type != CFG_CallNode) {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,
+                    "Incorrect constructor for CFG_Node");
+  }
+
   this->type = type;
   this->node_id = node_id;
 
@@ -40,6 +50,11 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt,
 CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt,
                    std::string op, CFG_Opd *lopd, CFG_Opd *ropd1,
                    CFG_Opd *ropd2) {
+  if (type != CFG_AssignNode) {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,
+                    "Incorrect constructor for CFG_Node");
+  }
+
   this->type = type;
   this->node_id = node_id;
 
