@@ -8,12 +8,7 @@
 class SSA_Opd;
 
 typedef enum {
-  SSA_StartStmt,
-  SSA_EndStmt,
-  SSA_CallStmt,
-  SSA_InputStmt,
-  SSA_UsevarStmt,
-  SSA_ExprStmt,
+  SSA_AssignStmt,
   SSA_PhiStmt,
 } SSA_StmtType;
 
@@ -26,7 +21,6 @@ public:
   std::string stmt;
 
   /* Conditionally initialized: post parsing */
-  std::string callee_proc;
   std::string op;
   SSA_Opd *lopd;
   SSA_Opd *ropd1;

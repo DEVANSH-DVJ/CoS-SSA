@@ -7,7 +7,6 @@ SSA_Stmt::SSA_Stmt(SSA_StmtType type) {
 
   this->stmt = "";
 
-  this->callee_proc = "";
   this->op = "";
   this->lopd = NULL;
   this->ropd1 = NULL;
