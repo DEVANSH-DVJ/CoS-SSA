@@ -5,19 +5,9 @@
 
 class SSA_Stmt;
 
-typedef enum {
-  SSA_StartMeta,
-  SSA_EndMeta,
-  SSA_CallMeta,
-  SSA_InputMeta,
-  SSA_UsevarMeta,
-  SSA_ExprMeta,
-} SSA_MetaType;
-
 class SSA_Meta {
 public:
   /* Always initialized: by constructor */
-  SSA_MetaType type;
   int node_id;
   int meta_id;
 
@@ -25,7 +15,7 @@ public:
   std::list<SSA_Stmt *> *stmts;
 
   /* Constructors and Destructor */
-  SSA_Meta(SSA_MetaType type, int node_id, int meta_id);
+  SSA_Meta(int node_id, int meta_id);
   ~SSA_Meta();
 
   void visualize();

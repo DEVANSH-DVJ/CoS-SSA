@@ -4,8 +4,7 @@ using namespace std;
 
 extern fstream *dot_fd;
 
-SSA_Meta::SSA_Meta(SSA_MetaType type, int node_id, int meta_id) {
-  this->type = type;
+SSA_Meta::SSA_Meta(int node_id, int meta_id) {
   this->node_id = node_id;
   this->meta_id = meta_id;
 
@@ -17,6 +16,7 @@ SSA_Meta::~SSA_Meta() {
        it != this->stmts->end(); ++it) {
     delete *it;
   }
+
   delete this->stmts;
 }
 
