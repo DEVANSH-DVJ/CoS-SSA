@@ -13,11 +13,6 @@ CFG_Edge::CFG_Edge(int src_id, int dst_id) {
 
 CFG_Edge::~CFG_Edge() {}
 
-void CFG_Edge::visualize() const {
-  *dot_fd << "\t\tnode_" << this->src->get_node_id() << " -> "
-          << "node_" << this->dst->get_node_id() << ";\n";
-}
-
 const std::pair<int, int> &CFG_Edge::get_edge_id() const {
   return this->edge_id;
 }
@@ -25,3 +20,8 @@ const std::pair<int, int> &CFG_Edge::get_edge_id() const {
 const CFG_Node *CFG_Edge::get_src() const { return this->src; }
 
 const CFG_Node *CFG_Edge::get_dst() const { return this->dst; }
+
+void CFG_Edge::visualize() const {
+  *dot_fd << "\t\tnode_" << this->src->get_node_id() << " -> "
+          << "node_" << this->dst->get_node_id() << ";\n";
+}

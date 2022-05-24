@@ -16,11 +16,17 @@ public:
   CFG_Edge(int src_id, int dst_id);
   ~CFG_Edge();
 
+  /* Get functions */
+  // Get the edge id
+  const std::pair<int, int> &get_edge_id() const;
+  // Get the source node
+  const CFG_Node *get_src() const;
+  // Get the destination node
+  const CFG_Node *get_dst() const;
+
   /* Helper functions */
-  void visualize() const;                         // Visualize the edge
-  const std::pair<int, int> &get_edge_id() const; // Get the edge id
-  const CFG_Node *get_src() const;                // Get the source node
-  const CFG_Node *get_dst() const;                // Get the destination node
+  // Visualize the edge
+  void visualize() const;
 };
 
 #endif
