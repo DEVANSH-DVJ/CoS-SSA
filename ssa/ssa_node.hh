@@ -10,9 +10,7 @@ typedef enum {
   SSA_StartNode,
   SSA_EndNode,
   SSA_CallNode,
-  SSA_InputNode,
-  SSA_UsevarNode,
-  SSA_ExprNode,
+  SSA_AssignNode,
 } SSA_NodeType;
 
 class SSA_Node {
@@ -23,9 +21,13 @@ public:
 
   /* Always initialized: post parsing*/
   std::string parent_proc;
-  std::map<int, SSA_Meta *> *metas;
   std::map<int, SSA_Edge *> *in_edges;
   std::map<int, SSA_Edge *> *out_edges;
+
+  /* Conditionally initialized: post parsing */
+  std::string stmt;
+  std::string callee_proc;
+  std::map<int, SSA_Meta *> *metas;
 
   /* Constructors and Destructor */
   SSA_Node(SSA_NodeType type, int node_id);
