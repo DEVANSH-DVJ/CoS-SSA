@@ -4,12 +4,13 @@ using namespace std;
 
 extern fstream *dot_fd;
 
-CFG_Node::CFG_Node(CFG_NodeType type, int node_id) {
+CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string parent_proc,
+                   std::string stmt) {
   this->type = type;
   this->node_id = node_id;
 
-  this->parent_proc = "";
-  this->stmt = "";
+  this->parent_proc = parent_proc;
+  this->stmt = stmt;
   this->in_edges = new std::map<int, CFG_Edge *>();
   this->out_edges = new std::map<int, CFG_Edge *>();
 
@@ -18,6 +19,41 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id) {
   this->lopd = NULL;
   this->ropd1 = NULL;
   this->ropd2 = NULL;
+}
+
+CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string callee_proc,
+                   std::string stmt) {
+  this->type = type;
+  this->node_id = node_id;
+
+  this->parent_proc = "";
+  this->stmt = stmt;
+  this->in_edges = new std::map<int, CFG_Edge *>();
+  this->out_edges = new std::map<int, CFG_Edge *>();
+
+  this->callee_proc = callee_proc;
+  this->op = "";
+  this->lopd = NULL;
+  this->ropd1 = NULL;
+  this->ropd2 = NULL;
+}
+
+CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string op,
+                   CFG_Opd *lopd, CFG_Opd *ropd1, CFG_Opd *ropd2,
+                   std::string stmt) {
+  this->type = type;
+  this->node_id = node_id;
+
+  this->parent_proc = "";
+  this->stmt = stmt;
+  this->in_edges = new std::map<int, CFG_Edge *>();
+  this->out_edges = new std::map<int, CFG_Edge *>();
+
+  this->callee_proc = "";
+  this->op = op;
+  this->lopd = lopd;
+  this->ropd1 = ropd1;
+  this->ropd2 = ropd2;
 }
 
 CFG_Node::~CFG_Node() {
