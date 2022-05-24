@@ -84,14 +84,13 @@ CFG_Node::~CFG_Node() {
     delete this->ropd2;
 }
 
-void CFG_Node::visualize() const {
-  *dot_fd << "\t\tnode_" << this->node_id << " [shape=box, xlabel=\""
-          << this->node_id << "\", label=\"" << this->stmt << "\"];\n";
-}
+const CFG_NodeType CFG_Node::get_type() const { return this->type; }
 
 const int CFG_Node::get_node_id() const { return this->node_id; }
 
-const std::string &CFG_Node::get_parent_proc() const { return this->parent_proc; }
+const std::string &CFG_Node::get_parent_proc() const {
+  return this->parent_proc;
+}
 
 void CFG_Node::set_parent_proc(std::string parent_proc) {
   CHECK_INVARIANT(this->parent_proc == "", "Parent proc already set");
@@ -108,4 +107,9 @@ void CFG_Node::add_out_edge(CFG_Edge *edge, int to_node_id) const {
   CHECK_INVARIANT(this->out_edges->find(to_node_id) == this->out_edges->end(),
                   "Edge already exists");
   this->out_edges->insert(make_pair(to_node_id, edge));
+}
+
+void CFG_Node::visualize() const {
+  *dot_fd << "\t\tnode_" << this->node_id << " [shape=box, xlabel=\""
+          << this->node_id << "\", label=\"" << this->stmt << "\"];\n";
 }
