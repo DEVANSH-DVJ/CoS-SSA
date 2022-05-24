@@ -113,8 +113,10 @@ Proc
     Procedure *proc = program->get_proc(proc_name);
     proc->cfg_nodes->insert(make_pair($2->node_id, $2));
     proc->cfg_nodes->insert(make_pair($4->node_id, $4));
-    for (list<CFG_Node *>::iterator it = $3->begin(); it != $3->end(); ++it)
+    for (list<CFG_Node *>::iterator it = $3->begin(); it != $3->end(); ++it) {
       proc->cfg_nodes->insert(make_pair((*it)->node_id, *it));
+      (*it)->set_parent_proc(proc_name);
+    }
     for (list<CFG_Edge *>::iterator it = $5->begin(); it != $5->end(); ++it)
       proc->cfg_edges->insert(make_pair((*it)->get_edge_id(), *it));
 
@@ -155,7 +157,7 @@ StartNode
   {
     string stmt = "START " + *$4;
     CFG_Node *node = new CFG_Node(CFG_StartNode, $1, stmt);
-    node->parent_proc = *$4;
+    node->set_parent_proc(*$4);
 
     program->cfg_nodes->insert(make_pair($1, node));
 
@@ -168,7 +170,7 @@ EndNode
   {
     string stmt = "END " + *$4;
     CFG_Node *node = new CFG_Node(CFG_EndNode, $1, stmt);
-    node->parent_proc = *$4;
+    node->set_parent_proc(*$4);
 
     program->cfg_nodes->insert(make_pair($1, node));
 
