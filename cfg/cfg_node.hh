@@ -12,9 +12,7 @@ typedef enum {
   CFG_StartNode,
   CFG_EndNode,
   CFG_CallNode,
-  CFG_InputNode,
-  CFG_UsevarNode,
-  CFG_ExprNode,
+  CFG_AssignNode,
 } CFG_NodeType;
 
 class CFG_Node {
