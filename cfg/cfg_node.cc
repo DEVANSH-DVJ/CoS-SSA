@@ -4,12 +4,11 @@ using namespace std;
 
 extern fstream *dot_fd;
 
-CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string parent_proc,
-                   std::string stmt) {
+CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt) {
   this->type = type;
   this->node_id = node_id;
 
-  this->parent_proc = parent_proc;
+  this->parent_proc = "";
   this->stmt = stmt;
   this->in_edges = new std::map<int, CFG_Edge *>();
   this->out_edges = new std::map<int, CFG_Edge *>();
@@ -21,8 +20,8 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string parent_proc,
   this->ropd2 = NULL;
 }
 
-CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string callee_proc,
-                   std::string stmt) {
+CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt,
+                   std::string callee_proc) {
   this->type = type;
   this->node_id = node_id;
 
@@ -38,9 +37,9 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string callee_proc,
   this->ropd2 = NULL;
 }
 
-CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string op,
-                   CFG_Opd *lopd, CFG_Opd *ropd1, CFG_Opd *ropd2,
-                   std::string stmt) {
+CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt,
+                   std::string op, CFG_Opd *lopd, CFG_Opd *ropd1,
+                   CFG_Opd *ropd2) {
   this->type = type;
   this->node_id = node_id;
 

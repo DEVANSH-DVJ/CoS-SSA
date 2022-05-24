@@ -35,12 +35,11 @@ public:
   CFG_Opd *ropd2;
 
   /* Constructors and Destructor */
-  CFG_Node(CFG_NodeType type, int node_id, std::string parent_proc,
-           std::string stmt);
-  CFG_Node(CFG_NodeType type, int node_id, std::string callee_proc,
-           std::string stmt);
-  CFG_Node(CFG_NodeType type, int node_id, std::string op, CFG_Opd *lopd,
-           CFG_Opd *ropd1, CFG_Opd *ropd2, std::string stmt);
+  CFG_Node(CFG_NodeType type, int node_id, std::string stmt);
+  CFG_Node(CFG_NodeType type, int node_id, std::string stmt,
+           std::string callee_proc);
+  CFG_Node(CFG_NodeType type, int node_id, std::string stmt, std::string op,
+           CFG_Opd *lopd, CFG_Opd *ropd1, CFG_Opd *ropd2);
   ~CFG_Node();
 
   /* Helper functions */
