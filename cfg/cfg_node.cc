@@ -89,6 +89,10 @@ void CFG_Node::visualize() const {
           << this->node_id << "\", label=\"" << this->stmt << "\"];\n";
 }
 
+const int CFG_Node::get_node_id() const { return this->node_id; }
+
+const std::string &CFG_Node::get_parent_proc() const { return this->parent_proc; }
+
 void CFG_Node::set_parent_proc(std::string parent_proc) {
   CHECK_INVARIANT(this->parent_proc == "", "Parent proc already set");
   this->parent_proc = parent_proc;
