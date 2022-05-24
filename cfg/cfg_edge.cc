@@ -17,3 +17,9 @@ void CFG_Edge::visualize() {
   *dot_fd << "\t\tnode_" << this->src->node_id << " -> "
           << "node_" << this->dst->node_id << ";\n";
 }
+
+const std::pair<int, int> &CFG_Edge::get_edge_id() { return this->edge_id; }
+
+const CFG_Node *CFG_Edge::get_src() { return this->src; }
+
+const CFG_Node *CFG_Edge::get_dst() { return this->dst; }
