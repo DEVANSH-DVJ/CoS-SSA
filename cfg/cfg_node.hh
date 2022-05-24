@@ -16,7 +16,6 @@ typedef enum {
 } CFG_NodeType;
 
 class CFG_Node {
-public:
   /* Always initialized: by constructor */
   CFG_NodeType type;
   int node_id;
@@ -34,6 +33,7 @@ public:
   CFG_Opd *ropd1;
   CFG_Opd *ropd2;
 
+public:
   /* Constructors and Destructor */
   CFG_Node(CFG_NodeType type, int node_id, std::string stmt);
   CFG_Node(CFG_NodeType type, int node_id, std::string stmt,
