@@ -45,6 +45,8 @@ public:
   /* Helper functions */
   void visualize();
   void set_parent_proc(std::string parent_proc);
+  void add_in_edge(CFG_Edge *edge, int from_node_id);
+  void add_out_edge(CFG_Edge *edge, int to_node_id);
 };
 
 #endif
