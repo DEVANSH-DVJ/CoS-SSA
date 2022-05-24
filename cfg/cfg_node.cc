@@ -88,3 +88,8 @@ void CFG_Node::visualize() {
   *dot_fd << "\t\tnode_" << this->node_id << " [shape=box, xlabel=\""
           << this->node_id << "\", label=\"" << this->stmt << "\"];\n";
 }
+
+void CFG_Node::set_parent_proc(std::string parent_proc) {
+  CHECK_INVARIANT(this->parent_proc == "", "Parent proc already set");
+  this->parent_proc = parent_proc;
+}

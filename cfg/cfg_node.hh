@@ -44,6 +44,7 @@ public:
 
   /* Helper functions */
   void visualize();
+  void set_parent_proc(std::string parent_proc);
 };
 
 #endif
