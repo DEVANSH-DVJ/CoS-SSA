@@ -13,7 +13,13 @@ SSA_Edge::SSA_Edge(int src_id, int dst_id) {
 
 SSA_Edge::~SSA_Edge() {}
 
-void SSA_Edge::visualize() {
+const pair<int, int> &SSA_Edge::get_edge_id() const { return this->edge_id; }
+
+const SSA_Node *SSA_Edge::get_src() const { return this->src; }
+
+const SSA_Node *SSA_Edge::get_dst() const { return this->dst; }
+
+void SSA_Edge::visualize() const {
   *dot_fd << "\t\tnode_" << this->src->node_id << " -> "
           << "node_" << this->dst->node_id << ";\n";
 }
