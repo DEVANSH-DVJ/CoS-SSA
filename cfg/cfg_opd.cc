@@ -34,6 +34,18 @@ CFG_Opd::CFG_Opd(CFG_OpdType type, std::string var_name) {
 
 CFG_Opd::~CFG_Opd() {}
 
+const CFG_OpdType CFG_Opd::get_type() const { return this->type; }
+
+const int CFG_Opd::get_opd_value() const {
+  CHECK_INVARIANT(this->type == CFG_NumOpd, "CFG_NumOpd expected");
+  return this->num_value;
+}
+
+const string &CFG_Opd::get_opd_var() const {
+  CHECK_INVARIANT(this->type == CFG_VarOpd, "CFG_VarOpd expected");
+  return this->var_name;
+}
+
 string CFG_Opd::str() const {
   switch (type) {
   case (CFG_NumOpd):

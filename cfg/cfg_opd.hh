@@ -25,6 +25,16 @@ public:
   CFG_Opd(CFG_OpdType type, std::string var_name);
   ~CFG_Opd();
 
+  /* Get functions */
+  // Get the node type
+  const CFG_OpdType get_type() const;
+  // Get opd value if it is a number
+  const int get_opd_value() const;
+  // Get opd value if it is a variable
+  const std::string &get_opd_var() const;
+
+  /* Helper functions */
+  // Return the string rep
   std::string str() const;
 };
 
