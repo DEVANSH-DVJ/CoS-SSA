@@ -4,7 +4,7 @@ using namespace std;
 
 extern fstream *dot_fd;
 
-CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt) {
+CFG_Node::CFG_Node(CFG_NodeType type, int node_id, string stmt) {
   if (type != CFG_StartNode && type != CFG_EndNode) {
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,
                     "CFG_StartNode or CFG_EndNode expected");
@@ -15,8 +15,8 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt) {
 
   this->parent_proc = "";
   this->stmt = stmt;
-  this->in_edges = new std::map<int, CFG_Edge *>();
-  this->out_edges = new std::map<int, CFG_Edge *>();
+  this->in_edges = new map<int, CFG_Edge *>();
+  this->out_edges = new map<int, CFG_Edge *>();
 
   this->callee_proc = "";
   this->op = "";
@@ -25,8 +25,8 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt) {
   this->ropd2 = NULL;
 }
 
-CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt,
-                   std::string callee_proc) {
+CFG_Node::CFG_Node(CFG_NodeType type, int node_id, string stmt,
+                   string callee_proc) {
   if (type != CFG_CallNode) {
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "CFG_CallNode expected");
   }
@@ -36,8 +36,8 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt,
 
   this->parent_proc = "";
   this->stmt = stmt;
-  this->in_edges = new std::map<int, CFG_Edge *>();
-  this->out_edges = new std::map<int, CFG_Edge *>();
+  this->in_edges = new map<int, CFG_Edge *>();
+  this->out_edges = new map<int, CFG_Edge *>();
 
   this->callee_proc = callee_proc;
   this->op = "";
@@ -46,8 +46,8 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt,
   this->ropd2 = NULL;
 }
 
-CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt,
-                   std::string op, CFG_Opd *lopd, CFG_Opd *ropd1,
+CFG_Node::CFG_Node(CFG_NodeType type, int node_id, string stmt,
+                   string op, CFG_Opd *lopd, CFG_Opd *ropd1,
                    CFG_Opd *ropd2) {
   if (type != CFG_AssignNode) {
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "CFG_AssignNode expected");
@@ -58,8 +58,8 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, std::string stmt,
 
   this->parent_proc = "";
   this->stmt = stmt;
-  this->in_edges = new std::map<int, CFG_Edge *>();
-  this->out_edges = new std::map<int, CFG_Edge *>();
+  this->in_edges = new map<int, CFG_Edge *>();
+  this->out_edges = new map<int, CFG_Edge *>();
 
   this->callee_proc = "";
   this->op = op;
@@ -86,11 +86,11 @@ const CFG_NodeType CFG_Node::get_type() const { return this->type; }
 
 const int CFG_Node::get_node_id() const { return this->node_id; }
 
-const std::string &CFG_Node::get_parent_proc() const {
+const string &CFG_Node::get_parent_proc() const {
   return this->parent_proc;
 }
 
-void CFG_Node::set_parent_proc(std::string parent_proc) {
+void CFG_Node::set_parent_proc(string parent_proc) {
   CHECK_INVARIANT(this->parent_proc == "", "Parent proc already set");
   this->parent_proc = parent_proc;
 }

@@ -23,7 +23,7 @@ CFG_Opd::CFG_Opd(CFG_OpdType type, int num_value) {
   this->var_name = "";
 }
 
-CFG_Opd::CFG_Opd(CFG_OpdType type, std::string var_name) {
+CFG_Opd::CFG_Opd(CFG_OpdType type, string var_name) {
   CHECK_INVARIANT(type == CFG_VarOpd, "CFG_VarOpd expected");
 
   this->type = type;

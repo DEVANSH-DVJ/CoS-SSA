@@ -32,8 +32,7 @@ SSA_Opd::SSA_Opd(SSA_OpdType type, int node_id, int meta_id, int num_value) {
   this->var_name = "";
 }
 
-SSA_Opd::SSA_Opd(SSA_OpdType type, int node_id, int meta_id,
-                 std::string var_name) {
+SSA_Opd::SSA_Opd(SSA_OpdType type, int node_id, int meta_id, string var_name) {
   this->type = type;
   this->node_id = node_id;
   this->meta_id = meta_id;
