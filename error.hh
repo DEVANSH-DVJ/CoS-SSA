@@ -5,8 +5,6 @@
 #include <iostream>
 #include <string>
 
-#include "stacktrace.h"
-
 using namespace std;
 
 #define CONTROL_SHOULD_NOT_REACH false

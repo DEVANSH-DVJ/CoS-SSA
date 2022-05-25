@@ -1,4 +1,5 @@
 #include "error.hh"
+#include "stacktrace.h"
 
 extern FILE *cfg_out;
 extern FILE *ssa_out;
