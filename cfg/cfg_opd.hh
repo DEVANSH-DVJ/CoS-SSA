@@ -11,7 +11,6 @@ typedef enum {
 } CFG_OpdType;
 
 class CFG_Opd {
-public:
   /* Always initialized: by constructor */
   CFG_OpdType type;
 
@@ -19,6 +18,7 @@ public:
   int num_value;
   std::string var_name;
 
+public:
   /* Constructors and Destructor */
   CFG_Opd(CFG_OpdType type);
   CFG_Opd(CFG_OpdType type, int num_value);

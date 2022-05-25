@@ -245,7 +245,7 @@ UsevarNode
 ExprNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_OP Opd CFG_EOS
   {
-    string stmt = *$3 + " = " + $5->str + " " + *$6 + " " + $7->str;
+    string stmt = *$3 + " = " + $5->str() + " " + *$6 + " " + $7->str();
     CFG_Node *node = new CFG_Node(CFG_AssignNode, $1, stmt,
                                   *$6,
                                   new CFG_Opd(CFG_VarOpd, *$3),
@@ -258,7 +258,7 @@ ExprNode
   }
   | CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_EOS
   {
-    string stmt = *$3 + " = " + $5->str;
+    string stmt = *$3 + " = " + $5->str();
     CFG_Node *node = new CFG_Node(CFG_AssignNode, $1, stmt,
                                   "=",
                                   new CFG_Opd(CFG_VarOpd, *$3),
