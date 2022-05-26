@@ -59,7 +59,7 @@ public:
   void add_out_edge(CFG_Edge *edge, int to_node_id) const;
 
   /* Helper functions */
-  // Visualize the edge
+  // Visualize the node
   void visualize() const;
 };
 
