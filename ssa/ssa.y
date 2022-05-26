@@ -231,7 +231,7 @@ InputNode
     stmt->lopd = $3;
     stmt->ropd1 = new SSA_Opd(SSA_InputOpd, $1->first, 0);
     stmt->op = "=";
-    stmt->stmt = stmt->lopd->str + " = " + stmt->ropd1->str;
+    stmt->stmt = stmt->lopd->str() + " = " + stmt->ropd1->str();
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -253,7 +253,7 @@ UsevarNode
     stmt->lopd = new SSA_Opd(SSA_UsevarOpd, $1->first, $1->second);
     stmt->ropd1 = $5;
     stmt->op = "=";
-    stmt->stmt = stmt->lopd->str + " = " + stmt->ropd1->str;
+    stmt->stmt = stmt->lopd->str() + " = " + stmt->ropd1->str();
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -273,7 +273,7 @@ UsevarNode
     stmt->lopd = new SSA_Opd(SSA_UsevarOpd, $1->first, $1->second);
     stmt->ropd1 = $6;
     stmt->op = "=";
-    stmt->stmt = stmt->lopd->str + " = " + stmt->ropd1->str;
+    stmt->stmt = stmt->lopd->str() + " = " + stmt->ropd1->str();
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -296,7 +296,7 @@ ExprNode
     stmt->ropd1 = $5;
     stmt->ropd2 = $7;
     stmt->op = *$6;
-    stmt->stmt = stmt->lopd->str + " = " + stmt->ropd1->str + " " + stmt->op + " " + stmt->ropd2->str;
+    stmt->stmt = stmt->lopd->str() + " = " + stmt->ropd1->str() + " " + stmt->op + " " + stmt->ropd2->str();
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -317,7 +317,7 @@ ExprNode
     stmt->ropd1 = $6;
     stmt->ropd2 = $8;
     stmt->op = *$7;
-    stmt->stmt = stmt->lopd->str + " = " + stmt->ropd1->str + " " + stmt->op + " " + stmt->ropd2->str;
+    stmt->stmt = stmt->lopd->str() + " = " + stmt->ropd1->str() + " " + stmt->op + " " + stmt->ropd2->str();
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -339,7 +339,7 @@ ExprNode
     stmt->ropd1 = $7;
     stmt->ropd2 = $9;
     stmt->op = *$8;
-    stmt->stmt = stmt->lopd->str + " = " + stmt->ropd1->str + " " + stmt->op + " " + stmt->ropd2->str;
+    stmt->stmt = stmt->lopd->str() + " = " + stmt->ropd1->str() + " " + stmt->op + " " + stmt->ropd2->str();
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -358,7 +358,7 @@ ExprNode
     stmt->lopd = $3;
     stmt->ropd1 = $5;
     stmt->op = "=";
-    stmt->stmt = stmt->lopd->str + " = " + stmt->ropd1->str;
+    stmt->stmt = stmt->lopd->str() + " = " + stmt->ropd1->str();
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -378,7 +378,7 @@ ExprNode
     stmt->lopd = $4;
     stmt->ropd1 = $6;
     stmt->op = "=";
-    stmt->stmt = stmt->lopd->str + " = " + stmt->ropd1->str;
+    stmt->stmt = stmt->lopd->str() + " = " + stmt->ropd1->str();
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -393,9 +393,9 @@ PhiStmt
     stmt->lopd = $1;
     stmt->ropds = $5;
     stmt->op = "phi";
-    stmt->stmt = $1->str + " = PHI(";
+    stmt->stmt = $1->str() + " = PHI(";
     for (list<SSA_Opd*>::iterator it = $5->begin(); it != $5->end(); ++it) {
-      stmt->stmt += (*it)->str;
+      stmt->stmt += (*it)->str();
       if (it != --$5->end())
         stmt->stmt += ", ";
     }
