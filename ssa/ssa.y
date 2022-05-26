@@ -223,14 +223,15 @@ InputNode
   : MetaNum SSA_COLON Var SSA_ASSIGN SSA_INPUT SSA_EOS
   {
     SSA_Node *node = new SSA_Node(SSA_AssignNode, $1->first);
-    SSA_Meta *meta = new SSA_Meta($1->first, $1->second);
+
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, "=",
                                   $3,
                                   new SSA_Opd(SSA_InputOpd, *$1),
                                   NULL);
 
+    SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
+
     node->metas->insert(make_pair($1->second, meta));
-    meta->stmts->push_back(stmt);
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -244,14 +245,15 @@ UsevarNode
     SSA_Node *node = program->get_ssa_node($1->first, false);
     if (node == NULL)
       node = new SSA_Node(SSA_AssignNode, $1->first);
-    SSA_Meta *meta = new SSA_Meta($1->first, $1->second);
+
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, "=",
                                   new SSA_Opd(SSA_UsevarOpd, *$1),
                                   $5,
                                   NULL);
 
+    SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
+
     node->metas->insert(make_pair($1->second, meta));
-    meta->stmts->push_back(stmt);
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -262,15 +264,15 @@ UsevarNode
     SSA_Node *node = program->get_ssa_node($1->first, false);
     if (node == NULL)
       node = new SSA_Node(SSA_AssignNode, $1->first);
-    SSA_Meta *meta = new SSA_Meta($1->first, $1->second);
+
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, "=",
                                   new SSA_Opd(SSA_UsevarOpd, *$1),
                                   $6,
                                   NULL);
 
+    SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, stmt}));
+
     node->metas->insert(make_pair($1->second, meta));
-    meta->stmts->push_back($3);
-    meta->stmts->push_back(stmt);
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -284,11 +286,12 @@ ExprNode
     SSA_Node *node = program->get_ssa_node($1->first, false);
     if (node == NULL)
       node = new SSA_Node(SSA_AssignNode, $1->first);
-    SSA_Meta *meta = new SSA_Meta($1->first, $1->second);
+
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, *$6, $3, $5, $7);
 
+    SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
+
     node->metas->insert(make_pair($1->second, meta));
-    meta->stmts->push_back(stmt);
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -299,12 +302,12 @@ ExprNode
     SSA_Node *node = program->get_ssa_node($1->first, false);
     if (node == NULL)
       node = new SSA_Node(SSA_AssignNode, $1->first);
-    SSA_Meta *meta = new SSA_Meta($1->first, $1->second);
+
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, *$7, $4, $6, $8);
 
+    SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, stmt}));
+
     node->metas->insert(make_pair($1->second, meta));
-    meta->stmts->push_back($3);
-    meta->stmts->push_back(stmt);
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -315,13 +318,12 @@ ExprNode
     SSA_Node *node = program->get_ssa_node($1->first, false);
     if (node == NULL)
       node = new SSA_Node(SSA_AssignNode, $1->first);
-    SSA_Meta *meta = new SSA_Meta($1->first, $1->second);
+
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, *$8, $5, $7, $9);
 
+    SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, $4, stmt}));
+
     node->metas->insert(make_pair($1->second, meta));
-    meta->stmts->push_back($3);
-    meta->stmts->push_back($4);
-    meta->stmts->push_back(stmt);
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -332,11 +334,12 @@ ExprNode
     SSA_Node *node = program->get_ssa_node($1->first, false);
     if (node == NULL)
       node = new SSA_Node(SSA_AssignNode, $1->first);
-    SSA_Meta *meta = new SSA_Meta($1->first, $1->second);
+
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, "=", $3, $5, NULL);
 
+    SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
+
     node->metas->insert(make_pair($1->second, meta));
-    meta->stmts->push_back(stmt);
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -347,12 +350,12 @@ ExprNode
     SSA_Node *node = program->get_ssa_node($1->first, false);
     if (node == NULL)
       node = new SSA_Node(SSA_AssignNode, $1->first);
-    SSA_Meta *meta = new SSA_Meta($1->first, $1->second);
+
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, "=", $4, $6, NULL);
 
+    SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, stmt}));
+
     node->metas->insert(make_pair($1->second, meta));
-    meta->stmts->push_back($3);
-    meta->stmts->push_back(stmt);
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
