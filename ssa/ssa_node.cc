@@ -19,7 +19,7 @@ SSA_Node::SSA_Node(SSA_NodeType type, int node_id, string stmt) {
 
   this->stmt = stmt;
   this->callee_proc = "";
-  this->metas = new map<int, SSA_Meta *>();
+  this->metas = NULL;
 }
 
 SSA_Node::SSA_Node(SSA_NodeType type, int node_id, string stmt,
@@ -37,7 +37,7 @@ SSA_Node::SSA_Node(SSA_NodeType type, int node_id, string stmt,
 
   this->stmt = stmt;
   this->callee_proc = callee_proc;
-  this->metas = new map<int, SSA_Meta *>();
+  this->metas = NULL;
 }
 
 SSA_Node::SSA_Node(SSA_NodeType type, int node_id) {
@@ -58,17 +58,44 @@ SSA_Node::SSA_Node(SSA_NodeType type, int node_id) {
 }
 
 SSA_Node::~SSA_Node() {
-  for (map<int, SSA_Meta *>::iterator it = this->metas->begin();
-       it != this->metas->end(); ++it) {
-    delete it->second;
-  }
-
   delete this->in_edges;
   delete this->out_edges;
-  delete this->metas;
+
+  if (this->metas != NULL) {
+    for (map<int, SSA_Meta *>::iterator it = this->metas->begin();
+         it != this->metas->end(); ++it) {
+      delete it->second;
+    }
+    delete this->metas;
+  }
 }
 
-void SSA_Node::visualize() {
+void SSA_Node::set_parent_proc(string parent_proc) {
+  CHECK_INVARIANT(this->parent_proc == "", "Parent proc already set");
+  this->parent_proc = parent_proc;
+}
+
+void SSA_Node::add_in_edge(SSA_Edge *edge, int from_node_id) const {
+  CHECK_INVARIANT(this->in_edges->find(from_node_id) == this->in_edges->end(),
+                  "Edge already exists");
+  this->in_edges->insert(make_pair(from_node_id, edge));
+}
+
+void SSA_Node::add_out_edge(SSA_Edge *edge, int to_node_id) const {
+  CHECK_INVARIANT(this->out_edges->find(to_node_id) == this->out_edges->end(),
+                  "Edge already exists");
+  this->out_edges->insert(make_pair(to_node_id, edge));
+}
+
+void SSA_Node::add_meta(SSA_Meta *meta, int meta_id) const {
+  CHECK_INVARIANT(this->type == SSA_AssignNode,
+                  "Meta can only be added to Assignment node");
+  CHECK_INVARIANT(this->metas->find(meta_id) == this->metas->end(),
+                  "Meta already exists");
+  this->metas->insert(make_pair(meta_id, meta));
+}
+
+void SSA_Node::visualize() const {
   if (this->type != SSA_AssignNode) {
     *dot_fd << "\t\tnode_" << this->node_id << " [shape=box, xlabel=\""
             << this->node_id << "\", label=\"" << this->stmt << "\"];\n";

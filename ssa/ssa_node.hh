@@ -36,8 +36,19 @@ public:
   SSA_Node(SSA_NodeType type, int node_id);
   ~SSA_Node();
 
+  /* Update functions */
+  // Set the parent procedure
+  void set_parent_proc(std::string parent_proc);
+  // Add an in edge
+  void add_in_edge(SSA_Edge *edge, int from_node_id) const;
+  // Add an out edge
+  void add_out_edge(SSA_Edge *edge, int to_node_id) const;
+  // Add a meta
+  void add_meta(SSA_Meta *meta, int meta_id) const;
+
   /* Helper functions */
-  void visualize();
+  // Visualize the node
+  void visualize() const;
 };
 
 #endif

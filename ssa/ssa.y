@@ -124,8 +124,10 @@ Proc
     Procedure *proc = program->get_proc(proc_name);
     proc->ssa_nodes->insert(make_pair($2->node_id, $2));
     proc->ssa_nodes->insert(make_pair($4->node_id, $4));
-    for (list<SSA_Node *>::iterator it = $3->begin(); it != $3->end(); ++it)
+    for (list<SSA_Node *>::iterator it = $3->begin(); it != $3->end(); ++it) {
       proc->ssa_nodes->insert(make_pair((*it)->node_id, *it));
+      (*it)->set_parent_proc(proc_name);
+    }
     for (list<SSA_Edge *>::iterator it = $5->begin(); it != $5->end(); ++it)
       proc->ssa_edges->insert(make_pair((*it)->get_edge_id(), *it));
 
@@ -166,7 +168,7 @@ StartNode
   {
     string stmt = "START " + *$4;
     SSA_Node *node = new SSA_Node(SSA_StartNode, $1->first, stmt);
-    node->parent_proc = *$4;
+    node->set_parent_proc(*$4);
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -179,7 +181,7 @@ EndNode
   {
     string stmt = "END " + *$4;
     SSA_Node *node = new SSA_Node(SSA_EndNode, $1->first, stmt);
-    node->parent_proc = *$4;
+    node->set_parent_proc(*$4);
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -230,8 +232,7 @@ InputNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
 
-    node->metas->insert(make_pair($1->second, meta));
-
+    node->add_meta(meta, $1->second);
     program->ssa_nodes->insert(make_pair($1->first, node));
 
     $$ = node;
@@ -252,8 +253,7 @@ UsevarNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
 
-    node->metas->insert(make_pair($1->second, meta));
-
+    node->add_meta(meta, $1->second);
     program->ssa_nodes->insert(make_pair($1->first, node));
 
     $$ = node;
@@ -271,8 +271,7 @@ UsevarNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, stmt}));
 
-    node->metas->insert(make_pair($1->second, meta));
-
+    node->add_meta(meta, $1->second);
     program->ssa_nodes->insert(make_pair($1->first, node));
 
     $$ = node;
@@ -290,8 +289,7 @@ ExprNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
 
-    node->metas->insert(make_pair($1->second, meta));
-
+    node->add_meta(meta, $1->second);
     program->ssa_nodes->insert(make_pair($1->first, node));
 
     $$ = node;
@@ -306,8 +304,7 @@ ExprNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, stmt}));
 
-    node->metas->insert(make_pair($1->second, meta));
-
+    node->add_meta(meta, $1->second);
     program->ssa_nodes->insert(make_pair($1->first, node));
 
     $$ = node;
@@ -322,8 +319,7 @@ ExprNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, $4, stmt}));
 
-    node->metas->insert(make_pair($1->second, meta));
-
+    node->add_meta(meta, $1->second);
     program->ssa_nodes->insert(make_pair($1->first, node));
 
     $$ = node;
@@ -338,8 +334,7 @@ ExprNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
 
-    node->metas->insert(make_pair($1->second, meta));
-
+    node->add_meta(meta, $1->second);
     program->ssa_nodes->insert(make_pair($1->first, node));
 
     $$ = node;
@@ -354,8 +349,7 @@ ExprNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, stmt}));
 
-    node->metas->insert(make_pair($1->second, meta));
-
+    node->add_meta(meta, $1->second);
     program->ssa_nodes->insert(make_pair($1->first, node));
 
     $$ = node;
@@ -391,8 +385,8 @@ Edge
   {
     SSA_Edge *edge = new SSA_Edge($1, $3);
 
-    edge->get_src()->out_edges->insert(make_pair($3, edge));
-    edge->get_dst()->in_edges->insert(make_pair($1, edge));
+    edge->get_src()->add_out_edge(edge, $3);
+    edge->get_dst()->add_in_edge(edge, $1);
     program->ssa_edges->insert(make_pair(make_pair($1, $3), edge));
 
     $$ = edge;
