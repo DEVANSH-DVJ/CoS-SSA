@@ -229,7 +229,7 @@ InputNode
     node->metas->insert(make_pair($1->second, meta));
     meta->stmts->push_back(stmt);
     stmt->lopd = $3;
-    stmt->ropd1 = new SSA_Opd(SSA_InputOpd, $1->first, 0);
+    stmt->ropd1 = new SSA_Opd(SSA_InputOpd, *$1);
     stmt->op = "=";
     stmt->stmt = stmt->lopd->str() + " = " + stmt->ropd1->str();
 
@@ -250,7 +250,7 @@ UsevarNode
 
     node->metas->insert(make_pair($1->second, meta));
     meta->stmts->push_back(stmt);
-    stmt->lopd = new SSA_Opd(SSA_UsevarOpd, $1->first, $1->second);
+    stmt->lopd = new SSA_Opd(SSA_UsevarOpd, *$1);
     stmt->ropd1 = $5;
     stmt->op = "=";
     stmt->stmt = stmt->lopd->str() + " = " + stmt->ropd1->str();
@@ -270,7 +270,7 @@ UsevarNode
     node->metas->insert(make_pair($1->second, meta));
     meta->stmts->push_back($3);
     meta->stmts->push_back(stmt);
-    stmt->lopd = new SSA_Opd(SSA_UsevarOpd, $1->first, $1->second);
+    stmt->lopd = new SSA_Opd(SSA_UsevarOpd, *$1);
     stmt->ropd1 = $6;
     stmt->op = "=";
     stmt->stmt = stmt->lopd->str() + " = " + stmt->ropd1->str();
@@ -438,7 +438,7 @@ Edge
 Opd
   : SSA_NUM
   {
-    $$ = new SSA_Opd(SSA_NumOpd, 0, 0, $1);
+    $$ = new SSA_Opd(SSA_NumOpd, $1);
   }
   | Var
   {
@@ -449,7 +449,7 @@ Opd
 Var
   : SSA_ID SSA_UNDERSCORE MetaNum
   {
-    $$ = new SSA_Opd(SSA_VarOpd, $3->first, $3->second, *$1);
+    $$ = new SSA_Opd(SSA_VarOpd, *$3, *$1);
   }
 ;
 

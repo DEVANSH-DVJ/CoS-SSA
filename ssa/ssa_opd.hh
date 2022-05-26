@@ -15,8 +15,7 @@ typedef enum {
 class SSA_Opd {
   /* Always initialized: by constructor */
   SSA_OpdType type;
-  int node_id;
-  int meta_id;
+  std::pair<int, int> meta_num;
 
   /* Conditionally initialized: post parsing */
   int num_value;
@@ -24,9 +23,9 @@ class SSA_Opd {
 
 public:
   /* Constructors and Destructor */
-  SSA_Opd(SSA_OpdType type, int node_id, int meta_id);
-  SSA_Opd(SSA_OpdType type, int node_id, int meta_id, int num_value);
-  SSA_Opd(SSA_OpdType type, int node_id, int meta_id, std::string var_name);
+  SSA_Opd(SSA_OpdType type, std::pair<int, int> meta_num);
+  SSA_Opd(SSA_OpdType type, int num_value);
+  SSA_Opd(SSA_OpdType type, std::pair<int, int> meta_num, std::string var_name);
   ~SSA_Opd();
 
   /* Get functions */

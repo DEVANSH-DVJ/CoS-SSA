@@ -2,37 +2,34 @@
 
 using namespace std;
 
-SSA_Opd::SSA_Opd(SSA_OpdType type, int node_id, int meta_id) {
+SSA_Opd::SSA_Opd(SSA_OpdType type, pair<int, int> meta_num) {
   if (type != SSA_InputOpd && type != SSA_UsevarOpd) {
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,
                     "SSA_InputOpd or SSA_UsevarOpd expected");
   }
 
   this->type = type;
-  this->node_id = node_id;
-  this->meta_id = meta_id;
+  this->meta_num = meta_num;
 
   this->num_value = 0;
   this->var_name = "";
 }
 
-SSA_Opd::SSA_Opd(SSA_OpdType type, int node_id, int meta_id, int num_value) {
+SSA_Opd::SSA_Opd(SSA_OpdType type, int num_value) {
   CHECK_INVARIANT(type == SSA_NumOpd, "SSA_NumOpd expected");
 
   this->type = type;
-  this->node_id = node_id;
-  this->meta_id = meta_id;
+  this->meta_num = make_pair(0, 0);
 
   this->num_value = num_value;
   this->var_name = "";
 }
 
-SSA_Opd::SSA_Opd(SSA_OpdType type, int node_id, int meta_id, string var_name) {
+SSA_Opd::SSA_Opd(SSA_OpdType type, pair<int, int> meta_num, string var_name) {
   CHECK_INVARIANT(type == SSA_VarOpd, "SSA_VarOpd expected");
 
   this->type = type;
-  this->node_id = node_id;
-  this->meta_id = meta_id;
+  this->meta_num = meta_num;
 
   this->num_value = 0;
   this->var_name = var_name;
@@ -42,9 +39,7 @@ SSA_Opd::~SSA_Opd() {}
 
 const SSA_OpdType SSA_Opd::get_type() const { return this->type; }
 
-const pair<int, int> SSA_Opd::get_meta_num() const {
-  return make_pair(this->node_id, this->meta_id);
-}
+const pair<int, int> SSA_Opd::get_meta_num() const { return this->meta_num; }
 
 const int SSA_Opd::get_opd_value() const { return this->num_value; }
 
@@ -55,11 +50,13 @@ string SSA_Opd::str() const {
   case (SSA_NumOpd):
     return to_string(num_value);
   case (SSA_VarOpd):
-    return var_name + "_" + to_string(node_id) + "_" + to_string(meta_id);
+    return var_name + "_" + to_string(meta_num.first) + "_" +
+           to_string(meta_num.second);
   case (SSA_InputOpd):
-    return "INPUT_" + to_string(node_id);
+    return "INPUT_" + to_string(meta_num.first);
   case (SSA_UsevarOpd):
-    return "USEVAR_" + to_string(node_id) + "_" + to_string(meta_id);
+    return "USEVAR_" + to_string(meta_num.first) + "_" +
+           to_string(meta_num.second);
   }
 
   CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "SSA_OpdType unknown");
