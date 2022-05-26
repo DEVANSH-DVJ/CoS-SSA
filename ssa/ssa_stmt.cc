@@ -63,3 +63,7 @@ SSA_Stmt::~SSA_Stmt() {
     delete this->ropds;
   }
 }
+
+const SSA_StmtType SSA_Stmt::get_type() const { return this->type; }
+
+const std::string &SSA_Stmt::get_stmt() const { return this->stmt; }

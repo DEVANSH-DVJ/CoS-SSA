@@ -23,7 +23,7 @@ SSA_Meta::~SSA_Meta() {
 void SSA_Meta::visualize() {
   for (list<SSA_Stmt *>::iterator it = this->stmts->begin();
        it != this->stmts->end(); ++it) {
-    *dot_fd << (*it)->stmt;
+    *dot_fd << (*it)->get_stmt();
     if (it != --this->stmts->end()) {
       *dot_fd << " \\n ";
     }
