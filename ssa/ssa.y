@@ -139,12 +139,14 @@ NodeList
   : Node
   {
     $$ = new list<SSA_Node *>();
-    $$->push_back($1);
+    if ($1 != NULL)
+      $$->push_back($1);
   }
   | NodeList Node
   {
     $$ = $1;
-    $$->push_back($2);
+    if ($2 != NULL)
+      $$->push_back($2);
   }
 ;
 
@@ -243,8 +245,11 @@ UsevarNode
   : MetaNum SSA_COLON SSA_USEVAR SSA_ASSIGN Var SSA_EOS
   {
     SSA_Node *node = program->get_ssa_node($1->first, false);
-    if (node == NULL)
+    bool new_node = false;
+    if (node == NULL) {
+      new_node = true;
       node = new SSA_Node(SSA_AssignNode, $1->first);
+    }
 
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, "=",
                                   new SSA_Opd(SSA_UsevarOpd, *$1),
@@ -254,15 +259,22 @@ UsevarNode
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
 
     node->add_meta(meta, $1->second);
-    program->ssa_nodes->insert(make_pair($1->first, node));
 
-    $$ = node;
+    if (new_node) {
+      program->ssa_nodes->insert(make_pair($1->first, node));
+      $$ = node;
+    } else {
+      $$ = NULL;
+    }
   }
   | MetaNum SSA_COLON PhiStmt SSA_USEVAR SSA_ASSIGN Var SSA_EOS
   {
     SSA_Node *node = program->get_ssa_node($1->first, false);
-    if (node == NULL)
+    bool new_node = false;
+    if (node == NULL) {
+      new_node = true;
       node = new SSA_Node(SSA_AssignNode, $1->first);
+    }
 
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, "=",
                                   new SSA_Opd(SSA_UsevarOpd, *$1),
@@ -272,9 +284,12 @@ UsevarNode
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, stmt}));
 
     node->add_meta(meta, $1->second);
-    program->ssa_nodes->insert(make_pair($1->first, node));
-
-    $$ = node;
+    if (new_node) {
+      program->ssa_nodes->insert(make_pair($1->first, node));
+      $$ = node;
+    } else {
+      $$ = NULL;
+    }
   }
 ;
 
@@ -282,77 +297,107 @@ ExprNode
   : MetaNum SSA_COLON Var SSA_ASSIGN Opd SSA_OP Opd SSA_EOS
   {
     SSA_Node *node = program->get_ssa_node($1->first, false);
-    if (node == NULL)
+    bool new_node = false;
+    if (node == NULL) {
+      new_node = true;
       node = new SSA_Node(SSA_AssignNode, $1->first);
+    }
 
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, *$6, $3, $5, $7);
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
 
     node->add_meta(meta, $1->second);
-    program->ssa_nodes->insert(make_pair($1->first, node));
-
-    $$ = node;
+    if (new_node) {
+      program->ssa_nodes->insert(make_pair($1->first, node));
+      $$ = node;
+    } else {
+      $$ = NULL;
+    }
   }
   | MetaNum SSA_COLON PhiStmt Var SSA_ASSIGN Opd SSA_OP Opd SSA_EOS
   {
     SSA_Node *node = program->get_ssa_node($1->first, false);
-    if (node == NULL)
+    bool new_node = false;
+    if (node == NULL) {
+      new_node = true;
       node = new SSA_Node(SSA_AssignNode, $1->first);
+    }
 
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, *$7, $4, $6, $8);
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, stmt}));
 
     node->add_meta(meta, $1->second);
-    program->ssa_nodes->insert(make_pair($1->first, node));
-
-    $$ = node;
+    if (new_node) {
+      program->ssa_nodes->insert(make_pair($1->first, node));
+      $$ = node;
+    } else {
+      $$ = NULL;
+    }
   }
   | MetaNum SSA_COLON PhiStmt PhiStmt Var SSA_ASSIGN Opd SSA_OP Opd SSA_EOS
   {
     SSA_Node *node = program->get_ssa_node($1->first, false);
-    if (node == NULL)
+    bool new_node = false;
+    if (node == NULL) {
+      new_node = true;
       node = new SSA_Node(SSA_AssignNode, $1->first);
+    }
 
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, *$8, $5, $7, $9);
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, $4, stmt}));
 
     node->add_meta(meta, $1->second);
-    program->ssa_nodes->insert(make_pair($1->first, node));
-
-    $$ = node;
+    if (new_node) {
+      program->ssa_nodes->insert(make_pair($1->first, node));
+      $$ = node;
+    } else {
+      $$ = NULL;
+    }
   }
   | MetaNum SSA_COLON Var SSA_ASSIGN Opd SSA_EOS
   {
     SSA_Node *node = program->get_ssa_node($1->first, false);
-    if (node == NULL)
+    bool new_node = false;
+    if (node == NULL) {
+      new_node = true;
       node = new SSA_Node(SSA_AssignNode, $1->first);
+    }
 
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, "=", $3, $5, NULL);
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
 
     node->add_meta(meta, $1->second);
-    program->ssa_nodes->insert(make_pair($1->first, node));
-
-    $$ = node;
+    if (new_node) {
+      program->ssa_nodes->insert(make_pair($1->first, node));
+      $$ = node;
+    } else {
+      $$ = NULL;
+    }
   }
   | MetaNum SSA_COLON PhiStmt Var SSA_ASSIGN Opd SSA_EOS
   {
     SSA_Node *node = program->get_ssa_node($1->first, false);
-    if (node == NULL)
+    bool new_node = false;
+    if (node == NULL) {
+      new_node = true;
       node = new SSA_Node(SSA_AssignNode, $1->first);
+    }
 
     SSA_Stmt *stmt = new SSA_Stmt(SSA_AssignStmt, "=", $4, $6, NULL);
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, stmt}));
 
     node->add_meta(meta, $1->second);
-    program->ssa_nodes->insert(make_pair($1->first, node));
-
-    $$ = node;
+    if (new_node) {
+      program->ssa_nodes->insert(make_pair($1->first, node));
+      $$ = node;
+    } else {
+      $$ = NULL;
+    }
   }
 ;
 
