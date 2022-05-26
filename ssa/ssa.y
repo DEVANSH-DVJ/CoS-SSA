@@ -117,15 +117,15 @@ ProcList
 Proc
   : SSA_LCB StartNode NodeList EndNode EdgeList SSA_RCB
   {
-    string proc_name = $2->parent_proc;
-    CHECK_INPUT_AND_ABORT(proc_name == $4->parent_proc,
+    string proc_name = $2->get_parent_proc();
+    CHECK_INPUT_AND_ABORT(proc_name == $4->get_parent_proc(),
                           "Start node and end node must be in the same procedure");
 
     Procedure *proc = program->get_proc(proc_name);
-    proc->ssa_nodes->insert(make_pair($2->node_id, $2));
-    proc->ssa_nodes->insert(make_pair($4->node_id, $4));
+    proc->ssa_nodes->insert(make_pair($2->get_node_id(), $2));
+    proc->ssa_nodes->insert(make_pair($4->get_node_id(), $4));
     for (list<SSA_Node *>::iterator it = $3->begin(); it != $3->end(); ++it) {
-      proc->ssa_nodes->insert(make_pair((*it)->node_id, *it));
+      proc->ssa_nodes->insert(make_pair((*it)->get_node_id(), *it));
       (*it)->set_parent_proc(proc_name);
     }
     for (list<SSA_Edge *>::iterator it = $5->begin(); it != $5->end(); ++it)

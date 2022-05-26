@@ -14,7 +14,6 @@ typedef enum {
 } SSA_NodeType;
 
 class SSA_Node {
-public:
   /* Always initialized: by constructor */
   SSA_NodeType type;
   int node_id;
@@ -29,12 +28,21 @@ public:
   std::string callee_proc;
   std::map<int, SSA_Meta *> *metas;
 
+public:
   /* Constructors and Destructor */
   SSA_Node(SSA_NodeType type, int node_id, std::string stmt);
   SSA_Node(SSA_NodeType type, int node_id, std::string stmt,
            std::string callee_proc);
   SSA_Node(SSA_NodeType type, int node_id);
   ~SSA_Node();
+
+  /* Get functions */
+  // Get the node type
+  const SSA_NodeType get_type() const;
+  // Get the node id
+  const int get_node_id() const;
+  // Get the parent procedure
+  const std::string &get_parent_proc() const;
 
   /* Update functions */
   // Set the parent procedure

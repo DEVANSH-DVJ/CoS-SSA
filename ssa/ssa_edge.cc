@@ -20,6 +20,6 @@ const SSA_Node *SSA_Edge::get_src() const { return this->src; }
 const SSA_Node *SSA_Edge::get_dst() const { return this->dst; }
 
 void SSA_Edge::visualize() const {
-  *dot_fd << "\t\tnode_" << this->src->node_id << " -> "
-          << "node_" << this->dst->node_id << ";\n";
+  *dot_fd << "\t\tnode_" << this->src->get_node_id() << " -> "
+          << "node_" << this->dst->get_node_id() << ";\n";
 }

@@ -70,6 +70,12 @@ SSA_Node::~SSA_Node() {
   }
 }
 
+const SSA_NodeType SSA_Node::get_type() const { return this->type; }
+
+const int SSA_Node::get_node_id() const { return this->node_id; }
+
+const string &SSA_Node::get_parent_proc() const { return this->parent_proc; }
+
 void SSA_Node::set_parent_proc(string parent_proc) {
   CHECK_INVARIANT(this->parent_proc == "", "Parent proc already set");
   this->parent_proc = parent_proc;
