@@ -164,9 +164,9 @@ EdgeList
 StartNode
   : MetaNum SSA_COLON SSA_START SSA_ID SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_StartNode, $1->first);
+    string stmt = "START " + *$4;
+    SSA_Node *node = new SSA_Node(SSA_StartNode, $1->first, stmt);
     node->parent_proc = *$4;
-    node->stmt = "START " + *$4;
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -177,9 +177,9 @@ StartNode
 EndNode
   : MetaNum SSA_COLON SSA_END SSA_ID SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_EndNode, $1->first);
+    string stmt = "END " + *$4;
+    SSA_Node *node = new SSA_Node(SSA_EndNode, $1->first, stmt);
     node->parent_proc = *$4;
-    node->stmt = "END " + *$4;
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 
@@ -209,9 +209,8 @@ Node
 CallNode
   : MetaNum SSA_COLON SSA_CALL SSA_ID SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_CallNode, $1->first);
-    node->callee_proc = *$4;
-    node->stmt = "CALL " + *$4;
+    string stmt = "CALL " + *$4;
+    SSA_Node *node = new SSA_Node(SSA_CallNode, $1->first, stmt, *$4);
 
     program->ssa_nodes->insert(make_pair($1->first, node));
 

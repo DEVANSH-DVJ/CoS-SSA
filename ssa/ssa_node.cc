@@ -4,7 +4,47 @@ using namespace std;
 
 extern fstream *dot_fd;
 
+SSA_Node::SSA_Node(SSA_NodeType type, int node_id, string stmt) {
+  if (type != SSA_StartNode && type != SSA_EndNode) {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,
+                    "SSA_StartNode or SSA_EndNode expected");
+  }
+
+  this->type = type;
+  this->node_id = node_id;
+
+  this->parent_proc = "";
+  this->in_edges = new map<int, SSA_Edge *>();
+  this->out_edges = new map<int, SSA_Edge *>();
+
+  this->stmt = stmt;
+  this->callee_proc = "";
+  this->metas = new map<int, SSA_Meta *>();
+}
+
+SSA_Node::SSA_Node(SSA_NodeType type, int node_id, string stmt,
+                   string callee_proc) {
+  if (type != SSA_CallNode) {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "SSA_CallNode expected");
+  }
+
+  this->type = type;
+  this->node_id = node_id;
+
+  this->parent_proc = "";
+  this->in_edges = new map<int, SSA_Edge *>();
+  this->out_edges = new map<int, SSA_Edge *>();
+
+  this->stmt = stmt;
+  this->callee_proc = callee_proc;
+  this->metas = new map<int, SSA_Meta *>();
+}
+
 SSA_Node::SSA_Node(SSA_NodeType type, int node_id) {
+  if (type != SSA_AssignNode) {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "SSA_AssignNode expected");
+  }
+
   this->type = type;
   this->node_id = node_id;
 

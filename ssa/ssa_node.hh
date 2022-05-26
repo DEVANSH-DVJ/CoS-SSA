@@ -30,6 +30,9 @@ public:
   std::map<int, SSA_Meta *> *metas;
 
   /* Constructors and Destructor */
+  SSA_Node(SSA_NodeType type, int node_id, std::string stmt);
+  SSA_Node(SSA_NodeType type, int node_id, std::string stmt,
+           std::string callee_proc);
   SSA_Node(SSA_NodeType type, int node_id);
   ~SSA_Node();
 
