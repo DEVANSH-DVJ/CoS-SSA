@@ -7,16 +7,22 @@
 class SSA_Stmt;
 
 class SSA_Meta {
-public:
   /* Always initialized: by constructor */
   std::pair<int, int> meta_num;
 
   /* Always initialized: post parsing*/
   std::list<SSA_Stmt *> *stmts;
 
+public:
   /* Constructors and Destructor */
   SSA_Meta(std::pair<int, int> meta_num, std::list<SSA_Stmt *> *stmts);
   ~SSA_Meta();
+
+  /* Get functions */
+  // Get the meta number
+  const std::pair<int, int> get_meta_num() const;
+  // Get the list of statements
+  const std::list<SSA_Stmt *> *get_stmts() const;
 
   /* Helper functions */
   // Visualize the meta

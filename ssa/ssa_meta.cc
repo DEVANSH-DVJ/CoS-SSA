@@ -18,6 +18,10 @@ SSA_Meta::~SSA_Meta() {
   delete this->stmts;
 }
 
+const pair<int, int> SSA_Meta::get_meta_num() const { return this->meta_num; }
+
+const list<SSA_Stmt *> *SSA_Meta::get_stmts() const { return this->stmts; }
+
 void SSA_Meta::visualize() const {
   for (list<SSA_Stmt *>::iterator it = this->stmts->begin();
        it != this->stmts->end(); ++it) {
