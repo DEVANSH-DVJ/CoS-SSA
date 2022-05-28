@@ -8,6 +8,8 @@
 class CFG_Edge;
 class CFG_Opd;
 
+class CFG_Node;
+
 typedef enum {
   CFG_StartNode,
   CFG_EndNode,

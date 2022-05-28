@@ -3,6 +3,8 @@
 
 #include <string>
 
+class CFG_Opd;
+
 typedef enum {
   CFG_NumOpd,
   CFG_VarOpd,

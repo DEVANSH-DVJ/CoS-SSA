@@ -7,6 +7,8 @@
 
 class SSA_Opd;
 
+class SSA_Stmt;
+
 typedef enum {
   SSA_AssignStmt,
   SSA_PhiStmt,

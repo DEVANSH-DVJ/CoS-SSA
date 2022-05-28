@@ -1,7 +1,11 @@
 #ifndef _SSA_EDGE_HH_
 #define _SSA_EDGE_HH_
 
+#include <utility>
+
 class SSA_Node;
+
+class SSA_Edge;
 
 class SSA_Edge {
   /* Always initialized: by constructor */

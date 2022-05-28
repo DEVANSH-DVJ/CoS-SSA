@@ -1,10 +1,14 @@
 #ifndef _SSA_NODE_HH_
 #define _SSA_NODE_HH_
 
+#include <string>
+
 #include <map>
 
 class SSA_Edge;
 class SSA_Meta;
+
+class SSA_Node;
 
 typedef enum {
   SSA_StartNode,

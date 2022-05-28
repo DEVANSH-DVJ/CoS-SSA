@@ -11,6 +11,8 @@ class CFG_Node;
 class SSA_Edge;
 class SSA_Node;
 
+class Procedure;
+
 class Procedure {
 public:
   std::string name;

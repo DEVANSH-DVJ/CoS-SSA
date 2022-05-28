@@ -6,6 +6,8 @@
 
 class SSA_Stmt;
 
+class SSA_Meta;
+
 class SSA_Meta {
   /* Always initialized: by constructor */
   std::pair<int, int> meta_num;

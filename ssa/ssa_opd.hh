@@ -5,6 +5,8 @@
 
 #include <utility>
 
+class SSA_Opd;
+
 typedef enum {
   SSA_NumOpd,
   SSA_VarOpd,

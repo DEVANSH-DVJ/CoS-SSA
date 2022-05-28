@@ -5,6 +5,8 @@
 
 class CFG_Node;
 
+class CFG_Edge;
+
 class CFG_Edge {
   /* Always initialized: by constructor */
   std::pair<int, int> edge_id;
