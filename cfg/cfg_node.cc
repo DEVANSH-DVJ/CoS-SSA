@@ -46,9 +46,8 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, string stmt,
   this->ropd2 = NULL;
 }
 
-CFG_Node::CFG_Node(CFG_NodeType type, int node_id, string stmt,
-                   string op, CFG_Opd *lopd, CFG_Opd *ropd1,
-                   CFG_Opd *ropd2) {
+CFG_Node::CFG_Node(CFG_NodeType type, int node_id, string stmt, string op,
+                   CFG_Opd *lopd, CFG_Opd *ropd1, CFG_Opd *ropd2) {
   if (type != CFG_AssignNode) {
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "CFG_AssignNode expected");
   }
@@ -86,9 +85,7 @@ const CFG_NodeType CFG_Node::get_type() const { return this->type; }
 
 const int CFG_Node::get_node_id() const { return this->node_id; }
 
-const string &CFG_Node::get_parent_proc() const {
-  return this->parent_proc;
-}
+const string &CFG_Node::get_parent_proc() const { return this->parent_proc; }
 
 void CFG_Node::set_parent_proc(string parent_proc) {
   CHECK_INVARIANT(this->parent_proc == "", "Parent proc already set");

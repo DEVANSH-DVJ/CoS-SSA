@@ -51,9 +51,9 @@ const string &CFG_Opd::get_opd_var() const {
 string CFG_Opd::str() const {
   switch (type) {
   case (CFG_NumOpd):
-    return to_string(num_value);
+    return to_string(this->num_value);
   case (CFG_VarOpd):
-    return var_name;
+    return this->var_name;
   case (CFG_InputOpd):
     return "INPUT";
   case (CFG_UsevarOpd):

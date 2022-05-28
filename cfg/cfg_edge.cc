@@ -13,9 +13,7 @@ CFG_Edge::CFG_Edge(int src_id, int dst_id) {
 
 CFG_Edge::~CFG_Edge() {}
 
-const pair<int, int> &CFG_Edge::get_edge_id() const {
-  return this->edge_id;
-}
+const pair<int, int> &CFG_Edge::get_edge_id() const { return this->edge_id; }
 
 const CFG_Node *CFG_Edge::get_src() const { return this->src; }
 

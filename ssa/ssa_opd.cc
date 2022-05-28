@@ -10,6 +10,9 @@ SSA_Opd::SSA_Opd(SSA_OpdType type, pair<int, int> meta_num) {
 
   this->type = type;
   this->meta_num = meta_num;
+  if (type == SSA_InputOpd) {
+    this->meta_num.second = 0;
+  }
 
   this->num_value = 0;
   this->var_name = "";
@@ -48,15 +51,15 @@ const string &SSA_Opd::get_opd_var() const { return this->var_name; }
 string SSA_Opd::str() const {
   switch (type) {
   case (SSA_NumOpd):
-    return to_string(num_value);
+    return to_string(this->num_value);
   case (SSA_VarOpd):
-    return var_name + "_" + to_string(meta_num.first) + "_" +
-           to_string(meta_num.second);
+    return var_name + "_" + to_string(this->meta_num.first) + "_" +
+           to_string(this->meta_num.second);
   case (SSA_InputOpd):
-    return "INPUT_" + to_string(meta_num.first);
+    return "INPUT_" + to_string(this->meta_num.first);
   case (SSA_UsevarOpd):
-    return "USEVAR_" + to_string(meta_num.first) + "_" +
-           to_string(meta_num.second);
+    return "USEVAR_" + to_string(this->meta_num.first) + "_" +
+           to_string(this->meta_num.second);
   }
 
   CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "SSA_OpdType unknown");
