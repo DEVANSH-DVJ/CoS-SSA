@@ -155,8 +155,7 @@ EdgeList
 StartNode
   : CFG_NUM CFG_COLON CFG_START CFG_ID CFG_EOS
   {
-    string stmt = "START " + *$4;
-    CFG_Node *node = new CFG_Node(CFG_StartNode, $1, stmt);
+    CFG_Node *node = new CFG_Node(CFG_StartNode, $1, "START " + *$4);
     node->set_parent_proc(*$4);
 
     program->cfg_nodes->insert(make_pair($1, node));
@@ -168,8 +167,7 @@ StartNode
 EndNode
   : CFG_NUM CFG_COLON CFG_END CFG_ID CFG_EOS
   {
-    string stmt = "END " + *$4;
-    CFG_Node *node = new CFG_Node(CFG_EndNode, $1, stmt);
+    CFG_Node *node = new CFG_Node(CFG_EndNode, $1, "END " + *$4);
     node->set_parent_proc(*$4);
 
     program->cfg_nodes->insert(make_pair($1, node));
@@ -200,9 +198,7 @@ Node
 CallNode
   : CFG_NUM CFG_COLON CFG_CALL CFG_ID CFG_EOS
   {
-    string stmt = "CALL " + *$4;
-    CFG_Node *node = new CFG_Node(CFG_CallNode, $1, stmt,
-                                  *$4);
+    CFG_Node *node = new CFG_Node(CFG_CallNode, $1, "CALL " + *$4, *$4);
 
     program->cfg_nodes->insert(make_pair($1, node));
 
@@ -213,9 +209,7 @@ CallNode
 InputNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN CFG_INPUT CFG_EOS
   {
-    string stmt = *$3 + " = INPUT";
-    CFG_Node *node = new CFG_Node(CFG_AssignNode, $1, stmt,
-                                  "=",
+    CFG_Node *node = new CFG_Node(CFG_AssignNode, $1, "=",
                                   new CFG_Opd(CFG_VarOpd, *$3),
                                   new CFG_Opd(CFG_InputOpd),
                                   NULL);
@@ -229,9 +223,7 @@ InputNode
 UsevarNode
   : CFG_NUM CFG_COLON CFG_USEVAR CFG_ASSIGN CFG_ID CFG_EOS
   {
-    string stmt = "USEVAR = " + *$5;
-    CFG_Node *node = new CFG_Node(CFG_AssignNode, $1, stmt,
-                                  "=",
+    CFG_Node *node = new CFG_Node(CFG_AssignNode, $1, "=",
                                   new CFG_Opd(CFG_UsevarOpd),
                                   new CFG_Opd(CFG_VarOpd, *$5),
                                   NULL);
@@ -245,9 +237,7 @@ UsevarNode
 ExprNode
   : CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_OP Opd CFG_EOS
   {
-    string stmt = *$3 + " = " + $5->str() + " " + *$6 + " " + $7->str();
-    CFG_Node *node = new CFG_Node(CFG_AssignNode, $1, stmt,
-                                  *$6,
+    CFG_Node *node = new CFG_Node(CFG_AssignNode, $1, *$6,
                                   new CFG_Opd(CFG_VarOpd, *$3),
                                   $5,
                                   $7);
@@ -258,9 +248,7 @@ ExprNode
   }
   | CFG_NUM CFG_COLON CFG_ID CFG_ASSIGN Opd CFG_EOS
   {
-    string stmt = *$3 + " = " + $5->str();
-    CFG_Node *node = new CFG_Node(CFG_AssignNode, $1, stmt,
-                                  "=",
+    CFG_Node *node = new CFG_Node(CFG_AssignNode, $1, "=",
                                   new CFG_Opd(CFG_VarOpd, *$3),
                                   $5,
                                   NULL);

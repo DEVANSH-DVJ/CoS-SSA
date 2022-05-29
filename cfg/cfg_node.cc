@@ -46,8 +46,8 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, string stmt,
   this->ropd2 = NULL;
 }
 
-CFG_Node::CFG_Node(CFG_NodeType type, int node_id, string stmt, string op,
-                   CFG_Opd *lopd, CFG_Opd *ropd1, CFG_Opd *ropd2) {
+CFG_Node::CFG_Node(CFG_NodeType type, int node_id, string op, CFG_Opd *lopd,
+                   CFG_Opd *ropd1, CFG_Opd *ropd2) {
   if (type != CFG_AssignNode) {
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "CFG_AssignNode expected");
   }
@@ -56,7 +56,6 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, string stmt, string op,
   this->node_id = node_id;
 
   this->parent_proc = "";
-  this->stmt = stmt;
   this->in_edges = new map<int, CFG_Edge *>();
   this->out_edges = new map<int, CFG_Edge *>();
 
@@ -65,6 +64,14 @@ CFG_Node::CFG_Node(CFG_NodeType type, int node_id, string stmt, string op,
   this->lopd = lopd;
   this->ropd1 = ropd1;
   this->ropd2 = ropd2;
+
+  if (ropd2 == NULL) {
+    CHECK_INVARIANT(op == "=", "Assignment operator expected");
+    this->stmt = lopd->str() + " = " + ropd1->str();
+  } else {
+    this->stmt =
+        lopd->str() + " = " + ropd1->str() + " " + op + " " + ropd2->str();
+  }
 }
 
 CFG_Node::~CFG_Node() {
