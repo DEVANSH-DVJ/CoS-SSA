@@ -56,9 +56,9 @@ public:
   // Set the parent procedure
   void set_parent_proc(std::string parent_proc);
   // Add an in edge
-  void add_in_edge(CFG_Edge *edge, int from_node_id) const;
+  void add_in_edge(CFG_Edge *edge) const;
   // Add an out edge
-  void add_out_edge(CFG_Edge *edge, int to_node_id) const;
+  void add_out_edge(CFG_Edge *edge) const;
 
   /* Helper functions */
   // Visualize the node

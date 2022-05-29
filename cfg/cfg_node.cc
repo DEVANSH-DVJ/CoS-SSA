@@ -92,14 +92,18 @@ void CFG_Node::set_parent_proc(string parent_proc) {
   this->parent_proc = parent_proc;
 }
 
-void CFG_Node::add_in_edge(CFG_Edge *edge, int from_node_id) const {
+void CFG_Node::add_in_edge(CFG_Edge *edge) const {
+  CHECK_INVARIANT(edge != NULL, "Edge cannot be NULL");
+  int from_node_id = edge->get_src()->get_node_id();
   CHECK_INPUT_AND_ABORT(this->in_edges->find(from_node_id) ==
                             this->in_edges->end(),
                         "Edge already exists");
   this->in_edges->insert(make_pair(from_node_id, edge));
 }
 
-void CFG_Node::add_out_edge(CFG_Edge *edge, int to_node_id) const {
+void CFG_Node::add_out_edge(CFG_Edge *edge) const {
+  CHECK_INVARIANT(edge != NULL, "Edge cannot be NULL");
+  int to_node_id = edge->get_dst()->get_node_id();
   CHECK_INPUT_AND_ABORT(this->out_edges->find(to_node_id) ==
                             this->out_edges->end(),
                         "Edge already exists");
