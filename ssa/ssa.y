@@ -258,7 +258,7 @@ UsevarNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
 
-    node->add_meta(meta, $1->second);
+    node->add_meta(meta);
 
     if (new_node) {
       program->ssa_nodes->insert(make_pair($1->first, node));
@@ -283,7 +283,7 @@ UsevarNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, stmt}));
 
-    node->add_meta(meta, $1->second);
+    node->add_meta(meta);
     if (new_node) {
       program->ssa_nodes->insert(make_pair($1->first, node));
       $$ = node;
@@ -307,7 +307,7 @@ ExprNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
 
-    node->add_meta(meta, $1->second);
+    node->add_meta(meta);
     if (new_node) {
       program->ssa_nodes->insert(make_pair($1->first, node));
       $$ = node;
@@ -328,7 +328,7 @@ ExprNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, stmt}));
 
-    node->add_meta(meta, $1->second);
+    node->add_meta(meta);
     if (new_node) {
       program->ssa_nodes->insert(make_pair($1->first, node));
       $$ = node;
@@ -349,7 +349,7 @@ ExprNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, $4, stmt}));
 
-    node->add_meta(meta, $1->second);
+    node->add_meta(meta);
     if (new_node) {
       program->ssa_nodes->insert(make_pair($1->first, node));
       $$ = node;
@@ -370,7 +370,7 @@ ExprNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
 
-    node->add_meta(meta, $1->second);
+    node->add_meta(meta);
     if (new_node) {
       program->ssa_nodes->insert(make_pair($1->first, node));
       $$ = node;
@@ -391,7 +391,7 @@ ExprNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({$3, stmt}));
 
-    node->add_meta(meta, $1->second);
+    node->add_meta(meta);
     if (new_node) {
       program->ssa_nodes->insert(make_pair($1->first, node));
       $$ = node;
@@ -430,8 +430,8 @@ Edge
   {
     SSA_Edge *edge = new SSA_Edge($1, $3);
 
-    edge->get_src()->add_out_edge(edge, $3);
-    edge->get_dst()->add_in_edge(edge, $1);
+    edge->get_src()->add_out_edge(edge);
+    edge->get_dst()->add_in_edge(edge);
     program->ssa_edges->insert(make_pair(make_pair($1, $3), edge));
 
     $$ = edge;

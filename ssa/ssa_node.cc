@@ -81,21 +81,27 @@ void SSA_Node::set_parent_proc(string parent_proc) {
   this->parent_proc = parent_proc;
 }
 
-void SSA_Node::add_in_edge(SSA_Edge *edge, int from_node_id) const {
+void SSA_Node::add_in_edge(SSA_Edge *edge) const {
+  CHECK_INVARIANT(edge != NULL, "Edge cannot be NULL");
+  int from_node_id = edge->get_src()->get_node_id();
   CHECK_INPUT_AND_ABORT(this->in_edges->find(from_node_id) ==
                             this->in_edges->end(),
                         "Edge already exists");
   this->in_edges->insert(make_pair(from_node_id, edge));
 }
 
-void SSA_Node::add_out_edge(SSA_Edge *edge, int to_node_id) const {
+void SSA_Node::add_out_edge(SSA_Edge *edge) const {
+  CHECK_INVARIANT(edge != NULL, "Edge cannot be NULL");
+  int to_node_id = edge->get_dst()->get_node_id();
   CHECK_INPUT_AND_ABORT(this->out_edges->find(to_node_id) ==
                             this->out_edges->end(),
                         "Edge already exists");
   this->out_edges->insert(make_pair(to_node_id, edge));
 }
 
-void SSA_Node::add_meta(SSA_Meta *meta, int meta_id) const {
+void SSA_Node::add_meta(SSA_Meta *meta) const {
+  CHECK_INVARIANT(meta != NULL, "Meta cannot be NULL");
+  int meta_id = meta->get_meta_num().second;
   CHECK_INVARIANT(this->type == SSA_AssignNode,
                   "Meta can only be added to Assignment node");
   CHECK_INVARIANT(this->metas->find(meta_id) == this->metas->end(),
