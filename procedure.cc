@@ -19,7 +19,43 @@ Procedure::~Procedure() {
   delete this->ssa_edges;
 }
 
-void Procedure::visualize_cfg() {
+string Procedure::get_name() const { return this->name; }
+
+void Procedure::add_cfg_node(CFG_Node *node) const {
+  CHECK_INVARIANT(node != NULL, "CFG node cannot be NULL.");
+  int node_id = node->get_node_id();
+  CHECK_INVARIANT(this->cfg_nodes->find(node_id) == this->cfg_nodes->end(),
+                  "CFG node " + to_string(node_id) + " already exists.");
+  this->cfg_nodes->insert(make_pair(node_id, node));
+}
+
+void Procedure::add_cfg_edge(CFG_Edge *edge) const {
+  CHECK_INVARIANT(edge != NULL, "CFG edge cannot be NULL.");
+  pair<int, int> edge_id = edge->get_edge_id();
+  CHECK_INVARIANT(this->cfg_edges->find(edge_id) == this->cfg_edges->end(),
+                  "CFG edge (" + to_string(edge_id.first) + ", " +
+                      to_string(edge_id.second) + ") already exists.");
+  this->cfg_edges->insert(make_pair(edge_id, edge));
+}
+
+void Procedure::add_ssa_node(SSA_Node *node) const {
+  CHECK_INVARIANT(node != NULL, "SSA node cannot be NULL.");
+  int node_id = node->get_node_id();
+  CHECK_INVARIANT(this->ssa_nodes->find(node_id) == this->ssa_nodes->end(),
+                  "SSA node " + to_string(node_id) + " already exists.");
+  this->ssa_nodes->insert(make_pair(node_id, node));
+}
+
+void Procedure::add_ssa_edge(SSA_Edge *edge) const {
+  CHECK_INVARIANT(edge != NULL, "SSA edge cannot be NULL.");
+  pair<int, int> edge_id = edge->get_edge_id();
+  CHECK_INVARIANT(this->ssa_edges->find(edge_id) == this->ssa_edges->end(),
+                  "SSA edge (" + to_string(edge_id.first) + ", " +
+                      to_string(edge_id.second) + ") already exists.");
+  this->ssa_edges->insert(make_pair(edge_id, edge));
+}
+
+void Procedure::visualize_cfg() const {
   *dot_fd << "\n\tsubgraph cluster_" << this->name << " {\n";
   *dot_fd << "\t\tlabel = \"" << this->name << "\";\n";
   *dot_fd << "\t\tmargin = 25;\n";
@@ -34,7 +70,7 @@ void Procedure::visualize_cfg() {
   *dot_fd << "\t}\n";
 }
 
-void Procedure::visualize_ssa() {
+void Procedure::visualize_ssa() const {
   *dot_fd << "\n\tsubgraph cluster_" << this->name << " {\n";
   *dot_fd << "\t\tlabel = \"" << this->name << "\";\n";
   *dot_fd << "\t\tmargin = 25;\n";
