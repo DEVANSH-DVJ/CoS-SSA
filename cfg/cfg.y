@@ -82,22 +82,22 @@ Program
 ProcDefList
   : CFG_ID
   {
-    program->procedures->insert(make_pair(*$1, new Procedure(*$1)));
+    program->add_proc(new Procedure(*$1));
   }
   | ProcDefList CFG_COMMA CFG_ID
   {
-    program->procedures->insert(make_pair(*$3, new Procedure(*$3)));
+    program->add_proc(new Procedure(*$3));
   }
 ;
 
 ProcList
   : Proc
   {
-    program->procs->push_back($1);
+    program->push_proc($1);
   }
   | ProcList Proc
   {
-    program->procs->push_back($2);
+    program->push_proc($2);
   }
 ;
 
@@ -158,7 +158,7 @@ StartNode
     CFG_Node *node = new CFG_Node(CFG_StartNode, $1, "START " + *$4);
     node->set_parent_proc(*$4);
 
-    program->cfg_nodes->insert(make_pair($1, node));
+    program->add_cfg_node(node);
 
     $$ = node;
   }
@@ -170,7 +170,7 @@ EndNode
     CFG_Node *node = new CFG_Node(CFG_EndNode, $1, "END " + *$4);
     node->set_parent_proc(*$4);
 
-    program->cfg_nodes->insert(make_pair($1, node));
+    program->add_cfg_node(node);
 
     $$ = node;
   }
@@ -200,7 +200,7 @@ CallNode
   {
     CFG_Node *node = new CFG_Node(CFG_CallNode, $1, "CALL " + *$4, *$4);
 
-    program->cfg_nodes->insert(make_pair($1, node));
+    program->add_cfg_node(node);
 
     $$ = node;
   }
@@ -214,7 +214,7 @@ InputNode
                                   new CFG_Opd(CFG_InputOpd),
                                   NULL);
 
-    program->cfg_nodes->insert(make_pair($1, node));
+    program->add_cfg_node(node);
 
     $$ = node;
   }
@@ -228,7 +228,7 @@ UsevarNode
                                   new CFG_Opd(CFG_VarOpd, *$5),
                                   NULL);
 
-    program->cfg_nodes->insert(make_pair($1, node));
+    program->add_cfg_node(node);
 
     $$ = node;
   }
@@ -242,7 +242,7 @@ ExprNode
                                   $5,
                                   $7);
 
-    program->cfg_nodes->insert(make_pair($1, node));
+    program->add_cfg_node(node);
 
     $$ = node;
   }
@@ -253,7 +253,7 @@ ExprNode
                                   $5,
                                   NULL);
 
-    program->cfg_nodes->insert(make_pair($1, node));
+    program->add_cfg_node(node);
 
     $$ = node;
   }
@@ -266,9 +266,10 @@ Edge
   {
     CFG_Edge *edge = new CFG_Edge($1, $3);
 
+    program->add_cfg_edge(edge);
+
     edge->get_src()->add_out_edge(edge);
     edge->get_dst()->add_in_edge(edge);
-    program->cfg_edges->insert(make_pair(make_pair($1, $3), edge));
 
     $$ = edge;
   }

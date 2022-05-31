@@ -14,7 +14,6 @@ class SSA_Node;
 class Program;
 
 class Program {
-public:
   /* Procedures */
   std::list<Procedure *> *procs;
   std::map<string, Procedure *> *procedures;
@@ -27,6 +26,7 @@ public:
   std::map<int, SSA_Node *> *ssa_nodes;
   std::map<std::pair<int, int>, SSA_Edge *> *ssa_edges;
 
+public:
   /* Constructors and Destructor */
   Program();
   ~Program();

@@ -93,22 +93,22 @@ Program
 ProcDefList
   : SSA_ID
   {
-    program->procedures->insert(make_pair(*$1, new Procedure(*$1)));
+    program->add_proc(new Procedure(*$1));
   }
   | ProcDefList SSA_COMMA SSA_ID
   {
-    program->procedures->insert(make_pair(*$3, new Procedure(*$3)));
+    program->add_proc(new Procedure(*$3));
   }
 ;
 
 ProcList
   : Proc
   {
-    program->procs->push_back($1);
+    program->push_proc($1);
   }
   | ProcList Proc
   {
-    program->procs->push_back($2);
+    program->push_proc($2);
   }
 ;
 
@@ -172,7 +172,7 @@ StartNode
     SSA_Node *node = new SSA_Node(SSA_StartNode, $1->first, stmt);
     node->set_parent_proc(*$4);
 
-    program->ssa_nodes->insert(make_pair($1->first, node));
+    program->add_ssa_node(node);
 
     $$ = node;
   }
@@ -185,7 +185,7 @@ EndNode
     SSA_Node *node = new SSA_Node(SSA_EndNode, $1->first, stmt);
     node->set_parent_proc(*$4);
 
-    program->ssa_nodes->insert(make_pair($1->first, node));
+    program->add_ssa_node(node);
 
     $$ = node;
   }
@@ -216,7 +216,7 @@ CallNode
     string stmt = "CALL " + *$4;
     SSA_Node *node = new SSA_Node(SSA_CallNode, $1->first, stmt, *$4);
 
-    program->ssa_nodes->insert(make_pair($1->first, node));
+    program->add_ssa_node(node);
 
     $$ = node;
   }
@@ -234,8 +234,8 @@ InputNode
 
     SSA_Meta *meta = new SSA_Meta(*$1, new list<SSA_Stmt *>({stmt}));
 
-    node->add_meta(meta, $1->second);
-    program->ssa_nodes->insert(make_pair($1->first, node));
+    node->add_meta(meta);
+    program->add_ssa_node(node);
 
     $$ = node;
   }
@@ -261,7 +261,7 @@ UsevarNode
     node->add_meta(meta);
 
     if (new_node) {
-      program->ssa_nodes->insert(make_pair($1->first, node));
+      program->add_ssa_node(node);
       $$ = node;
     } else {
       $$ = NULL;
@@ -285,7 +285,7 @@ UsevarNode
 
     node->add_meta(meta);
     if (new_node) {
-      program->ssa_nodes->insert(make_pair($1->first, node));
+      program->add_ssa_node(node);
       $$ = node;
     } else {
       $$ = NULL;
@@ -309,7 +309,7 @@ ExprNode
 
     node->add_meta(meta);
     if (new_node) {
-      program->ssa_nodes->insert(make_pair($1->first, node));
+      program->add_ssa_node(node);
       $$ = node;
     } else {
       $$ = NULL;
@@ -330,7 +330,7 @@ ExprNode
 
     node->add_meta(meta);
     if (new_node) {
-      program->ssa_nodes->insert(make_pair($1->first, node));
+      program->add_ssa_node(node);
       $$ = node;
     } else {
       $$ = NULL;
@@ -351,7 +351,7 @@ ExprNode
 
     node->add_meta(meta);
     if (new_node) {
-      program->ssa_nodes->insert(make_pair($1->first, node));
+      program->add_ssa_node(node);
       $$ = node;
     } else {
       $$ = NULL;
@@ -372,7 +372,7 @@ ExprNode
 
     node->add_meta(meta);
     if (new_node) {
-      program->ssa_nodes->insert(make_pair($1->first, node));
+      program->add_ssa_node(node);
       $$ = node;
     } else {
       $$ = NULL;
@@ -393,7 +393,7 @@ ExprNode
 
     node->add_meta(meta);
     if (new_node) {
-      program->ssa_nodes->insert(make_pair($1->first, node));
+      program->add_ssa_node(node);
       $$ = node;
     } else {
       $$ = NULL;
@@ -430,9 +430,10 @@ Edge
   {
     SSA_Edge *edge = new SSA_Edge($1, $3);
 
+    program->add_ssa_edge(edge);
+
     edge->get_src()->add_out_edge(edge);
     edge->get_dst()->add_in_edge(edge);
-    program->ssa_edges->insert(make_pair(make_pair($1, $3), edge));
 
     $$ = edge;
   }
