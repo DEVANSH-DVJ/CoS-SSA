@@ -14,7 +14,6 @@ class SSA_Node;
 class Procedure;
 
 class Procedure {
-public:
   /* Always initialized: by constructor */
   std::string name;
 
@@ -26,6 +25,7 @@ public:
   std::map<int, SSA_Node *> *ssa_nodes;
   std::map<std::pair<int, int>, SSA_Edge *> *ssa_edges;
 
+public:
   /* Constructors and Destructor */
   Procedure(std::string name);
   ~Procedure();

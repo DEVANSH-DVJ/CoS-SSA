@@ -122,14 +122,14 @@ Proc
                           "Start node and end node must be in the same procedure");
 
     Procedure *proc = program->get_proc(proc_name);
-    proc->ssa_nodes->insert(make_pair($2->get_node_id(), $2));
-    proc->ssa_nodes->insert(make_pair($4->get_node_id(), $4));
+    proc->add_ssa_node($2);
+    proc->add_ssa_node($4);
     for (list<SSA_Node *>::iterator it = $3->begin(); it != $3->end(); ++it) {
-      proc->ssa_nodes->insert(make_pair((*it)->get_node_id(), *it));
+      proc->add_ssa_node(*it);
       (*it)->set_parent_proc(proc_name);
     }
     for (list<SSA_Edge *>::iterator it = $5->begin(); it != $5->end(); ++it)
-      proc->ssa_edges->insert(make_pair((*it)->get_edge_id(), *it));
+      proc->add_ssa_edge(*it);
 
     $$ = proc;
   }
