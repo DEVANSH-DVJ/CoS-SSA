@@ -19,9 +19,9 @@ Procedure::~Procedure() {
   delete this->ssa_edges;
 }
 
-string Procedure::get_name() const { return this->name; }
+string Procedure::get_name() { return this->name; }
 
-void Procedure::add_cfg_node(CFG_Node *node) const {
+void Procedure::add_cfg_node(CFG_Node *node) {
   CHECK_INVARIANT(node != NULL, "CFG node cannot be NULL.");
   int node_id = node->get_node_id();
   CHECK_INVARIANT(this->cfg_nodes->find(node_id) == this->cfg_nodes->end(),
@@ -29,7 +29,7 @@ void Procedure::add_cfg_node(CFG_Node *node) const {
   this->cfg_nodes->insert(make_pair(node_id, node));
 }
 
-void Procedure::add_cfg_edge(CFG_Edge *edge) const {
+void Procedure::add_cfg_edge(CFG_Edge *edge) {
   CHECK_INVARIANT(edge != NULL, "CFG edge cannot be NULL.");
   pair<int, int> edge_id = edge->get_edge_id();
   CHECK_INVARIANT(this->cfg_edges->find(edge_id) == this->cfg_edges->end(),
@@ -38,7 +38,7 @@ void Procedure::add_cfg_edge(CFG_Edge *edge) const {
   this->cfg_edges->insert(make_pair(edge_id, edge));
 }
 
-void Procedure::add_ssa_node(SSA_Node *node) const {
+void Procedure::add_ssa_node(SSA_Node *node) {
   CHECK_INVARIANT(node != NULL, "SSA node cannot be NULL.");
   int node_id = node->get_node_id();
   CHECK_INVARIANT(this->ssa_nodes->find(node_id) == this->ssa_nodes->end(),
@@ -46,7 +46,7 @@ void Procedure::add_ssa_node(SSA_Node *node) const {
   this->ssa_nodes->insert(make_pair(node_id, node));
 }
 
-void Procedure::add_ssa_edge(SSA_Edge *edge) const {
+void Procedure::add_ssa_edge(SSA_Edge *edge) {
   CHECK_INVARIANT(edge != NULL, "SSA edge cannot be NULL.");
   pair<int, int> edge_id = edge->get_edge_id();
   CHECK_INVARIANT(this->ssa_edges->find(edge_id) == this->ssa_edges->end(),
@@ -55,7 +55,7 @@ void Procedure::add_ssa_edge(SSA_Edge *edge) const {
   this->ssa_edges->insert(make_pair(edge_id, edge));
 }
 
-void Procedure::visualize_cfg() const {
+void Procedure::visualize_cfg() {
   *dot_fd << "\n\tsubgraph cluster_" << this->name << " {\n";
   *dot_fd << "\t\tlabel = \"" << this->name << "\";\n";
   *dot_fd << "\t\tmargin = 25;\n";
@@ -70,7 +70,7 @@ void Procedure::visualize_cfg() const {
   *dot_fd << "\t}\n";
 }
 
-void Procedure::visualize_ssa() const {
+void Procedure::visualize_ssa() {
   *dot_fd << "\n\tsubgraph cluster_" << this->name << " {\n";
   *dot_fd << "\t\tlabel = \"" << this->name << "\";\n";
   *dot_fd << "\t\tmargin = 25;\n";

@@ -32,23 +32,23 @@ public:
 
   /* Get functions */
   // Get procedure name
-  std::string get_name() const;
+  std::string get_name();
 
   /* Update functions */
   // Add a CFG node
-  void add_cfg_node(CFG_Node *node) const;
+  void add_cfg_node(CFG_Node *node);
   // Add a CFG edge
-  void add_cfg_edge(CFG_Edge *edge) const;
+  void add_cfg_edge(CFG_Edge *edge);
   // Add a SSA node
-  void add_ssa_node(SSA_Node *node) const;
+  void add_ssa_node(SSA_Node *node);
   // Add a SSA edge
-  void add_ssa_edge(SSA_Edge *edge) const;
+  void add_ssa_edge(SSA_Edge *edge);
 
   /* Helper functions */
   // Visualize CFG graph
-  void visualize_cfg() const;
+  void visualize_cfg();
   // Visualize SSA graph
-  void visualize_ssa() const;
+  void visualize_ssa();
 };
 
 #endif
