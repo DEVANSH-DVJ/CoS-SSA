@@ -34,21 +34,21 @@ CFG_Opd::CFG_Opd(CFG_OpdType type, string var_name) {
 
 CFG_Opd::~CFG_Opd() {}
 
-const CFG_OpdType CFG_Opd::get_type() const { return this->type; }
+CFG_OpdType CFG_Opd::get_type() { return this->type; }
 
-const int CFG_Opd::get_opd_value() const {
+int CFG_Opd::get_opd_value() {
   CHECK_INVARIANT(this->type == CFG_NumOpd, "CFG_NumOpd expected");
 
   return this->num_value;
 }
 
-const string &CFG_Opd::get_opd_var() const {
+string &CFG_Opd::get_opd_var() {
   CHECK_INVARIANT(this->type == CFG_VarOpd, "CFG_VarOpd expected");
 
   return this->var_name;
 }
 
-string CFG_Opd::str() const {
+string CFG_Opd::str() {
   switch (type) {
   case (CFG_NumOpd):
     return to_string(this->num_value);

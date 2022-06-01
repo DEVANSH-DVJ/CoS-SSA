@@ -88,18 +88,18 @@ CFG_Node::~CFG_Node() {
     delete this->ropd2;
 }
 
-const CFG_NodeType CFG_Node::get_type() const { return this->type; }
+CFG_NodeType CFG_Node::get_type() { return this->type; }
 
-const int CFG_Node::get_node_id() const { return this->node_id; }
+int CFG_Node::get_node_id() { return this->node_id; }
 
-const string &CFG_Node::get_parent_proc() const { return this->parent_proc; }
+string &CFG_Node::get_parent_proc() { return this->parent_proc; }
 
 void CFG_Node::set_parent_proc(string parent_proc) {
   CHECK_INVARIANT(this->parent_proc == "", "Parent proc already set");
   this->parent_proc = parent_proc;
 }
 
-void CFG_Node::add_in_edge(CFG_Edge *edge) const {
+void CFG_Node::add_in_edge(CFG_Edge *edge) {
   CHECK_INVARIANT(edge != NULL, "Edge cannot be NULL");
   int from_node_id = edge->get_src()->get_node_id();
   CHECK_INVARIANT(this->in_edges->find(from_node_id) == this->in_edges->end(),
@@ -107,7 +107,7 @@ void CFG_Node::add_in_edge(CFG_Edge *edge) const {
   this->in_edges->insert(make_pair(from_node_id, edge));
 }
 
-void CFG_Node::add_out_edge(CFG_Edge *edge) const {
+void CFG_Node::add_out_edge(CFG_Edge *edge) {
   CHECK_INVARIANT(edge != NULL, "Edge cannot be NULL");
   int to_node_id = edge->get_dst()->get_node_id();
   CHECK_INVARIANT(this->out_edges->find(to_node_id) == this->out_edges->end(),
@@ -115,7 +115,7 @@ void CFG_Node::add_out_edge(CFG_Edge *edge) const {
   this->out_edges->insert(make_pair(to_node_id, edge));
 }
 
-void CFG_Node::visualize() const {
+void CFG_Node::visualize() {
   *dot_fd << "\t\tnode_" << this->node_id << " [shape=box, xlabel=\""
           << this->node_id << "\", label=\"" << this->stmt << "\"];\n";
 }

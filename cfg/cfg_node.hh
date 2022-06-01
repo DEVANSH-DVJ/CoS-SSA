@@ -46,23 +46,23 @@ public:
 
   /* Get functions */
   // Get the node type
-  const CFG_NodeType get_type() const;
+  CFG_NodeType get_type();
   // Get the node id
-  const int get_node_id() const;
+  int get_node_id();
   // Get the parent procedure
-  const std::string &get_parent_proc() const;
+  std::string &get_parent_proc();
 
   /* Update functions */
   // Set the parent procedure
   void set_parent_proc(std::string parent_proc);
   // Add an in edge
-  void add_in_edge(CFG_Edge *edge) const;
+  void add_in_edge(CFG_Edge *edge);
   // Add an out edge
-  void add_out_edge(CFG_Edge *edge) const;
+  void add_out_edge(CFG_Edge *edge);
 
   /* Helper functions */
   // Visualize the node
-  void visualize() const;
+  void visualize();
 };
 
 #endif

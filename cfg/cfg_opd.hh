@@ -29,15 +29,15 @@ public:
 
   /* Get functions */
   // Get the node type
-  const CFG_OpdType get_type() const;
+  CFG_OpdType get_type();
   // Get opd value if it is a number
-  const int get_opd_value() const;
+  int get_opd_value();
   // Get opd value if it is a variable
-  const std::string &get_opd_var() const;
+  std::string &get_opd_var();
 
   /* Helper functions */
   // Return the string rep
-  std::string str() const;
+  std::string str();
 };
 
 #endif

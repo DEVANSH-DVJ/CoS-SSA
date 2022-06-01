@@ -13,13 +13,13 @@ CFG_Edge::CFG_Edge(int src_id, int dst_id) {
 
 CFG_Edge::~CFG_Edge() {}
 
-const pair<int, int> &CFG_Edge::get_edge_id() const { return this->edge_id; }
+pair<int, int> &CFG_Edge::get_edge_id() { return this->edge_id; }
 
-const CFG_Node *CFG_Edge::get_src() const { return this->src; }
+CFG_Node *CFG_Edge::get_src() { return this->src; }
 
-const CFG_Node *CFG_Edge::get_dst() const { return this->dst; }
+CFG_Node *CFG_Edge::get_dst() { return this->dst; }
 
-void CFG_Edge::visualize() const {
+void CFG_Edge::visualize() {
   *dot_fd << "\t\tnode_" << this->src->get_node_id() << " -> "
           << "node_" << this->dst->get_node_id() << ";\n";
 }
