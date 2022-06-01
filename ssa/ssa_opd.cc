@@ -40,15 +40,15 @@ SSA_Opd::SSA_Opd(SSA_OpdType type, pair<int, int> meta_num, string var_name) {
 
 SSA_Opd::~SSA_Opd() {}
 
-const SSA_OpdType SSA_Opd::get_type() const { return this->type; }
+SSA_OpdType SSA_Opd::get_type() { return this->type; }
 
-const pair<int, int> SSA_Opd::get_meta_num() const { return this->meta_num; }
+pair<int, int> SSA_Opd::get_meta_num() { return this->meta_num; }
 
-const int SSA_Opd::get_opd_value() const { return this->num_value; }
+int SSA_Opd::get_opd_value() { return this->num_value; }
 
-const string &SSA_Opd::get_opd_var() const { return this->var_name; }
+string &SSA_Opd::get_opd_var() { return this->var_name; }
 
-string SSA_Opd::str() const {
+string SSA_Opd::str() {
   switch (type) {
   case (SSA_NumOpd):
     return to_string(this->num_value);

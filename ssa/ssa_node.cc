@@ -70,18 +70,18 @@ SSA_Node::~SSA_Node() {
   }
 }
 
-const SSA_NodeType SSA_Node::get_type() const { return this->type; }
+SSA_NodeType SSA_Node::get_type() { return this->type; }
 
-const int SSA_Node::get_node_id() const { return this->node_id; }
+int SSA_Node::get_node_id() { return this->node_id; }
 
-const string &SSA_Node::get_parent_proc() const { return this->parent_proc; }
+string &SSA_Node::get_parent_proc() { return this->parent_proc; }
 
 void SSA_Node::set_parent_proc(string parent_proc) {
   CHECK_INVARIANT(this->parent_proc == "", "Parent proc already set");
   this->parent_proc = parent_proc;
 }
 
-void SSA_Node::add_in_edge(SSA_Edge *edge) const {
+void SSA_Node::add_in_edge(SSA_Edge *edge) {
   CHECK_INVARIANT(edge != NULL, "Edge cannot be NULL");
   int from_node_id = edge->get_src()->get_node_id();
   CHECK_INVARIANT(this->in_edges->find(from_node_id) == this->in_edges->end(),
@@ -89,7 +89,7 @@ void SSA_Node::add_in_edge(SSA_Edge *edge) const {
   this->in_edges->insert(make_pair(from_node_id, edge));
 }
 
-void SSA_Node::add_out_edge(SSA_Edge *edge) const {
+void SSA_Node::add_out_edge(SSA_Edge *edge) {
   CHECK_INVARIANT(edge != NULL, "Edge cannot be NULL");
   int to_node_id = edge->get_dst()->get_node_id();
   CHECK_INVARIANT(this->out_edges->find(to_node_id) == this->out_edges->end(),
@@ -97,7 +97,7 @@ void SSA_Node::add_out_edge(SSA_Edge *edge) const {
   this->out_edges->insert(make_pair(to_node_id, edge));
 }
 
-void SSA_Node::add_meta(SSA_Meta *meta) const {
+void SSA_Node::add_meta(SSA_Meta *meta) {
   CHECK_INVARIANT(meta != NULL, "Meta cannot be NULL");
   int meta_id = meta->get_meta_num().second;
   CHECK_INVARIANT(this->type == SSA_AssignNode,
@@ -107,7 +107,7 @@ void SSA_Node::add_meta(SSA_Meta *meta) const {
   this->metas->insert(make_pair(meta_id, meta));
 }
 
-void SSA_Node::visualize() const {
+void SSA_Node::visualize() {
   if (this->type != SSA_AssignNode) {
     *dot_fd << "\t\tnode_" << this->node_id << " [shape=box, xlabel=\""
             << this->node_id << "\", label=\"" << this->stmt << "\"];\n";

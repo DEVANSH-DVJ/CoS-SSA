@@ -37,9 +37,9 @@ public:
 
   /* Get functions */
   // Get the statement type
-  const SSA_StmtType get_type() const;
+  SSA_StmtType get_type();
   // Get the statement
-  const std::string &get_stmt() const;
+  std::string &get_stmt();
 };
 
 #endif

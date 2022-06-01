@@ -20,15 +20,15 @@ public:
 
   /* Get functions */
   // Get the edge id
-  const std::pair<int, int> &get_edge_id() const;
+  std::pair<int, int> &get_edge_id();
   // Get the source node
-  const SSA_Node *get_src() const;
+  SSA_Node *get_src();
   // Get the destination node
-  const SSA_Node *get_dst() const;
+  SSA_Node *get_dst();
 
   /* Helper functions */
   // Visualize the edge
-  void visualize() const;
+  void visualize();
 };
 
 #endif

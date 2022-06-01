@@ -22,13 +22,13 @@ public:
 
   /* Get functions */
   // Get the meta number
-  const std::pair<int, int> get_meta_num() const;
+  std::pair<int, int> get_meta_num();
   // Get the list of statements
-  const std::list<SSA_Stmt *> *get_stmts() const;
+  std::list<SSA_Stmt *> *get_stmts();
 
   /* Helper functions */
   // Visualize the meta
-  void visualize() const;
+  void visualize();
 };
 
 #endif
