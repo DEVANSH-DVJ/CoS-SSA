@@ -32,6 +32,8 @@ public:
   ~Program();
 
   /* Get functions */
+  // Get procedures
+  std::map<std::string, Procedure *> *get_procs();
   // Get procedure by name
   Procedure *get_proc(string name);
   // Get CFG node by id

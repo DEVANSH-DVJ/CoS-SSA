@@ -45,6 +45,8 @@ Program::~Program() {
   delete this->ssa_edges;
 }
 
+map<string, Procedure *> *Program::get_procs() { return this->procedures; }
+
 Procedure *Program::get_proc(string name) {
   if (this->procedures->find(name) == this->procedures->end()) {
     CHECK_INPUT_AND_ABORT(false, "Procedure " + name + " not found.");
