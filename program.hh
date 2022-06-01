@@ -33,31 +33,31 @@ public:
 
   /* Get functions */
   // Get procedure by name
-  Procedure *get_proc(string name) const;
+  Procedure *get_proc(string name);
   // Get CFG node by id
-  CFG_Node *get_cfg_node(int node_id, bool abort_if_not_found) const;
+  CFG_Node *get_cfg_node(int node_id, bool abort_if_not_found);
   // Get SSA node by id
-  SSA_Node *get_ssa_node(int node_id, bool abort_if_not_found) const;
+  SSA_Node *get_ssa_node(int node_id, bool abort_if_not_found);
 
   /* Update functions */
   // Add a procedure
-  void add_proc(Procedure *proc) const;
+  void add_proc(Procedure *proc);
   // Push a procedure in the list
-  void push_proc(Procedure *proc) const;
+  void push_proc(Procedure *proc);
   // Add a CFG node
-  void add_cfg_node(CFG_Node *node) const;
+  void add_cfg_node(CFG_Node *node);
   // Add a CFG edge
-  void add_cfg_edge(CFG_Edge *edge) const;
+  void add_cfg_edge(CFG_Edge *edge);
   // Add a SSA node
-  void add_ssa_node(SSA_Node *node) const;
+  void add_ssa_node(SSA_Node *node);
   // Add a SSA edge
-  void add_ssa_edge(SSA_Edge *edge) const;
+  void add_ssa_edge(SSA_Edge *edge);
 
   /* Helper functions */
   // Visualize CFG graph
-  void visualize_cfg() const;
+  void visualize_cfg();
   // Visualize SSA graph
-  void visualize_ssa() const;
+  void visualize_ssa();
 };
 
 #endif
