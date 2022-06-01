@@ -1,0 +1,21 @@
+digraph G {
+
+	subgraph cluster_main {
+		label = "main";
+		margin = 25;
+		node_1 [shape=box, xlabel="1", label="START main"];
+		node_2 [shape=record, xlabel="2", label="a_2_1 = INPUT_2"];
+		node_3 [shape=record, xlabel="3", label="a_3_1 = INPUT_3"];
+		node_4 [shape=record, xlabel="4", label="a_4_1 = PHI(a_2_1, a_3_1) \n a_4_1 = a_4_1 + 1"];
+		node_5 [shape=record, xlabel="5", label="a_5_1 = PHI(a_2_1, a_3_1) \n USEVAR_5_1 = a_5_1"];
+		node_6 [shape=record, xlabel="6", label="a_6_1 = PHI(a_2_1, a_3_1) \n USEVAR_6_1 = a_6_1"];
+		node_7 [shape=box, xlabel="7", label="END main"];
+		node_1 -> node_2;
+		node_1 -> node_3;
+		node_2 -> node_4;
+		node_3 -> node_4;
+		node_4 -> node_5;
+		node_5 -> node_6;
+		node_6 -> node_7;
+	}
+}
