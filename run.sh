@@ -1,6 +1,6 @@
 #/bin/sh
 
-make clean && make
+make
 
 if [[ -f cs_ssa ]]; then
   # CFG Tests
