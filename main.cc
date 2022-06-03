@@ -12,25 +12,7 @@
 
 using namespace std;
 
-#include "cfg/cfg.tab.hh"
-#include "ssa/ssa.tab.hh"
-
-extern int cfg_lex(void);
-extern void cfg_set_in(FILE *);
-extern void cfg_set_out(FILE *);
-extern FILE *cfg_out;
-
-extern int ssa_lex(void);
-extern void ssa_set_in(FILE *);
-extern void ssa_set_out(FILE *);
-extern FILE *ssa_out;
-
 Program *program;
-
-string cfg_file = "/dev/null";
-string ssa_file = "/dev/null";
-string dot_file = "/dev/null";
-string png_file = "/dev/null";
 
 fstream *dot_fd;
 
@@ -43,54 +25,6 @@ int main(int argc, char **argv) {
   arguments.input_file = "";
 
   argp_parse(&argp, argc, argv, 0, 0, &arguments);
-
-  program = new Program();
-
-  char *input_file = (char *)arguments.input_file.c_str();
-
-  dot_file = arguments.input_file + ".dot";
-  png_file = arguments.input_file + ".png";
-
-  FILE *in_file = fopen(input_file, "r");
-  if (in_file == NULL) {
-    printf("Error opening file: %s\n", input_file);
-    exit(1);
-  }
-
-  if (arguments.input_type == FILE_CFG) {
-    cfg_set_in(in_file);
-  } else if (arguments.input_type == FILE_SSA) {
-    ssa_set_in(in_file);
-  } else {
-    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Unknown input type");
-  }
-
-  cfg_set_out(fopen(cfg_file.c_str(), "w"));
-  ssa_set_out(fopen(ssa_file.c_str(), "w"));
-
-  dot_fd = new fstream(dot_file.c_str(), ios::out | ios::trunc);
-
-  if (arguments.input_type == FILE_CFG) {
-    cfg_parse();
-    program->visualize_cfg();
-
-  } else if (arguments.input_type == FILE_SSA) {
-    ssa_parse();
-    program->visualize_ssa();
-  }
-
-  if (arguments.input_type == FILE_CFG) {
-    fclose(cfg_out);
-  } else if (arguments.input_type == FILE_SSA) {
-    fclose(ssa_out);
-  }
-
-  dot_fd->close();
-
-  if (system(("dot -Tpng " + dot_file + " -o " + png_file).c_str()) != 0) {
-    printf("Error generating png file\n");
-    exit(1);
-  }
 
   exit(0);
 }
