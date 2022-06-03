@@ -86,7 +86,11 @@ int main(int argc, char **argv) {
   }
 
   dot_fd->close();
-  system(("dot -Tpng " + dot_file + " -o " + png_file).c_str());
+
+  if (system(("dot -Tpng " + dot_file + " -o " + png_file).c_str()) != 0) {
+    printf("Error generating png file\n");
+    exit(1);
+  }
 
   exit(0);
 }
