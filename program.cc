@@ -2,11 +2,32 @@
 
 using namespace std;
 
+#include "cfg/cfg.tab.hh"
+#include "ssa/ssa.tab.hh"
+
+extern void cfg_set_in(FILE *);
+extern void cfg_set_out(FILE *);
+
+extern void ssa_set_in(FILE *);
+extern void ssa_set_out(FILE *);
+
 extern fstream *dot_fd;
 
 Program::Program(string tool, string input_name) {
   this->tool = tool;
   this->input_name = input_name;
+
+  if (this->tool == "cfg") {
+    string cfg_file = this->input_name + ".cfg";
+    cfg_set_in(fopen(cfg_file.c_str(), "r"));
+    cfg_set_out(fopen("/dev/null", "w"));
+  } else if (this->tool == "ssa") {
+    string ssa_file = this->input_name + ".ssa";
+    ssa_set_in(fopen(ssa_file.c_str(), "r"));
+    ssa_set_out(fopen("/dev/null", "w"));
+  } else {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Unknown input type");
+  }
 
   this->procs = new list<Procedure *>();
   this->procedures = new map<string, Procedure *>();
