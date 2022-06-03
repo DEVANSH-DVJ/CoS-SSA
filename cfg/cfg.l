@@ -12,6 +12,7 @@
 %}
 
 %option noyywrap
+%option nounput
 %option prefix="cfg_"
 
 digit [0-9]

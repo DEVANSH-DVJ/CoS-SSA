@@ -12,6 +12,7 @@
 %}
 
 %option noyywrap
+%option nounput
 %option prefix="ssa_"
 
 digit [0-9]
