@@ -26,6 +26,7 @@ SSA_Stmt::SSA_Stmt(SSA_StmtType type, string op, SSA_Opd *lopd, SSA_Opd *ropd1,
 SSA_Stmt::SSA_Stmt(SSA_StmtType type, SSA_Opd *lopd,
                    std::list<SSA_Opd *> *ropds) {
   CHECK_INVARIANT(type == SSA_PhiStmt, "SSA_PhiStmt expected");
+  CHECK_INVARIANT(lopd->get_type() == SSA_PhiOpd, "SSA_PhiOpd expected");
 
   this->type = type;
 
