@@ -11,10 +11,10 @@ enum short_options {
   OPT_TYPE = 0x80,
 };
 
-enum file_type { FILE_CFG, FILE_SSA, FILE_UNKNOWN };
+enum tool_name { TOOL_CFG, TOOL_SSA, TOOL_UNKNOWN };
 
 struct arguments {
-  file_type input_type;
+  tool_name tool;
   string input_file;
 };
 
@@ -25,7 +25,7 @@ char doc[] = "CS-SSA";
 char args_doc[] = "[FILE]";
 
 /* Options visible to user */
-struct argp_option options[] = {{"type", OPT_TYPE, "TYPE", 0, "Type of input"},
+struct argp_option options[] = {{"tool", OPT_TYPE, "TYPE", 0, "Tool Name"},
                                 {0}};
 
 error_t parse_opt(int key, char *arg, struct argp_state *state) {
@@ -34,14 +34,14 @@ error_t parse_opt(int key, char *arg, struct argp_state *state) {
   switch (key) {
   case OPT_TYPE:
     if (arg == NULL) {
-      cout << "Need to specify input type" << endl;
+      cout << "Need to specify tool name" << endl;
       argp_usage(state);
     } else if (strcmp(arg, "cfg") == 0) {
-      arguments->input_type = FILE_CFG;
+      arguments->tool = TOOL_CFG;
     } else if (strcmp(arg, "ssa") == 0) {
-      arguments->input_type = FILE_SSA;
+      arguments->tool = TOOL_SSA;
     } else {
-      cout << "Unknown input type: " << arg << endl;
+      cout << "Unknown tool name: " << arg << endl;
       argp_usage(state);
     }
     break;
@@ -57,8 +57,8 @@ error_t parse_opt(int key, char *arg, struct argp_state *state) {
     break;
 
   case ARGP_KEY_END:
-    if (arguments->input_type == FILE_UNKNOWN) {
-      cout << "Need to specify input type" << endl;
+    if (arguments->tool == TOOL_UNKNOWN) {
+      cout << "Need to specify tool name" << endl;
       argp_usage(state);
     }
     break;
