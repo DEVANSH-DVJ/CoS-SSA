@@ -5,7 +5,7 @@ digraph G {
 		margin = 25;
 		node_1 [shape=box, xlabel="1", label="START main"];
 		node_3 [shape=box, xlabel="3", label="CALL P"];
-		node_4 [shape=record, xlabel="4", label="w_4_1 = PHI(w_30_1, w_31_1) \n USEVAR_4_1 = w_4_1 | w_4_2 = PHI(w_30_1, w_31_2) \n USEVAR_4_2 = w_4_2"];
+		node_4 [shape=record, xlabel="4", label="w_4_1_PHI = PHI(w_30_1, w_31_1) \n USEVAR_4_1 = w_4_1_PHI | w_4_2_PHI = PHI(w_30_1, w_31_2) \n USEVAR_4_2 = w_4_2_PHI"];
 		node_6 [shape=record, xlabel="6", label="z_6_1 = INPUT_6"];
 		node_7 [shape=box, xlabel="7", label="CALL Q"];
 		node_8 [shape=box, xlabel="8", label="END main"];
@@ -79,8 +79,8 @@ digraph G {
 		margin = 25;
 		node_28 [shape=box, xlabel="28", label="START T"];
 		node_29 [shape=record, xlabel="29", label="x_29_1 = INPUT_29"];
-		node_30 [shape=record, xlabel="30", label="w_30_1 = x_29_1 + z_10_1 | z_30_2 = PHI(z_6_1, z_15_1) \n w_30_2 = x_29_1 + z_30_2 | w_30_3 = x_29_1 + z_17_1"];
-		node_31 [shape=record, xlabel="31", label="w_31_1 = y_21_1 + z_10_1 | w_31_2 = y_25_1 + z_10_1 | z_31_3 = PHI(z_6_1, z_15_1) \n w_31_3 = y_21_1 + z_31_3 | w_31_4 = y_25_1 + z_17_1"];
+		node_30 [shape=record, xlabel="30", label="w_30_1 = x_29_1 + z_10_1 | z_30_2_PHI = PHI(z_6_1, z_15_1) \n w_30_2 = x_29_1 + z_30_2_PHI | w_30_3 = x_29_1 + z_17_1"];
+		node_31 [shape=record, xlabel="31", label="w_31_1 = y_21_1 + z_10_1 | w_31_2 = y_25_1 + z_10_1 | z_31_3_PHI = PHI(z_6_1, z_15_1) \n w_31_3 = y_21_1 + z_31_3_PHI | w_31_4 = y_25_1 + z_17_1"];
 		node_32 [shape=box, xlabel="32", label="END T"];
 		node_28 -> node_29;
 		node_28 -> node_31;
