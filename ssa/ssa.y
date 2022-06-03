@@ -81,6 +81,7 @@
 
 %type <ssa_opd> Opd
 %type <ssa_opd> Var
+%type <ssa_opd> PhiVar
 %type <meta_num> MetaNum
 
 %%
@@ -267,7 +268,7 @@ UsevarNode
       $$ = NULL;
     }
   }
-  | MetaNum SSA_COLON PhiStmt SSA_USEVAR SSA_ASSIGN Var SSA_EOS
+  | MetaNum SSA_COLON PhiStmt SSA_USEVAR SSA_ASSIGN PhiVar SSA_EOS
   {
     SSA_Node *node = program->get_ssa_node($1->first, false);
     bool new_node = false;
@@ -402,7 +403,7 @@ ExprNode
 ;
 
 PhiStmt
-  : Var SSA_ASSIGN SSA_PHI SSA_LRB VarList SSA_RRB SSA_EOS
+  : PhiVar SSA_ASSIGN SSA_PHI SSA_LRB VarList SSA_RRB SSA_EOS
   {
     SSA_Stmt *stmt = new SSA_Stmt(SSA_PhiStmt, $1, $5);
 
@@ -450,12 +451,23 @@ Opd
   {
     $$ = $1;
   }
+  | PhiVar
+  {
+    $$ = $1;
+  }
 ;
 
 Var
   : SSA_ID SSA_UNDERSCORE MetaNum
   {
     $$ = new SSA_Opd(SSA_VarOpd, *$3, *$1);
+  }
+;
+
+PhiVar
+  : SSA_ID SSA_UNDERSCORE MetaNum SSA_UNDERSCORE SSA_PHI
+  {
+    $$ = new SSA_Opd(SSA_PhiOpd, *$3, *$1);
   }
 ;
 
