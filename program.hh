@@ -14,6 +14,10 @@ class SSA_Node;
 class Program;
 
 class Program {
+  /* State */
+  string tool;
+  string input_name;
+
   /* Procedures */
   std::list<Procedure *> *procs;
   std::map<string, Procedure *> *procedures;
@@ -28,7 +32,7 @@ class Program {
 
 public:
   /* Constructors and Destructor */
-  Program();
+  Program(std::string tool, std::string input_file);
   ~Program();
 
   /* Get functions */

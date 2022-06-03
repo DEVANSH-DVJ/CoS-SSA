@@ -4,7 +4,10 @@ using namespace std;
 
 extern fstream *dot_fd;
 
-Program::Program() {
+Program::Program(string tool, string input_name) {
+  this->tool = tool;
+  this->input_name = input_name;
+
   this->procs = new list<Procedure *>();
   this->procedures = new map<string, Procedure *>();
   this->cfg_nodes = new map<int, CFG_Node *>();
