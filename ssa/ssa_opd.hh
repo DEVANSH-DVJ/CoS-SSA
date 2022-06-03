@@ -10,6 +10,7 @@ class SSA_Opd;
 typedef enum {
   SSA_NumOpd,
   SSA_VarOpd,
+  SSA_PhiOpd,
   SSA_InputOpd,
   SSA_UsevarOpd,
 } SSA_OpdType;

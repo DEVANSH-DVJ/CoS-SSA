@@ -29,7 +29,10 @@ SSA_Opd::SSA_Opd(SSA_OpdType type, int num_value) {
 }
 
 SSA_Opd::SSA_Opd(SSA_OpdType type, pair<int, int> meta_num, string var_name) {
-  CHECK_INVARIANT(type == SSA_VarOpd, "SSA_VarOpd expected");
+  if (type != SSA_VarOpd && type != SSA_PhiOpd) {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,
+                    "SSA_VarOpd or SSA_PhiOpd expected");
+  }
 
   this->type = type;
   this->meta_num = meta_num;
@@ -55,6 +58,9 @@ string SSA_Opd::str() {
   case (SSA_VarOpd):
     return var_name + "_" + to_string(this->meta_num.first) + "_" +
            to_string(this->meta_num.second);
+  case (SSA_PhiOpd):
+    return var_name + "_" + to_string(this->meta_num.first) + "_" +
+           to_string(this->meta_num.second) + "_PHI";
   case (SSA_InputOpd):
     return "INPUT_" + to_string(this->meta_num.first);
   case (SSA_UsevarOpd):
