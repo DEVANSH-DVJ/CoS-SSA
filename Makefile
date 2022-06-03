@@ -1,5 +1,5 @@
 
-CPP = g++
+CPP = g++ -O3 -Wall
 YACC = bison
 LEX = flex
 
