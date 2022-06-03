@@ -29,8 +29,14 @@ int main(int argc, char **argv) {
   string input_file = arguments.input_file;
   switch (arguments.tool) {
   case TOOL_CFG:
+    CHECK_INPUT_AND_ABORT(input_file.substr(input_file.length() - 4) == ".cfg",
+                          "Input file must be a .cfg file");
+    program = new Program("cfg", input_file.substr(0, input_file.length() - 4));
     break;
   case TOOL_SSA:
+    CHECK_INPUT_AND_ABORT(input_file.substr(input_file.length() - 4) == ".ssa",
+                          "Input file must be a .ssa file");
+    program = new Program("ssa", input_file.substr(0, input_file.length() - 4));
     break;
   default:
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Unknown tool");
