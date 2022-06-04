@@ -158,21 +158,39 @@ void Program::parse_cfg() { cfg_parse(); }
 void Program::parse_ssa() { ssa_parse(); }
 
 void Program::visualize_cfg() {
+  string dot_file = input_name + ".cfg.dot";
+  string png_file = input_name + ".cfg.png";
+
+  CHECK_INVARIANT(dot_fd == NULL, "Dot file descriptor must be NULL.");
+  dot_fd = new fstream(dot_file.c_str(), ios::out | ios::trunc);
+
   *dot_fd << "digraph G {\n";
   for (list<Procedure *>::iterator it = this->procs->begin();
        it != this->procs->end(); ++it) {
     (*it)->visualize_cfg();
   }
   *dot_fd << "}\n";
+
+  dot_fd->close();
+  delete dot_fd;
 }
 
 void Program::visualize_ssa() {
+  string dot_file = input_name + ".ssa.dot";
+  string png_file = input_name + ".ssa.png";
+
+  CHECK_INVARIANT(dot_fd == NULL, "Dot file descriptor must be NULL.");
+  dot_fd = new fstream(dot_file.c_str(), ios::out | ios::trunc);
+
   *dot_fd << "digraph G {\n";
   for (list<Procedure *>::iterator it = this->procs->begin();
        it != this->procs->end(); ++it) {
     (*it)->visualize_ssa();
   }
   *dot_fd << "}\n";
+
+  dot_fd->close();
+  delete dot_fd;
 }
 
 void Program::run() {
