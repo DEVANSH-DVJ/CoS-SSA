@@ -30,6 +30,12 @@ class Program {
   std::map<int, SSA_Node *> *ssa_nodes;
   std::map<std::pair<int, int>, SSA_Edge *> *ssa_edges;
 
+  /* Helper functions */
+  // Visualize CFG graph
+  void visualize_cfg();
+  // Visualize SSA graph
+  void visualize_ssa();
+
 public:
   /* Constructors and Destructor */
   Program(std::string tool, std::string input_file);
@@ -58,12 +64,6 @@ public:
   void add_ssa_node(SSA_Node *node);
   // Add a SSA edge
   void add_ssa_edge(SSA_Edge *edge);
-
-  /* Helper functions */
-  // Visualize CFG graph
-  void visualize_cfg();
-  // Visualize SSA graph
-  void visualize_ssa();
 };
 
 #endif
