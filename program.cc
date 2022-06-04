@@ -153,6 +153,10 @@ void Program::add_ssa_edge(SSA_Edge *edge) {
   this->ssa_edges->insert(make_pair(edge_id, edge));
 }
 
+void Program::parse_cfg() { cfg_parse(); }
+
+void Program::parse_ssa() { ssa_parse(); }
+
 void Program::visualize_cfg() {
   *dot_fd << "digraph G {\n";
   for (list<Procedure *>::iterator it = this->procs->begin();

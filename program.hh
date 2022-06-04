@@ -31,6 +31,10 @@ class Program {
   std::map<std::pair<int, int>, SSA_Edge *> *ssa_edges;
 
   /* Helper functions */
+  // Parse CFG graph
+  void parse_cfg();
+  // Parse SSA graph
+  void parse_ssa();
   // Visualize CFG graph
   void visualize_cfg();
   // Visualize SSA graph
