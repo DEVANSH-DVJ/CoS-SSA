@@ -173,6 +173,10 @@ void Program::visualize_cfg() {
 
   dot_fd->close();
   delete dot_fd;
+
+  if (system(("dot -Tpng " + dot_file + " -o " + png_file).c_str()) != 0) {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Error generating png file\n");
+  }
 }
 
 void Program::visualize_ssa() {
@@ -191,7 +195,13 @@ void Program::visualize_ssa() {
 
   dot_fd->close();
   delete dot_fd;
+
+  if (system(("dot -Tpng " + dot_file + " -o " + png_file).c_str()) != 0) {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Error generating png file\n");
+  }
 }
+
+void Program::cleanup() {}
 
 void Program::run() {
   if (this->tool == "cfg") {
