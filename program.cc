@@ -174,3 +174,15 @@ void Program::visualize_ssa() {
   }
   *dot_fd << "}\n";
 }
+
+void Program::run() {
+  if (this->tool == "cfg") {
+    this->parse_cfg();
+    this->visualize_cfg();
+  } else if (this->tool == "ssa") {
+    this->parse_ssa();
+    this->visualize_ssa();
+  } else {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Unknown input type");
+  }
+}

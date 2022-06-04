@@ -68,6 +68,9 @@ public:
   void add_ssa_node(SSA_Node *node);
   // Add a SSA edge
   void add_ssa_edge(SSA_Edge *edge);
+
+  // Run
+  void run();
 };
 
 #endif
