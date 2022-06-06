@@ -1,5 +1,11 @@
 
-CPP = g++ -O3 -Wall
+DEBUG = 0
+ifeq ($(DEBUG), 0)
+	CPP = g++ -O3 -Wall
+else
+	CPP = g++ -O0 -Wall -ggdb3
+endif
+
 YACC = bison
 LEX = flex
 
