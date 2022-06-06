@@ -1,6 +1,6 @@
 #/bin/sh
 
-make
+make DEBUG=0
 
 if [[ -f cs_ssa ]]; then
   # CFG Tests
