@@ -9,7 +9,6 @@ using namespace std;
 
 #define CONTROL_SHOULD_NOT_REACH false
 
-void cleanup();
 void check_invariant_underlying_function(bool condition, string error_message,
                                          int line, string file);
 void report_violation_and_abort(bool condition, string s);
