@@ -69,6 +69,9 @@ public:
   // Add a SSA edge
   void add_ssa_edge(SSA_Edge *edge);
 
+  // Cleanup
+  void cleanup();
+
   // Run
   void run();
 };
