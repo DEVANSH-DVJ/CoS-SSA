@@ -482,6 +482,6 @@ MetaNum
 
 int ssa_error(const char *msg) {
   cerr << "Syntax Error: Line " << ssa_lineno << ": " << msg << "\n";
-  cleanup();
+  program->cleanup();
   return 1;
 }
