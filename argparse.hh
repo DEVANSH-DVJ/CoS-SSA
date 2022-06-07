@@ -36,9 +36,9 @@ error_t parse_opt(int key, char *arg, struct argp_state *state) {
     if (arg == NULL) {
       cout << "Need to specify tool name" << endl;
       argp_usage(state);
-    } else if (strcmp(arg, "cfg") == 0) {
+    } else if (strcasecmp(arg, "cfg") == 0) {
       arguments->tool = TOOL_CFG;
-    } else if (strcmp(arg, "ssa") == 0) {
+    } else if (strcasecmp(arg, "ssa") == 0) {
       arguments->tool = TOOL_SSA;
     } else {
       cout << "Unknown tool name: " << arg << endl;
