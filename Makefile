@@ -1,5 +1,5 @@
 
-DEBUG = 0
+DEBUG = 1
 ifeq ($(DEBUG), 0)
 	CPP = g++ -O3 -Wall
 else
