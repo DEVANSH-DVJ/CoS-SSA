@@ -5,6 +5,8 @@
 #include <map>
 #include <utility>
 
+#include <string>
+
 class Procedure;
 class CFG_Edge;
 class CFG_Node;
@@ -15,12 +17,12 @@ class Program;
 
 class Program {
   /* State */
-  string tool;
-  string input_name;
+  std::string tool;
+  std::string input_name;
 
   /* Procedures */
   std::list<Procedure *> *procs;
-  std::map<string, Procedure *> *procedures;
+  std::map<std::string, Procedure *> *procedures;
 
   /* CFG Graph */
   std::map<int, CFG_Node *> *cfg_nodes;
@@ -49,7 +51,7 @@ public:
   // Get procedures
   std::map<std::string, Procedure *> *get_procs();
   // Get procedure by name
-  Procedure *get_proc(string name);
+  Procedure *get_proc(std::string name);
   // Get CFG node by id
   CFG_Node *get_cfg_node(int node_id, bool abort_if_not_found);
   // Get SSA node by id
