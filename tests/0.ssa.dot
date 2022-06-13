@@ -5,7 +5,7 @@ digraph G {
 		margin = 25;
 		node_1 [shape=box, xlabel="1", label="START main"];
 		node_3 [shape=box, xlabel="3", label="CALL P"];
-		node_4 [shape=record, xlabel="4", label="w_4_1_PHI = PHI(w_30_1, w_31_1) \n USEVAR_4_1 = w_4_1_PHI | w_4_2_PHI = PHI(w_30_1, w_31_2) \n USEVAR_4_2 = w_4_2_PHI"];
+		node_4 [shape=record, xlabel="4", label="w_4_1_PHI = PHI(w_30_1, w_31_1, w_31_2) \n USEVAR_4_1 = w_4_1_PHI"];
 		node_6 [shape=record, xlabel="6", label="z_6_1 = INPUT_6"];
 		node_7 [shape=box, xlabel="7", label="CALL Q"];
 		node_8 [shape=box, xlabel="8", label="END main"];

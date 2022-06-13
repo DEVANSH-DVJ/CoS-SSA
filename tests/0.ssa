@@ -3,8 +3,7 @@ main, P, Q, R, S, T;
 {
   1_1: START main;
   3_1: CALL P;
-  4_1: w_4_1_PHI = PHI(w_30_1, w_31_1); USEVAR = w_4_1_PHI;
-  4_2: w_4_2_PHI = PHI(w_30_1, w_31_2); USEVAR = w_4_2_PHI;
+  4_1: w_4_1_PHI = PHI(w_30_1, w_31_1, w_31_2); USEVAR = w_4_1_PHI;
   6_1: z_6_1 = INPUT;
   7_1: CALL Q;
   8_1: END main;
