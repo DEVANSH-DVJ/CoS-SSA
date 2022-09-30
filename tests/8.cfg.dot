@@ -1,0 +1,41 @@
+digraph G {
+
+	subgraph cluster_main {
+		label = "main";
+		margin = 25;
+		node_1 [shape=box, xlabel="1", label="START main"];
+		node_2 [shape=box, xlabel="2", label="b = 2"];
+		node_3 [shape=box, xlabel="3", label="CALL P"];
+		node_4 [shape=box, xlabel="4", label="b = 3"];
+		node_5 [shape=box, xlabel="5", label="CALL P"];
+		node_6 [shape=box, xlabel="6", label="CALL Q"];
+		node_7 [shape=box, xlabel="7", label="END main"];
+		node_1 -> node_2;
+		node_1 -> node_4;
+		node_2 -> node_3;
+		node_3 -> node_6;
+		node_4 -> node_5;
+		node_5 -> node_6;
+		node_6 -> node_7;
+	}
+
+	subgraph cluster_P {
+		label = "P";
+		margin = 25;
+		node_8 [shape=box, xlabel="8", label="START P"];
+		node_9 [shape=box, xlabel="9", label="b = b + 1"];
+		node_10 [shape=box, xlabel="10", label="END P"];
+		node_8 -> node_9;
+		node_9 -> node_10;
+	}
+
+	subgraph cluster_Q {
+		label = "Q";
+		margin = 25;
+		node_11 [shape=box, xlabel="11", label="START Q"];
+		node_12 [shape=box, xlabel="12", label="c = b"];
+		node_13 [shape=box, xlabel="13", label="END Q"];
+		node_11 -> node_12;
+		node_12 -> node_13;
+	}
+}

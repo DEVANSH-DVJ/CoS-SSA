@@ -1,0 +1,50 @@
+digraph G {
+
+	subgraph cluster_main {
+		label = "main";
+		margin = 25;
+		node_1 [shape=box, xlabel="1", label="START main"];
+		node_2 [shape=record, xlabel="2", label="c_2_1 = INPUT_2"];
+		node_3 [shape=record, xlabel="3", label="z_3_1 = INPUT_3"];
+		node_4 [shape=box, xlabel="4", label="CALL P"];
+		node_5 [shape=record, xlabel="5", label="z_5_1 = 0"];
+		node_6 [shape=box, xlabel="6", label="CALL P"];
+		node_7 [shape=record, xlabel="7", label="a_7_1_PHI = PHI(a_16_1, a_16_2) \n USEVAR_7_1 = a_7_1_PHI"];
+		node_8 [shape=box, xlabel="8", label="END main"];
+		node_1 -> node_2;
+		node_2 -> node_3;
+		node_2 -> node_5;
+		node_3 -> node_4;
+		node_4 -> node_7;
+		node_5 -> node_6;
+		node_6 -> node_7;
+		node_7 -> node_8;
+	}
+
+	subgraph cluster_P {
+		label = "P";
+		margin = 25;
+		node_9 [shape=box, xlabel="9", label="START P"];
+		node_10 [shape=record, xlabel="10", label="isLeft_10_1 = z_3_1 | isLeft_10_2 = z_5_1"];
+		node_11 [shape=record, xlabel="11", label="b_11_1 = INPUT_11"];
+		node_12 [shape=record, xlabel="12", label="b_12_1 = INPUT_12"];
+		node_13 [shape=box, xlabel="13", label="CALL Q"];
+		node_14 [shape=box, xlabel="14", label="END P"];
+		node_9 -> node_10;
+		node_10 -> node_11;
+		node_10 -> node_12;
+		node_11 -> node_13;
+		node_12 -> node_13;
+		node_13 -> node_14;
+	}
+
+	subgraph cluster_Q {
+		label = "Q";
+		margin = 25;
+		node_15 [shape=box, xlabel="15", label="START Q"];
+		node_16 [shape=record, xlabel="16", label="b_16_1_PHI = PHI(b_11_1, b_12_1) \n a_16_1 = b_16_1_PHI + c_2_1 | a_16_2 = b_12_1 + c_2_1"];
+		node_17 [shape=box, xlabel="17", label="END Q"];
+		node_15 -> node_16;
+		node_16 -> node_17;
+	}
+}
