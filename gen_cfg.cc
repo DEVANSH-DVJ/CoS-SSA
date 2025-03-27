@@ -22,6 +22,7 @@ std::string func_ret_to_global(llvm::Function* func) {
 
 bool is_usable_func(llvm::Function* func) {
   // Get other generated code (like templates), use return !func->isDeclaration();
+  /*return !func->isDeclaration();*/
   return !(func->isDeclaration() || func->getName().starts_with("_Z") || func->getName().starts_with("__") || func->getName().starts_with("_GLOBAL__"));
 }
 
@@ -131,6 +132,13 @@ GlobalInfo get_globals(llvm::Module* module) {
             if (addr_taken.find(var->getName().str()) == addr_taken.end() && var->getNumOperands() == 1) {
               globals.globals.insert(var);
               globals.stores[&inst] = var->getName();
+            }
+          }
+        } else if (llvm::GetElementPtrInst* gep = llvm::dyn_cast<llvm::GetElementPtrInst>(&inst)) {
+          if (llvm::GlobalVariable* var = llvm::dyn_cast<llvm::GlobalVariable>(gep->getPointerOperand())) {
+            if (addr_taken.find(var->getName().str()) == addr_taken.end()) {
+              globals.globals.insert(var);
+              globals.loads[&inst] = var->getName();
             }
           }
         // "Promote" returns to globals
