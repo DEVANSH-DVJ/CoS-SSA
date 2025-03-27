@@ -6,6 +6,8 @@
 #include <set>
 #include <vector>
 
+/*#define IGNORE_NULL_EQUALS_0*/
+
 extern Program* program;
 
 void ddg_construct() {
@@ -15,6 +17,11 @@ void ddg_construct() {
   std::map<QNode, std::set<QDef>> rd_in;
   rd_in[{start_main, default_context}] = std::set<QDef>();
   for (const std::string& var_name : program->get_globals()) {
+#ifdef IGNORE_NULL_EQUALS_0
+    if (var_name == "null") {
+      continue;
+    }
+#endif
     rd_in[{start_main, default_context}].insert({var_name, 0, default_context});
     program->add_ddg_node({var_name, 0, default_context});
   }
@@ -52,14 +59,20 @@ void ddg_construct() {
 
     if (node->get_type() == CFG_NodeType::CFG_AssignNode) {
       const std::string& def = node->get_def();
-      std::set<std::string> uses = node->get_uses();
-      QDef new_qdef = {{def, cur_qnode.node}, cur_qnode.context};
-      program->add_ddg_node(new_qdef);
-      for (QDef qdef : rd_in[cur_qnode]) {
-        if (uses.find(qdef.def.var_name) != uses.end()) {
-          program->add_ddg_edge(qdef, new_qdef);
+#ifdef IGNORE_NULL_EQUALS_0
+      if (def != "null") {
+#endif
+        std::set<std::string> uses = node->get_uses();
+        QDef new_qdef = {{def, cur_qnode.node}, cur_qnode.context};
+        program->add_ddg_node(new_qdef);
+        for (QDef qdef : rd_in[cur_qnode]) {
+          if (uses.find(qdef.def.var_name) != uses.end()) {
+            program->add_ddg_edge(qdef, new_qdef);
+          }
         }
+#ifdef IGNORE_NULL_EQUALS_0
       }
+#endif
     }
 
     bool updated_transition = false;
@@ -76,20 +89,26 @@ void ddg_construct() {
     } else {
       rd_out[cur_qnode] = rd_in[cur_qnode];
       if (node->get_type() == CFG_NodeType::CFG_AssignNode) {
-        // Applies rd_kill
         std::string killed_var = node->get_def();
-        std::vector<QDef> to_remove;
-        for (QDef qdef : rd_out[cur_qnode]) {
-          if (qdef.def.var_name == killed_var) {
-            to_remove.push_back(qdef);
+#ifdef IGNORE_NULL_EQUALS_0
+        if (killed_var != "null") {
+#endif
+          // Applies rd_kill
+          std::vector<QDef> to_remove;
+          for (QDef qdef : rd_out[cur_qnode]) {
+            if (qdef.def.var_name == killed_var) {
+              to_remove.push_back(qdef);
+            }
           }
-        }
-        for (QDef qdef : to_remove) {
-          rd_out[cur_qnode].erase(rd_out[cur_qnode].find(qdef));
-        }
+          for (QDef qdef : to_remove) {
+            rd_out[cur_qnode].erase(rd_out[cur_qnode].find(qdef));
+          }
 
-        // Applies rd_gen
-        rd_out[cur_qnode].insert({{killed_var, cur_qnode.node}, cur_qnode.context});
+          // Applies rd_gen
+          rd_out[cur_qnode].insert({{killed_var, cur_qnode.node}, cur_qnode.context});
+#ifdef IGNORE_NULL_EQUALS_0
+        }
+#endif
       }
     }
 
