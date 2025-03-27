@@ -40,6 +40,12 @@ int main(int argc, char **argv) {
     program = new Program("ssa", input_file.substr(0, input_file.length() - 4));
     program->run();
     break;
+  case TOOL_DDG:
+    CHECK_INPUT_AND_ABORT(input_file.substr(input_file.length() - 4) == ".cfg",
+                          "Input file must be a .cfg file");
+    program = new Program("ddg", input_file.substr(0, input_file.length() - 4));
+    program->run();
+    break;
   default:
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Unknown tool");
   }

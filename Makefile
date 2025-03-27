@@ -17,18 +17,21 @@ CFG_OBJ = cfg/cfg.scan.o cfg/cfg.tab.o cfg/cfg_edge.o cfg/cfg_node.o cfg/cfg_opd
 CFG_HEADERS = cfg/cfg_edge.hh cfg/cfg_node.hh cfg/cfg_opd.hh
 SSA_OBJ = ssa/ssa.scan.o ssa/ssa.tab.o ssa/ssa_edge.o ssa/ssa_meta.o ssa/ssa_node.o ssa/ssa_opd.o ssa/ssa_stmt.o
 SSA_HEADERS = ssa/ssa_edge.hh ssa/ssa_meta.hh ssa/ssa_node.hh ssa/ssa_opd.hh ssa/ssa_stmt.hh
-DDG_OBJ = ddg/ddg_edge.o ddg/ddg_node.o
-DDG_HEADERS = ddg/ddg_edge.hh ddg/ddg_node.hh
+DDG_OBJ = ddg/ddg_compute.o ddg/ddg_context.o ddg/ddg_edge.o ddg/ddg_node.o ddg/ddg_types.o
+DDG_HEADERS = ddg/ddg_compute.hh ddg/ddg_context.hh ddg/ddg_edge.hh ddg/ddg_node.hh ddg/ddg_types.hh
 
 HEADERS = $(BASE_HEADERS) $(CFG_HEADERS) $(SSA_HEADERS) $(DDG_HEADERS)
 
-all: $(TGT)
+all: $(TGT) gen_cfg
 
 $(TGT): $(BASE_OBJ) $(CFG_OBJ) $(SSA_OBJ) $(DDG_OBJ)
-	$(CPP) $(BASE_OBJ) $(CFG_OBJ) $(SSA_OBJ) $(DDG_OBJ) -o $(TGT) -ly -ll
+	$(CPP) $(BASE_OBJ) $(CFG_OBJ) $(SSA_OBJ) $(DDG_OBJ) -o $(TGT)
 ifeq ($(DEBUG), 0)
 	strip cs_ssa
 endif
+
+gen_cfg: gen_cfg.cc
+	$(CPP) gen_cfg.cc `llvm-config --system-libs --cppflags --ldflags --libs core` -o gen_cfg
 
 main.o: main.cc argparse.hh cfg/cfg.tab.hh ssa/ssa.tab.hh $(HEADERS)
 	$(CPP) -c main.cc

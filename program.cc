@@ -1,4 +1,7 @@
+#include "program.hh"
 #include "headers.hh"
+
+#include <algorithm>
 
 using namespace std;
 
@@ -17,7 +20,7 @@ Program::Program(string tool, string input_name) {
   this->tool = tool;
   this->input_name = input_name;
 
-  if (this->tool == "cfg") {
+  if (this->tool == "cfg" || this->tool == "ddg") {
     string cfg_file = this->input_name + ".cfg";
     cfg_set_in(fopen(cfg_file.c_str(), "r"));
     cfg_set_out(fopen("/dev/null", "w"));
@@ -82,6 +85,8 @@ CFG_Node *Program::get_cfg_node(int node_id, bool abort_if_not_found) {
   if (this->cfg_nodes->find(node_id) == this->cfg_nodes->end()) {
     CHECK_INPUT_AND_ABORT(!abort_if_not_found,
                           "CFG node " + to_string(node_id) + " not found.");
+    CHECK_INPUT_AND_ABORT(true, "");
+    CHECK_INPUT_AND_ABORT(false, "");
     return NULL;
   }
   return this->cfg_nodes->find(node_id)->second;
@@ -157,6 +162,10 @@ void Program::parse_cfg() { cfg_parse(); }
 
 void Program::parse_ssa() { ssa_parse(); }
 
+void Program::construct_ddg() { ddg_construct(); }
+
+void Program::propagate_ddg_constants() { ddg_propagated_values = ddg_propagate_constants(); }
+
 void Program::visualize_cfg() {
   string dot_file = input_name + ".cfg.dot";
   string png_file = input_name + ".cfg.png";
@@ -201,6 +210,112 @@ void Program::visualize_ssa() {
   }
 }
 
+void print_qdef(QDef node, const std::map<QDef, int>& propagated_values) {
+  std::cout << node.def.var_name + '_' + std::to_string(node.def.node) + '_' + std::to_string(node.context);
+  auto it = propagated_values.find(node);
+  if (it != propagated_values.end()) {
+    std::cout << " = " << it->second;
+  }
+}
+
+void Program::visualize_ddg() {
+  std::cout << ddg_context_table.to_string() << '\n';
+
+  for (auto pair : ddg_context_transitions) {
+    std::cout << "Context transition at node " << pair.first.node << ": " << pair.first.context << " -> " << pair.second << '\n';
+  }
+  std::cout << '\n';
+
+  std::vector<QDef> nodes (ddg_nodes.begin(), ddg_nodes.end());
+  std::sort(nodes.begin(), nodes.end(), [](QDef l, QDef r) {
+    return l.def.node < r.def.node;
+  });
+
+  for (QDef node : nodes) {
+    print_qdef(node, ddg_propagated_values);
+    std::cout << " <- ";
+    bool first = true;
+    for (QDef incoming : ddg_reverse_edges[node]) {
+      if (first) {
+        first = false;
+      } else {
+        std::cout << ", ";
+      }
+      print_qdef(incoming, ddg_propagated_values);
+    }
+    std::cout << '\n';
+  }
+}
+
+std::set<std::string> Program::get_globals() {
+  std::set<std::string> res;
+  for (Procedure* proc : *procs) {
+    for (std::string global : proc->get_globals()) {
+      res.insert(global);
+    }
+  }
+  return res;
+}
+
+std::set<QDef> Program::get_ddg_nodes() {
+  return ddg_nodes;
+}
+
+std::set<QDef> Program::get_ddg_incoming(QDef node) {
+  return ddg_reverse_edges[node];
+}
+
+std::set<QDef> Program::get_ddg_outgoing(QDef node) {
+  return ddg_edges[node];
+}
+
+bool Program::create_ddg_transition(QNode from_qnode, const Context& to_context) {
+
+  bool updated_transition = false;
+  auto it = ddg_context_transitions.find(from_qnode);
+  if (it != ddg_context_transitions.end()) {
+    updated_transition = ddg_context_table.update_context(it->second, to_context);
+  } else {
+    int context = ddg_context_table.insert_context(to_context);
+    updated_transition = true;
+    ddg_context_transitions[from_qnode] = context;
+    ddg_reverse_context_transitions[context].insert(from_qnode);
+  }
+
+  return updated_transition;
+}
+
+std::map<QNode, int>::iterator Program::get_ddg_transition(QNode from_qnode) {
+  return ddg_context_transitions.find(from_qnode);
+}
+
+std::map<QNode, int>::iterator Program::ddg_transitions_end() {
+  return ddg_context_transitions.end();
+}
+
+std::map<int, std::set<QNode>>::iterator Program::get_ddg_reverse_transitions(int to_context) {
+  return ddg_reverse_context_transitions.find(to_context);
+}
+
+  std::map<int, std::set<QNode>>::iterator Program::ddg_reverse_transitions_end() {
+  return ddg_reverse_context_transitions.end();
+}
+
+int Program::insert_ddg_context(Context context) {
+  return ddg_context_table.insert_context(context);
+}
+
+void Program::add_ddg_node(QDef node) {
+  ddg_nodes.insert(node);
+}
+
+void Program::add_ddg_edge(QDef src, QDef dest) {
+  ddg_nodes.insert(src);
+  ddg_nodes.insert(dest);
+  ddg_edges[src].insert(dest);
+  ddg_reverse_edges[dest].insert(src);
+}
+
 void Program::cleanup() {}
 
 void Program::run() {
@@ -210,6 +325,11 @@ void Program::run() {
   } else if (this->tool == "ssa") {
     this->parse_ssa();
     this->visualize_ssa();
+  } else if (this->tool == "ddg") {
+    this->parse_cfg();
+    this->construct_ddg();
+    this->propagate_ddg_constants();
+    this->visualize_ddg();
   } else {
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Unknown input type");
   }

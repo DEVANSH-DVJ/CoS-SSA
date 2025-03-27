@@ -1,3 +1,4 @@
+#include "cfg_node.hh"
 #include "../headers.hh"
 
 using namespace std;
@@ -113,6 +114,75 @@ void CFG_Node::add_out_edge(CFG_Edge *edge) {
   CHECK_INVARIANT(this->out_edges->find(to_node_id) == this->out_edges->end(),
                   "Edge already exists");
   this->out_edges->insert(make_pair(to_node_id, edge));
+}
+
+std::set<std::string> CFG_Node::get_globals() {
+  std::set<std::string> res;
+  if (lopd && lopd->get_type() == CFG_OpdType::CFG_VarOpd) {
+    res.insert(lopd->get_opd_var());
+  }
+  if (ropd1 && ropd1->get_type() == CFG_OpdType::CFG_VarOpd) {
+    res.insert(ropd1->get_opd_var());
+  }
+  if (ropd2 && ropd2->get_type() == CFG_OpdType::CFG_VarOpd) {
+    res.insert(ropd2->get_opd_var());
+  }
+  return res;
+}
+
+std::set<int> CFG_Node::get_predecessors() {
+  std::set<int> res;
+  for (auto pair : *in_edges) {
+    res.insert(pair.first);
+  }
+  return res;
+}
+
+std::set<int> CFG_Node::get_successors() {
+  std::set<int> res;
+  for (auto pair : *out_edges) {
+    res.insert(pair.first);
+  }
+  return res;
+}
+
+const std::string& CFG_Node::get_op() {
+  return op;
+}
+
+static std::string USEVAR = "$USEVAR$";
+const std::string& CFG_Node::get_def() {
+  CHECK_INVARIANT(type == CFG_NodeType::CFG_AssignNode, "Can not get def of non assignment statement");
+  return lopd->get_type() == CFG_OpdType::CFG_UsevarOpd ? USEVAR : lopd->get_opd_var();
+}
+
+std::set<std::string> CFG_Node::get_uses() {
+  CHECK_INVARIANT(type == CFG_NodeType::CFG_AssignNode, "Can not get uses of non assignment statement");
+  std::set<std::string> res;
+  if (ropd1 && ropd1->get_type() == CFG_OpdType::CFG_VarOpd) {
+    res.insert(ropd1->get_opd_var());
+  }
+  if (ropd2 && ropd2->get_type() == CFG_OpdType::CFG_VarOpd) {
+    res.insert(ropd2->get_opd_var());
+  }
+  return res;
+}
+
+std::vector<CFG_Opd*> CFG_Node::get_rhs_operands() {
+  CHECK_INVARIANT(type == CFG_NodeType::CFG_AssignNode, "Can not get uses of non assignment statement");
+  std::vector<CFG_Opd*> res;
+  if (ropd1) {
+    res.push_back(ropd1);
+  }
+  if (ropd2) {
+    res.push_back(ropd2);
+  }
+  return res;
+}
+
+const std::string& CFG_Node::get_callee() {
+  CHECK_INVARIANT(type == CFG_NodeType::CFG_CallNode, "Can not get callee of non call statement");
+  return callee_proc;
 }
 
 void CFG_Node::visualize() {

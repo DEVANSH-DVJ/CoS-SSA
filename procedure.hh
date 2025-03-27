@@ -2,6 +2,7 @@
 #define _PROCEDURE_HH_
 
 #include <map>
+#include <set>
 #include <utility>
 
 #include <string>
@@ -43,6 +44,10 @@ public:
   void add_ssa_node(SSA_Node *node);
   // Add a SSA edge
   void add_ssa_edge(SSA_Edge *edge);
+
+  std::set<std::string> get_globals();
+  int get_start_node();
+  int get_end_node();
 
   /* Helper functions */
   // Visualize CFG graph

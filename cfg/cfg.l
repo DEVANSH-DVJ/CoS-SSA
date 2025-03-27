@@ -2,6 +2,7 @@
 
     #include <list>
     #include <string>
+#include<iostream>
 
     #include "../headers.hh"
 
@@ -17,6 +18,7 @@
 
 digit [0-9]
 letter [a-zA-Z]
+alphanum [0-9a-zA-Z]
 operator [-+*/]
 ignore [ \t\n]
 
@@ -49,14 +51,14 @@ ignore [ \t\n]
 "=" { return CFG_ASSIGN; }
 {operator} { cfg_lval.name = new string(cfg_text); return CFG_OP; }
 
-  /* Identifiers */
-
-{letter}+ { cfg_lval.name = new string(cfg_text); return CFG_ID; }
-
   /* Constants */
 
-{digit}+ { cfg_lval.value = atoi(cfg_text); return CFG_NUM; }
+("-")?{digit}+ { cfg_lval.value = atoi(cfg_text); return CFG_NUM; }
+
+  /* Identifiers */
+
+(("$")*("_")*(".")*{alphanum}("$")*("_")*(".")*)+ { cfg_lval.name = new string(cfg_text); return CFG_ID; }
 
   /* Rest */
 
-. { return CFG_UNKNOWN; }
+. { std::cout << "H\n"; return CFG_UNKNOWN; }
