@@ -6,7 +6,7 @@
 #include <set>
 #include <vector>
 
-/*#define IGNORE_NULL_EQUALS_0*/
+#define IGNORE_NULL_EQUALS_0
 
 extern Program* program;
 

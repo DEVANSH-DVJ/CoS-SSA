@@ -33,7 +33,7 @@ public:
   std::string to_string();
 private:
   std::map<int, Context> context_map;
-  std::map<Context, int> context_to_int;
+  std::map<Context, std::set<int>> context_to_int;
   int next_context = 0;
 };
 

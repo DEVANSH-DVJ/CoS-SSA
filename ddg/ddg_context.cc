@@ -1,4 +1,3 @@
-#include "ddg_context.hh"
 #include "../headers.hh"
 
 #include <queue>
@@ -52,14 +51,13 @@ int ContextTable::insert_context(const Context& context) {
   auto it = context_to_int.find(context);
   if (it == context_to_int.end()) {
     context_map[next_context] = context;
-    context_to_int[context] = next_context;
+    context_to_int[context].insert(next_context);
     return next_context++;
   }
-  return it->second;
+  return *it->second.begin();
 }
 
 bool ContextTable::update_context(int repr, const Context& context) {
-
   auto it = context_map.find(repr);
   CHECK_INVARIANT(it != context_map.end(), "Context represented by integer does not exist");
 
@@ -67,10 +65,11 @@ bool ContextTable::update_context(int repr, const Context& context) {
     return false;
   }
 
-  context_to_int.erase(context_to_int.find(it->second));
+  std::set<int>& reprs = context_to_int[it->second];
+  reprs.erase(reprs.find(it->first));
 
   context_map[repr] = context;
-  context_to_int[context] = repr;
+  context_to_int[context].insert(repr);
 
   return true;
 }
