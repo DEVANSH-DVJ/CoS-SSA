@@ -46,7 +46,7 @@ error_t parse_opt(int key, char *arg, struct argp_state *state) {
       arguments->tool = TOOL_DDG;
     } else if (strcasecmp(arg, "llvm") == 0) {
       arguments->tool = TOOL_LLVM;
-    } else if (strcasecmp(arg, "all")) {
+    } else if (strcasecmp(arg, "all") == 0) {
       arguments->tool = TOOL_ALL;
     } else {
       cout << "Unknown tool name: " << arg << endl;

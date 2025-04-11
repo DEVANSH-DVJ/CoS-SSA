@@ -92,6 +92,11 @@ void Procedure::dump_cfg() {
     pair.second->dump();
     *dot_fd << ";\n";
   }
+
+  *dot_fd << "\n";
+  for (auto pair : *cfg_edges) {
+    *dot_fd << "\t" << pair.first.first << "->" << pair.first.second << ";\n";
+  }
   *dot_fd << '}';
 }
 

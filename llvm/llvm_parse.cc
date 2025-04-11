@@ -177,7 +177,7 @@ bool get_operand_repr(llvm::Value* operand, CFG_Opd** repr, const GlobalInfo& gl
   } else if (llvm::ConstantInt* value = llvm::dyn_cast<llvm::ConstantInt>(operand)) {
     llvm::SmallVector<char> vec;
     value->getValue().toStringSigned(vec);
-    *repr = new CFG_Opd(CFG_OpdType::CFG_VarOpd, std::string(vec.begin(), vec.end()));
+    *repr = new CFG_Opd(CFG_OpdType::CFG_NumOpd, std::string(vec.begin(), vec.end()));
     return true;
   }
 
@@ -283,6 +283,10 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const s
     res.push_back(std::make_pair(new CFG_Node(CFG_NodeType::CFG_EmptyNode, node_num++, ""), nullptr));
   }
 
+  for (auto pair : res) {
+    pair.first->set_parent_proc(proc);
+  }
+
   return res;
 }
 
@@ -301,17 +305,20 @@ void convert_to_proc_cfg(llvm::Function* func, std::vector<llvm::Value*>* node_t
       proc->add_cfg_node(node);
       node_to_llvm->push_back(nodes[i].second);
     }
-    int start_node_num = node_num + nodes.size() - 1;
+    int start_node_num = node_num - nodes.size();
     basic_blocks[pair.first] = {start_node_num, node_num - 1};
 
-    for (int i = node_num; i < node_num - 1; ++i) {
+    for (int i = start_node_num; i < node_num - 1; ++i) {
       CFG_Edge* edge = new CFG_Edge(i, i + 1);
+      edge->get_src()->add_out_edge(edge);
+      edge->get_dst()->add_in_edge(edge);
       program->add_cfg_edge(edge);
       proc->add_cfg_edge(edge);
     }
   }
 
   CFG_Node* end_node = new CFG_Node(CFG_NodeType::CFG_EndNode, node_num, "END " + func->getName().str());
+  end_node->set_parent_proc(func->getName().str());
   program->add_cfg_node(end_node);
   proc->add_cfg_node(end_node);
 
@@ -320,11 +327,15 @@ void convert_to_proc_cfg(llvm::Function* func, std::vector<llvm::Value*>* node_t
     for (llvm::BasicBlock* outgoing : pair.second) {
       int bb2_start = basic_blocks[outgoing].first;
       CFG_Edge* edge = new CFG_Edge(bb1_end, bb2_start);
+      edge->get_src()->add_out_edge(edge);
+      edge->get_dst()->add_in_edge(edge);
       program->add_cfg_edge(edge);
       proc->add_cfg_edge(edge);
     }
     if (pair.second.empty()) {
       CFG_Edge* edge = new CFG_Edge(bb1_end, node_num); // Transition to END node
+      edge->get_src()->add_out_edge(edge);
+      edge->get_dst()->add_in_edge(edge);
       program->add_cfg_edge(edge);
       proc->add_cfg_edge(edge);
     }
