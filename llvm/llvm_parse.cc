@@ -331,6 +331,7 @@ void convert_to_proc_cfg(llvm::Function* func, std::vector<llvm::Value*>* node_t
   }
   ++node_num; // END node
   program->add_proc(proc);
+  program->push_proc(proc);
 }
 
 std::vector<llvm::Value*> llvm_parse() {

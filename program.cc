@@ -187,10 +187,10 @@ void Program::dump_cfg() {
 
     *dot_fd << proc->get_name();
   }
-  *dot_fd << ";\n\n";
+  *dot_fd << ";";
 
-  for (Procedure* proc : *procs) {
-    proc->dump_cfg();
+  for (auto pair : *procedures) {
+    pair.second->dump_cfg();
   }
 
   dot_fd->close();
