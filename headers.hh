@@ -9,6 +9,8 @@
 #include "cfg/cfg_node.hh"
 #include "cfg/cfg_opd.hh"
 
+#include "llvm/llvm_parse.hh"
+
 #include "ddg/ddg_compute.hh"
 #include "ddg/ddg_context.hh"
 #include "ddg/ddg_edge.hh"

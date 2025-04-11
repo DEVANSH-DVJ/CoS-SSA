@@ -85,6 +85,16 @@ int Procedure::get_end_node() {
   return 0;
 }
 
+void Procedure::dump_cfg() {
+  *dot_fd << "\n\n{\n";
+  for (auto pair : *cfg_nodes) {
+    *dot_fd << "\t" << pair.first << ": ";
+    pair.second->dump();
+    *dot_fd << ";\n";
+  }
+  *dot_fd << '}';
+}
+
 void Procedure::visualize_cfg() {
   *dot_fd << "\n\tsubgraph cluster_" << this->name << " {\n";
   *dot_fd << "\t\tlabel = \"" << this->name << "\";\n";

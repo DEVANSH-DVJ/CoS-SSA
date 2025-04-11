@@ -13,7 +13,7 @@ enum short_options {
   OPT_TYPE = 0x80,
 };
 
-enum tool_name { TOOL_CFG, TOOL_SSA, TOOL_DDG, TOOL_UNKNOWN };
+enum tool_name { TOOL_CFG, TOOL_SSA, TOOL_DDG, TOOL_LLVM, TOOL_ALL, TOOL_UNKNOWN };
 
 struct arguments {
   tool_name tool;
@@ -44,6 +44,10 @@ error_t parse_opt(int key, char *arg, struct argp_state *state) {
       arguments->tool = TOOL_SSA;
     } else if (strcasecmp(arg, "ddg") == 0) {
       arguments->tool = TOOL_DDG;
+    } else if (strcasecmp(arg, "llvm") == 0) {
+      arguments->tool = TOOL_LLVM;
+    } else if (strcasecmp(arg, "all")) {
+      arguments->tool = TOOL_ALL;
     } else {
       cout << "Unknown tool name: " << arg << endl;
       argp_usage(state);

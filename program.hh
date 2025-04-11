@@ -3,12 +3,14 @@
 
 #include "ddg/ddg_context.hh"
 
+#include <llvm/IR/Value.h>
+
 #include <list>
 #include <map>
 #include <set>
-#include <utility>
-
 #include <string>
+#include <utility>
+#include <vector>
 
 class Procedure;
 class CFG_Edge;
@@ -46,15 +48,22 @@ class Program {
   std::map<int, SSA_Node *> *ssa_nodes;
   std::map<std::pair<int, int>, SSA_Edge *> *ssa_edges;
 
+  /* Node to LLVM value mapping */
+  std::vector<llvm::Value*> node_to_llvm;
+
   /* Helper functions */
-  // Parse CFG graph
+  // Parse CFG graph from a file
   void parse_cfg();
+  // Parse LLVM IR into a CFG
+  void parse_cfg_from_llvm();
   // Parse SSA graph
   void parse_ssa();
   // Construct DDG from the CFG graph
   void construct_ddg();
   // Do constant propagation on the DDG
   void propagate_ddg_constants();
+  // Dump the CFG to a file
+  void dump_cfg();
   // Visualize CFG graph
   void visualize_cfg();
   // Visualize SSA graph

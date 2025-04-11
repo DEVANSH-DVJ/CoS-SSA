@@ -46,6 +46,18 @@ int main(int argc, char **argv) {
     program = new Program("ddg", input_file.substr(0, input_file.length() - 4));
     program->run();
     break;
+  case TOOL_LLVM:
+    CHECK_INPUT_AND_ABORT(input_file.substr(input_file.length() - 3) == ".ll",
+                          "Input file must be a .ll file");
+    program = new Program("llvm", input_file.substr(0, input_file.length() - 3));
+    program->run();
+    break;
+  case TOOL_ALL:
+    CHECK_INPUT_AND_ABORT(input_file.substr(input_file.length() - 3) == ".ll",
+                          "Input file must be a .ll file");
+    program = new Program("all", input_file.substr(0, input_file.length() - 3));
+    program->run();
+    break;
   default:
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Unknown tool");
   }

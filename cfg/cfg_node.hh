@@ -17,6 +17,7 @@ typedef enum {
   CFG_EndNode,
   CFG_CallNode,
   CFG_AssignNode,
+  CFG_EmptyNode
 } CFG_NodeType;
 
 class CFG_Node {
@@ -73,6 +74,8 @@ public:
   const std::string& get_callee();
 
   /* Helper functions */
+  // Dump the node
+  void dump();
   // Visualize the node
   void visualize();
 };

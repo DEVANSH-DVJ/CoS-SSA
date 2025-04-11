@@ -45,6 +45,7 @@ ignore [ \t\n]
 "CALL" { return CFG_CALL; }
 "INPUT" { return CFG_INPUT; }
 "USEVAR" { return CFG_USEVAR; }
+"EMPTY" { return CFG_EMPTY_NODE; }
 
   /* Identifiers */
 

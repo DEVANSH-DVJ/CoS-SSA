@@ -50,6 +50,8 @@ public:
   int get_end_node();
 
   /* Helper functions */
+  // Dump the CFG to a file
+  void dump_cfg();
   // Visualize CFG graph
   void visualize_cfg();
   // Visualize SSA graph

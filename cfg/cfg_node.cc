@@ -6,7 +6,9 @@ using namespace std;
 extern fstream *dot_fd;
 
 CFG_Node::CFG_Node(CFG_NodeType type, int node_id, string stmt) {
-  if (type != CFG_StartNode && type != CFG_EndNode) {
+  if (type == CFG_EmptyNode) {
+    stmt = "EMPTY";
+  } else if (type != CFG_StartNode && type != CFG_EndNode) {
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,
                     "CFG_StartNode or CFG_EndNode expected");
   }
@@ -183,6 +185,10 @@ std::vector<CFG_Opd*> CFG_Node::get_rhs_operands() {
 const std::string& CFG_Node::get_callee() {
   CHECK_INVARIANT(type == CFG_NodeType::CFG_CallNode, "Can not get callee of non call statement");
   return callee_proc;
+}
+
+void CFG_Node::dump() {
+  *dot_fd << stmt;
 }
 
 void CFG_Node::visualize() {

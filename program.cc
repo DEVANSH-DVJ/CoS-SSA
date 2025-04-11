@@ -28,6 +28,9 @@ Program::Program(string tool, string input_name) {
     string ssa_file = this->input_name + ".ssa";
     ssa_set_in(fopen(ssa_file.c_str(), "r"));
     ssa_set_out(fopen("/dev/null", "w"));
+  } else if (this->tool == "llvm" || this->tool == "all") {
+    string ll_file = this->input_name + ".ll";
+    llvm_set_in(ll_file);
   } else {
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Unknown input type");
   }
@@ -158,6 +161,8 @@ void Program::add_ssa_edge(SSA_Edge *edge) {
   this->ssa_edges->insert(make_pair(edge_id, edge));
 }
 
+void Program::parse_cfg_from_llvm() { node_to_llvm = llvm_parse(); }
+
 void Program::parse_cfg() { cfg_parse(); }
 
 void Program::parse_ssa() { ssa_parse(); }
@@ -165,6 +170,32 @@ void Program::parse_ssa() { ssa_parse(); }
 void Program::construct_ddg() { ddg_construct(); }
 
 void Program::propagate_ddg_constants() { ddg_propagated_values = ddg_propagate_constants(); }
+
+void Program::dump_cfg() {
+  string cfg_file = input_name + ".cfg";
+
+  CHECK_INVARIANT(dot_fd == NULL, "Dot file descriptor must be NULL.");
+  dot_fd = new fstream(cfg_file.c_str(), ios::out | ios::trunc);
+
+  bool first = true;
+  for (Procedure* proc : *procs) {
+    if (first) {
+      first = false;
+    } else {
+      *dot_fd << ", ";
+    }
+
+    *dot_fd << proc->get_name();
+  }
+  *dot_fd << ";\n\n";
+
+  for (Procedure* proc : *procs) {
+    proc->dump_cfg();
+  }
+
+  dot_fd->close();
+  delete dot_fd;
+}
 
 void Program::visualize_cfg() {
   string dot_file = input_name + ".cfg.dot";
@@ -327,6 +358,14 @@ void Program::run() {
     this->visualize_ssa();
   } else if (this->tool == "ddg") {
     this->parse_cfg();
+    this->construct_ddg();
+    this->propagate_ddg_constants();
+    this->visualize_ddg();
+  } else if (this->tool == "llvm") {
+    this->parse_cfg_from_llvm();
+    this->dump_cfg();
+  } else if (this->tool == "all") {
+    this->parse_cfg_from_llvm();
     this->construct_ddg();
     this->propagate_ddg_constants();
     this->visualize_ddg();
