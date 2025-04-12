@@ -16,6 +16,8 @@
 extern Program* program;
 std::string ll_file;
 
+std::unique_ptr<llvm::Module> module = nullptr;
+
 void llvm_set_in(std::string file) {
   ll_file = file;
 }
@@ -349,7 +351,7 @@ std::vector<llvm::Value*> llvm_parse() {
   llvm::LLVMContext context;
   llvm::SMDiagnostic err;
 
-  std::unique_ptr<llvm::Module> module = llvm::parseIRFile(ll_file, err, context);
+  module = llvm::parseIRFile(ll_file, err, context);
   if (module == nullptr) {
     err.print("Failed to parse LLVM IR file: ", llvm::errs());
     CHECK_INVARIANT(false, "");

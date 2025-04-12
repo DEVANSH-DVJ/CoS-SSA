@@ -41,8 +41,8 @@ SSA_Node::SSA_Node(SSA_NodeType type, int node_id, string stmt,
 }
 
 SSA_Node::SSA_Node(SSA_NodeType type, int node_id) {
-  if (type != SSA_AssignNode) {
-    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "SSA_AssignNode expected");
+  if (type != SSA_AssignNode && type != SSA_EmptyNode) {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "SSA_AssignNode or SSA_EmptyNode expected");
   }
 
   this->type = type;
@@ -52,7 +52,7 @@ SSA_Node::SSA_Node(SSA_NodeType type, int node_id) {
   this->in_edges = new map<int, SSA_Edge *>();
   this->out_edges = new map<int, SSA_Edge *>();
 
-  this->stmt = "";
+  this->stmt = type == SSA_AssignNode ? "" : "EMPTY";
   this->callee_proc = "";
   this->metas = new map<int, SSA_Meta *>();
 }

@@ -15,6 +15,7 @@ typedef enum {
   SSA_EndNode,
   SSA_CallNode,
   SSA_AssignNode,
+  SSA_EmptyNode,
 } SSA_NodeType;
 
 class SSA_Node {

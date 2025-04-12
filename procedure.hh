@@ -34,6 +34,8 @@ public:
   /* Get functions */
   // Get procedure name
   std::string get_name();
+  // Get CFG nodes
+  std::set<int> get_cfg_nodes();
 
   /* Update functions */
   // Add a CFG node

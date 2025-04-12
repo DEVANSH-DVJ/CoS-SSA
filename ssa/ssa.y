@@ -51,6 +51,8 @@
 %token SSA_USEVAR
 %token SSA_PHI
 
+%token SSA_EMPTYNODE
+
 %token SSA_ASSIGN
 %token <name> SSA_OP
 
@@ -206,6 +208,10 @@ Node
     $$ = $1;
   }
   | ExprNode
+  {
+    $$ = $1;
+  }
+  | EmptyNode
   {
     $$ = $1;
   }
@@ -421,6 +427,14 @@ VarList
   {
     $$ = $1;
     $$->push_back($3);
+  }
+;
+
+EmptyNode
+  : MetaNum SSA_COLON SSA_EMPTYNODE SSA_EOS
+  {
+    SSA_Node *node = new SSA_Node(SSA_EmptyNode, $1);
+    $$ = node;
   }
 ;
 

@@ -21,6 +21,14 @@ Procedure::~Procedure() {
 
 string Procedure::get_name() { return this->name; }
 
+std::set<int> Procedure::get_cfg_nodes() {
+  std::set<int> res;
+  for (auto pair : *cfg_nodes) {
+    res.insert(pair.first);
+  }
+  return res;
+}
+
 void Procedure::add_cfg_node(CFG_Node *node) {
   CHECK_INVARIANT(node != NULL, "CFG node cannot be NULL.");
   int node_id = node->get_node_id();

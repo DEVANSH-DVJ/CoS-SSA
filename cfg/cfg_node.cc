@@ -170,6 +170,16 @@ std::set<std::string> CFG_Node::get_uses() {
   return res;
 }
 
+CFG_Opd* CFG_Node::get_lopd() {
+  CHECK_INVARIANT(type == CFG_NodeType::CFG_AssignNode, "Can not get def of non assignment statement");
+  return lopd;
+}
+
+std::pair<CFG_Opd*, CFG_Opd*> CFG_Node::get_ropds() {
+  CHECK_INVARIANT(type == CFG_NodeType::CFG_AssignNode, "Can not get uses of non assignment statement");
+  return std::make_pair(ropd1, ropd2);
+}
+
 std::vector<CFG_Opd*> CFG_Node::get_rhs_operands() {
   CHECK_INVARIANT(type == CFG_NodeType::CFG_AssignNode, "Can not get uses of non assignment statement");
   std::vector<CFG_Opd*> res;

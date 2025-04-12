@@ -70,6 +70,8 @@ public:
   const std::string& get_op();
   const std::string& get_def();
   std::set<std::string> get_uses();
+  CFG_Opd* get_lopd();
+  std::pair<CFG_Opd*, CFG_Opd*> get_ropds();
   std::vector<CFG_Opd*> get_rhs_operands();
   const std::string& get_callee();
 
