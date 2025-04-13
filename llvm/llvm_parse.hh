@@ -2,9 +2,9 @@
 #define _LLVM_PARSE_HH_
 
 #include <llvm/IR/Value.h>
-#include <vector>
+#include <map>
 
 void llvm_set_in(std::string file);
-std::vector<llvm::Value*> llvm_parse();
+std::map<int, llvm::Value*> llvm_parse();
 
 #endif

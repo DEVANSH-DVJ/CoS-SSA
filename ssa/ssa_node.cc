@@ -107,6 +107,12 @@ void SSA_Node::add_meta(SSA_Meta *meta) {
   this->metas->insert(make_pair(meta_id, meta));
 }
 
+std::map<int, SSA_Meta*>* SSA_Node::get_metas() {
+  CHECK_INVARIANT(metas != NULL, "Meta cannot be NULL");
+  CHECK_INVARIANT(metas->size() < 1, "Meta must have at least one element");
+  return metas;
+}
+
 void SSA_Node::visualize() {
   if (this->type != SSA_AssignNode) {
     *dot_fd << "\t\tnode_" << this->node_id << " [shape=box, xlabel=\""

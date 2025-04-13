@@ -36,6 +36,8 @@ public:
   std::string get_name();
   // Get CFG nodes
   std::set<int> get_cfg_nodes();
+  // Get SSA nodes
+  std::set<int> get_ssa_nodes();
 
   /* Update functions */
   // Add a CFG node

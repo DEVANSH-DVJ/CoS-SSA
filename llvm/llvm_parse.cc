@@ -66,55 +66,35 @@ typedef struct GlobalInfo {
 
 GlobalInfo get_globals(llvm::Module* module) {
   std::set<std::string> addr_taken;
-  for (llvm::Function& func : *module) {
-    for (llvm::BasicBlock& bb : func) {
-      for (llvm::Instruction& inst : bb) {
-        // Can ignore GEP because then this is not an int
-        // TODO: some globals may have their addr taken by other globals
-        if (llvm::StoreInst* store = llvm::dyn_cast<llvm::StoreInst>(&inst)) {
-          if (llvm::GlobalVariable* var = llvm::dyn_cast<llvm::GlobalVariable>(store->getValueOperand())) {
-            addr_taken.insert(var->getName().str());
-          }
-        } else if (llvm::CallInst* call = llvm::dyn_cast<llvm::CallInst>(&inst)) {
-          for (unsigned int i = 0; i < call->getNumOperands() - 1; ++i) {
-            if (llvm::GlobalVariable* var = llvm::dyn_cast<llvm::GlobalVariable>(call->getOperand(i))) {
-              addr_taken.insert(var->getName().str());
-            }
-          }
+  // Probably a better way to check if a global's addr is taken
+  for (llvm::GlobalVariable& var : module->globals()) {
+    if (var.getNumOperands() != 1) {
+      addr_taken.insert(var.getName().str());
+      break;
+    }
+    bool found = false;
+    for (llvm::Use& use : var.uses()) {
+      llvm::User* user = use.getUser();
+      if (llvm::LoadInst* load = llvm::dyn_cast<llvm::LoadInst>(user)) {
+        if (&var != load->getPointerOperand()) {
+          found = true;
+          break;
         }
+      } else if (llvm::StoreInst* load = llvm::dyn_cast<llvm::StoreInst>(user)) {
+        if (&var != load->getPointerOperand()) {
+          found = true;
+          break;
+        }
+      } else {
+        found = true;
+        break;
       }
     }
+    if (found) {
+      addr_taken.insert(var.getName().str());
+      break;
+    }
   }
-
-  // Probably a better way to check if a global's addr is taken
-  /*for (llvm::GlobalVariable& var : module->globals()) {*/
-  /*  if (var.getNumOperands() != 1) {*/
-  /*    addr_taken.insert(var.getName());*/
-  /*    break;*/
-  /*  }*/
-  /*  bool found = false;*/
-  /*  for (auto& use : var.uses()) {*/
-  /*    llvm::User* user = use.getUser();*/
-  /*    if (llvm::LoadInst* load = llvm::dyn_cast<llvm::LoadInst>(user)) {*/
-  /*      if (&var != load->getPointerOperand()) {*/
-  /*        found = true;*/
-  /*        break;*/
-  /*      }*/
-  /*    } else if (llvm::StoreInst* load = llvm::dyn_cast<llvm::StoreInst>(user)) {*/
-  /*      if (&var != load->getPointerOperand()) {*/
-  /*        found = true;*/
-  /*        break;*/
-  /*      }*/
-  /*    } else {*/
-  /*      found = true;*/
-  /*      break;*/
-  /*    }*/
-  /*  }*/
-  /*  if (found) {*/
-  /*    addr_taken.insert(var.getName());*/
-  /*    break;*/
-  /*  }*/
-  /*}*/
 
   GlobalInfo globals;
   for (llvm::Function& func : *module) {
@@ -142,13 +122,15 @@ GlobalInfo get_globals(llvm::Module* module) {
               globals.stores[&inst] = var->getName();
             }
           }
-        } else if (llvm::GetElementPtrInst* gep = llvm::dyn_cast<llvm::GetElementPtrInst>(&inst)) {
-          if (llvm::GlobalVariable* var = llvm::dyn_cast<llvm::GlobalVariable>(gep->getPointerOperand())) {
-            if (addr_taken.find(var->getName().str()) == addr_taken.end()) {
-              globals.globals.insert(var);
-              globals.loads[&inst] = var->getName();
-            }
-          }
+        // Handle non scalar types
+        /*} else if (llvm::GetElementPtrInst* gep = llvm::dyn_cast<llvm::GetElementPtrInst>(&inst)) {*/
+        /*  if (llvm::GlobalVariable* var = llvm::dyn_cast<llvm::GlobalVariable>(gep->getPointerOperand())) {*/
+        /*    if (addr_taken.find(var->getName().str()) == addr_taken.end()) {*/
+        /*      globals.globals.insert(var);*/
+        /*      globals.loads[&inst] = var->getName();*/
+        /*    }*/
+        /*  }*/
+        // TODO: handle parameters
         // "Promote" returns to globals
         /*} else if (llvm::CallInst* call = llvm::dyn_cast<llvm::CallInst>(&inst)) {*/
         /*  if (is_usable_func(call->getCalledFunction())) {*/
@@ -222,7 +204,7 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const s
   if (bb->isEntryBlock()) {
     res.push_back(std::make_pair(new CFG_Node(CFG_NodeType::CFG_StartNode, node_num++, "START " + proc), nullptr));
 
-    if (proc == "main") {
+    if (proc == "main") { // TODO: handle initial values some other way
       for (llvm::GlobalVariable* var : globals.globals) {
         CFG_Opd* ropd1;
         if (get_operand_repr(var->getOperand(0), &ropd1, globals)) {
@@ -292,7 +274,7 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const s
   return res;
 }
 
-void convert_to_proc_cfg(llvm::Function* func, std::vector<llvm::Value*>* node_to_llvm, const GlobalInfo& globals) {
+void convert_to_proc_cfg(llvm::Function* func, std::map<int, llvm::Value*>* node_to_llvm, const GlobalInfo& globals) {
   std::vector<CFG_Node*> instructions;
 
   std::map<llvm::BasicBlock*, std::set<llvm::BasicBlock*>> cfg_transitions = construct_llvm_cfg(func);
@@ -305,7 +287,7 @@ void convert_to_proc_cfg(llvm::Function* func, std::vector<llvm::Value*>* node_t
       CFG_Node* node = nodes[i].first;
       program->add_cfg_node(node);
       proc->add_cfg_node(node);
-      node_to_llvm->push_back(nodes[i].second);
+      (*node_to_llvm)[node_to_llvm->size() + 1] = nodes[i].second;
     }
     int start_node_num = node_num - nodes.size();
     basic_blocks[pair.first] = {start_node_num, node_num - 1};
@@ -323,6 +305,7 @@ void convert_to_proc_cfg(llvm::Function* func, std::vector<llvm::Value*>* node_t
   end_node->set_parent_proc(func->getName().str());
   program->add_cfg_node(end_node);
   proc->add_cfg_node(end_node);
+  (*node_to_llvm)[node_to_llvm->size() + 1] = nullptr;
 
   for (auto pair : cfg_transitions) {
     int bb1_end = basic_blocks[pair.first].second;
@@ -347,7 +330,7 @@ void convert_to_proc_cfg(llvm::Function* func, std::vector<llvm::Value*>* node_t
   program->push_proc(proc);
 }
 
-std::vector<llvm::Value*> llvm_parse() {
+std::map<int, llvm::Value*> llvm_parse() {
   llvm::LLVMContext context;
   llvm::SMDiagnostic err;
 
@@ -357,7 +340,7 @@ std::vector<llvm::Value*> llvm_parse() {
     CHECK_INVARIANT(false, "");
   }
 
-  std::vector<llvm::Value*> node_to_llvm {nullptr};
+  std::map<int, llvm::Value*> node_to_llvm;
   GlobalInfo globals = get_globals(module.get());
   for (auto& func : *module) {
     if (!is_usable_func(&func)) {

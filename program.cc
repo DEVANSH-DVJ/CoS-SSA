@@ -104,6 +104,16 @@ SSA_Node *Program::get_ssa_node(int node_id, bool abort_if_not_found) {
   return this->ssa_nodes->find(node_id)->second;
 }
 
+llvm::Value* Program::get_llvm_node(int node_id, bool abort_if_not_found) {
+  auto it = llvm_nodes.find(node_id);
+  if (it == llvm_nodes.end()) {
+    CHECK_INPUT_AND_ABORT(!abort_if_not_found,
+                          "LLVM node " + to_string(node_id) + " not found.");
+    return NULL;
+  }
+  return it->second;
+}
+
 void Program::add_proc(Procedure *proc) {
   CHECK_INVARIANT(proc != NULL, "Procedure cannot be NULL.");
   string name = proc->get_name();
@@ -161,7 +171,7 @@ void Program::add_ssa_edge(SSA_Edge *edge) {
   this->ssa_edges->insert(make_pair(edge_id, edge));
 }
 
-void Program::parse_cfg_from_llvm() { node_to_llvm = llvm_parse(); }
+void Program::parse_cfg_from_llvm() { llvm_nodes = llvm_parse(); }
 
 void Program::parse_cfg() { cfg_parse(); }
 
@@ -253,7 +263,9 @@ void Program::visualize_ddg() {
   std::cout << ddg_context_table.to_string() << '\n';
 
   for (auto pair : ddg_context_transitions) {
-    std::cout << "Context transition at node " << pair.first.node << ": " << pair.first.context << " -> " << pair.second << '\n';
+    for (auto subpair : pair.second) {
+      std::cout << "Context transition at node " << pair.first << ": " << subpair.first << " -> " << subpair.second << '\n';
+    }
   }
   std::cout << '\n';
 
@@ -301,27 +313,27 @@ std::set<QDef> Program::get_ddg_outgoing(QDef node) {
 }
 
 bool Program::create_ddg_transition(QNode from_qnode, const Context& to_context) {
-
-  bool updated_transition = false;
-  auto it = ddg_context_transitions.find(from_qnode);
-  if (it != ddg_context_transitions.end()) {
-    updated_transition = ddg_context_table.update_context(it->second, to_context);
-  } else {
-    int context = ddg_context_table.insert_context(to_context);
-    updated_transition = true;
-    ddg_context_transitions[from_qnode] = context;
-    ddg_reverse_context_transitions[context].insert(from_qnode);
+  auto it = ddg_context_transitions[from_qnode.node].find(from_qnode.context);
+  if (it != ddg_context_transitions[from_qnode.node].end()) {
+    return ddg_context_table.update_context(it->second, to_context);
   }
 
-  return updated_transition;
+  int context = ddg_context_table.insert_context(to_context);
+  ddg_context_transitions[from_qnode.node][from_qnode.context] = context;
+  ddg_reverse_context_transitions[context].insert(from_qnode);
+  return true;
 }
 
-std::map<QNode, int>::iterator Program::get_ddg_transition(QNode from_qnode) {
-  return ddg_context_transitions.find(from_qnode);
+std::map<int, int>::iterator Program::get_ddg_transition(QNode from_qnode) {
+  return ddg_context_transitions[from_qnode.node].find(from_qnode.context);
 }
 
-std::map<QNode, int>::iterator Program::ddg_transitions_end() {
-  return ddg_context_transitions.end();
+std::map<int, int>& Program::get_ddg_transitions(int node) {
+  return ddg_context_transitions[node];
+}
+
+std::map<int, int>::iterator Program::ddg_transitions_end(int node) {
+  return ddg_context_transitions[node].end();
 }
 
 std::map<int, std::set<QNode>>::iterator Program::get_ddg_reverse_transitions(int to_context) {
