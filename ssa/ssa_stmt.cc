@@ -68,3 +68,28 @@ SSA_Stmt::~SSA_Stmt() {
 SSA_StmtType SSA_Stmt::get_type() { return this->type; }
 
 std::string &SSA_Stmt::get_stmt() { return this->stmt; }
+
+std::string& SSA_Stmt::get_op() {
+  return op;
+}
+
+SSA_Opd* SSA_Stmt::get_lhs() {
+  return lopd;
+}
+
+std::vector<SSA_Opd*> SSA_Stmt::get_rhs() {
+  CHECK_INVARIANT(type == SSA_AssignStmt, "Can't get RHS of non assign stmt");
+  std::vector<SSA_Opd*> res;
+  if (ropd1 != nullptr) {
+    res.push_back(ropd1);
+  }
+  if (ropd2 != nullptr) {
+    res.push_back(ropd2);
+  }
+  return res;
+}
+
+std::list<SSA_Opd*>* SSA_Stmt::get_phi_uses() {
+  CHECK_INVARIANT(type == SSA_PhiStmt, "Can't get PHI uses of non PHI stmt");
+  return ropds;
+}
