@@ -131,6 +131,19 @@ void Procedure::visualize_cfg() {
   *dot_fd << "\t}\n";
 }
 
+void Procedure::dump_ssa() {
+  *dot_fd << "\n\n{\n";
+  for (auto pair : *ssa_nodes) {
+    pair.second->dump();
+  }
+
+  *dot_fd << "\n";
+  for (auto pair : *ssa_edges) {
+    *dot_fd << "\t" << pair.first.first << "->" << pair.first.second << ";\n";
+  }
+  *dot_fd << '}';
+}
+
 void Procedure::visualize_ssa() {
   *dot_fd << "\n\tsubgraph cluster_" << this->name << " {\n";
   *dot_fd << "\t\tlabel = \"" << this->name << "\";\n";

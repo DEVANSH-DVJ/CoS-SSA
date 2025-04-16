@@ -65,7 +65,7 @@ void ddg_construct() {
     bool updated_transition = false;
     if (node->get_type() == CFG_NodeType::CFG_CallNode) {
       auto it = program->get_ddg_transition(cur_qnode);
-      if (it != program->ddg_transitions_end()) {
+      if (it != program->ddg_transitions_end(cur_qnode.node)) {
         int end_node = program->get_proc(node->get_callee())->get_end_node();
         for (QDef qdef : rd_out[{end_node, it->second}]) {
           rd_out[cur_qnode].insert(qdef);
@@ -97,7 +97,7 @@ void ddg_construct() {
       // Update at start of call
       int start_node = program->get_proc(node->get_callee())->get_start_node();
       auto it = program->get_ddg_transition(cur_qnode);
-      if (it != program->ddg_transitions_end()) {
+      if (it != program->ddg_transitions_end(cur_qnode.node)) {
         if (in_list.find({start_node, it->second}) == in_list.end()) {
           worklist.push({start_node, it->second});
           in_list.insert({start_node, it->second});

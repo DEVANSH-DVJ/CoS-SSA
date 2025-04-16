@@ -34,7 +34,7 @@ public:
 private:
   std::map<int, Context> context_map;
   std::map<Context, std::set<int>> context_to_int;
-  int next_context = 0;
+  int next_context = 1;
 };
 
 #endif

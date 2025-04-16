@@ -113,6 +113,16 @@ std::map<int, SSA_Meta*>* SSA_Node::get_metas() {
   return metas;
 }
 
+void SSA_Node::dump() {
+  if (this->type != SSA_AssignNode) {
+    *dot_fd << "\t" << this->node_id << "_1: " << this->stmt << ";\n";
+  } else {
+    for (auto pair : *this->metas) {
+      pair.second->dump();
+    }
+  }
+}
+
 void SSA_Node::visualize() {
   if (this->type != SSA_AssignNode) {
     *dot_fd << "\t\tnode_" << this->node_id << " [shape=box, xlabel=\""

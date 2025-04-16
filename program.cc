@@ -2,6 +2,8 @@
 #include "headers.hh"
 
 #include <algorithm>
+#include <llvm/IRReader/IRReader.h>
+#include <llvm/IR/Module.h>
 
 using namespace std;
 
@@ -30,7 +32,10 @@ Program::Program(string tool, string input_name) {
     ssa_set_out(fopen("/dev/null", "w"));
   } else if (this->tool == "llvm" || this->tool == "all") {
     string ll_file = this->input_name + ".ll";
-    llvm_set_in(ll_file);
+    string output_ll_file = this->input_name + ".out.ll";
+    llvm_module = llvm::parseIRFile(ll_file, err, context);
+    llvm_set_in(llvm_module.get());
+    llvm_set_out(output_ll_file);
   } else {
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Unknown input type");
   }
@@ -181,6 +186,14 @@ void Program::construct_ddg() { ddg_construct(); }
 
 void Program::propagate_ddg_constants() { ddg_propagated_values = ddg_propagate_constants(); }
 
+void Program::construct_ssa() {
+  ssa_construct();
+}
+
+void Program::deconstruct_ssa() {
+  ssa_deconstruct();
+}
+
 void Program::dump_cfg() {
   string cfg_file = input_name + ".cfg";
 
@@ -229,28 +242,6 @@ void Program::visualize_cfg() {
   }
 }
 
-void Program::visualize_ssa() {
-  string dot_file = input_name + ".ssa.dot";
-  string png_file = input_name + ".ssa.png";
-
-  CHECK_INVARIANT(dot_fd == NULL, "Dot file descriptor must be NULL.");
-  dot_fd = new fstream(dot_file.c_str(), ios::out | ios::trunc);
-
-  *dot_fd << "digraph G {\n";
-  for (list<Procedure *>::iterator it = this->procs->begin();
-       it != this->procs->end(); ++it) {
-    (*it)->visualize_ssa();
-  }
-  *dot_fd << "}\n";
-
-  dot_fd->close();
-  delete dot_fd;
-
-  if (system(("dot -Tpng " + dot_file + " -o " + png_file).c_str()) != 0) {
-    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Error generating png file\n");
-  }
-}
-
 void print_qdef(QDef node, const std::map<QDef, int>& propagated_values) {
   std::cout << node.def.var_name + '_' + std::to_string(node.def.node) + '_' + std::to_string(node.context);
   auto it = propagated_values.find(node);
@@ -288,6 +279,58 @@ void Program::visualize_ddg() {
     }
     std::cout << '\n';
   }
+}
+
+void Program::dump_ssa() {
+  string ssa_file = input_name + ".out.ssa";
+
+  CHECK_INVARIANT(dot_fd == NULL, "Dot file descriptor must be NULL.");
+  dot_fd = new fstream(ssa_file.c_str(), ios::out | ios::trunc);
+
+  bool first = true;
+  for (Procedure* proc : *procs) {
+    if (first) {
+      first = false;
+    } else {
+      *dot_fd << ", ";
+    }
+
+    *dot_fd << proc->get_name();
+  }
+  *dot_fd << ";";
+
+  for (auto pair : *procedures) {
+    pair.second->dump_ssa();
+  }
+
+  dot_fd->close();
+  delete dot_fd;
+}
+
+void Program::visualize_ssa() {
+  string dot_file = input_name + ".ssa.dot";
+  string png_file = input_name + ".ssa.png";
+
+  CHECK_INVARIANT(dot_fd == NULL, "Dot file descriptor must be NULL.");
+  dot_fd = new fstream(dot_file.c_str(), ios::out | ios::trunc);
+
+  *dot_fd << "digraph G {\n";
+  for (list<Procedure *>::iterator it = this->procs->begin();
+       it != this->procs->end(); ++it) {
+    (*it)->visualize_ssa();
+  }
+  *dot_fd << "}\n";
+
+  dot_fd->close();
+  delete dot_fd;
+
+  if (system(("dot -Tpng " + dot_file + " -o " + png_file).c_str()) != 0) {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Error generating png file\n");
+  }
+}
+
+void Program::dump_llvm() {
+  llvm_dump();
 }
 
 std::set<std::string> Program::get_globals() {
@@ -344,6 +387,15 @@ std::map<int, std::set<QNode>>::iterator Program::get_ddg_reverse_transitions(in
   return ddg_reverse_context_transitions.end();
 }
 
+bool Program::get_ddg_propagated_value(QDef qdef, int* value) {
+  auto it = ddg_propagated_values.find(qdef);
+  if (it != ddg_propagated_values.end()) {
+    *value = it->second;
+    return true;
+  }
+  return false;
+}
+
 int Program::insert_ddg_context(Context context) {
   return ddg_context_table.insert_context(context);
 }
@@ -379,8 +431,10 @@ void Program::run() {
   } else if (this->tool == "all") {
     this->parse_cfg_from_llvm();
     this->construct_ddg();
-    this->propagate_ddg_constants();
-    this->visualize_ddg();
+    /*this->propagate_ddg_constants();*/
+    this->construct_ssa();
+    this->deconstruct_ssa();
+    this->dump_llvm();
   } else {
     CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Unknown input type");
   }

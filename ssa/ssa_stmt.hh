@@ -38,6 +38,8 @@ public:
   /* Get functions */
   // Get the statement type
   SSA_StmtType get_type();
+  // Dump the statement
+  void dump();
   // Get the statement
   std::string &get_stmt();
 

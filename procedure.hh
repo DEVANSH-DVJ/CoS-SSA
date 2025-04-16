@@ -58,6 +58,8 @@ public:
   void dump_cfg();
   // Visualize CFG graph
   void visualize_cfg();
+  // Dump the SSA graph to a file
+  void dump_ssa();
   // Visualize SSA graph
   void visualize_ssa();
 };

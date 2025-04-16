@@ -2,16 +2,22 @@
 
 extern Program* program;
 
-SSA_Opd* cfg_to_ssa_opd(CFG_Opd* cfg_opd, std::pair<int, int> meta_num) {
+SSA_Opd* cfg_to_ssa_opd(CFG_Opd* cfg_opd, std::pair<int, int> meta_num, std::map<std::string, SSA_Opd*>& final_versions) {
   if (cfg_opd == nullptr) {
     return nullptr;
   }
 
   switch (cfg_opd->get_type()) {
     case CFG_OpdType::CFG_NumOpd:
-      return new SSA_Opd(SSA_NumOpd, meta_num);
-    case CFG_OpdType::CFG_VarOpd:
-      return new SSA_Opd(SSA_VarOpd, meta_num, cfg_opd->get_opd_var());
+      return new SSA_Opd(SSA_NumOpd, cfg_opd->get_opd_value());
+    case CFG_OpdType::CFG_VarOpd: {
+      std::string var = cfg_opd->get_opd_var();
+      auto it = final_versions.find(var);
+      if (it != final_versions.end()) {
+        return it->second;
+      }
+      return new SSA_Opd(SSA_VarOpd, meta_num, var);
+    }
     case CFG_OpdType::CFG_InputOpd:
       return new SSA_Opd(SSA_InputOpd, meta_num);
     case CFG_OpdType::CFG_UsevarOpd:
@@ -54,7 +60,6 @@ void ssa_construct() {
   // Create SSA edges
   for (auto pair : *program->get_procs()) {
     for (int src : pair.second->get_cfg_nodes()) {
-      SSA_Node* ssa_src = program->get_ssa_node(src, true);
       for (int dst : program->get_cfg_node(src, true)->get_successors()) {
         SSA_Edge* edge = new SSA_Edge(src, dst);
         program->add_ssa_edge(edge);
@@ -64,35 +69,53 @@ void ssa_construct() {
   }
 
   for (QDef qdef : program->get_ddg_nodes()) {
+    if (qdef.def.node == 0) {
+      continue;
+    }
+
     CFG_Node* cfg_node = program->get_cfg_node(qdef.def.node, true);
     std::list<SSA_Stmt*>* stmts = new std::list<SSA_Stmt*>();
     std::set<QDef> deps = program->get_ddg_incoming(qdef);
     std::map<string, std::list<std::pair<int, int>>> versions;
+    std::map<string, SSA_Opd*> final_versions;
     for (QDef dep : deps) {
       versions[dep.def.var_name].push_back(std::make_pair(dep.def.node, dep.context));
     }
 
-    // Add phi nodes
-    for (auto pair : versions) {
-      if (pair.second.size() >= 2) {
-        SSA_Opd* lopd = new SSA_Opd(SSA_PhiOpd, std::make_pair(qdef.def.node, qdef.context), pair.first);
-
-        std::list<SSA_Opd*>* ropds = new std::list<SSA_Opd*>();
-        for (auto meta_num : pair.second) {
-          ropds->push_back(new SSA_Opd(SSA_VarOpd, meta_num, pair.first));
-        }
-
-        stmts->push_back(new SSA_Stmt(SSA_PhiStmt, lopd, ropds));
-      }
+    SSA_Node* node = program->get_ssa_node(qdef.def.node, true);
+    SSA_Opd* lopd = cfg_to_ssa_opd(cfg_node->get_lopd(), std::make_pair(qdef.def.node, qdef.context), final_versions);
+    int value;
+    if (program->get_ddg_propagated_value(qdef, &value)) {
+      // Use the propogated value
+      stmts->push_back(new SSA_Stmt(SSA_AssignStmt, "=", lopd, new SSA_Opd(SSA_NumOpd, value), nullptr));
+      node->add_meta(new SSA_Meta(std::make_pair(qdef.def.node, qdef.context), stmts));
+      continue;
     }
 
-    SSA_Opd* lopd = cfg_to_ssa_opd(cfg_node->get_lopd(), std::make_pair(qdef.def.node, qdef.context));
+    // Add phi nodes
+    for (auto pair : versions) {
+      if (pair.second.size() == 1) {
+        final_versions[pair.first] = new SSA_Opd(SSA_VarOpd, *pair.second.begin(), pair.first);
+        continue;
+      }
+      CHECK_INVARIANT(pair.second.size() >= 2, "Expected at least two incoming defs");
+
+      SSA_Opd* lopd = new SSA_Opd(SSA_PhiOpd, std::make_pair(qdef.def.node, qdef.context), pair.first);
+
+      std::list<SSA_Opd*>* ropds = new std::list<SSA_Opd*>();
+      for (auto meta_num : pair.second) {
+        ropds->push_back(new SSA_Opd(SSA_VarOpd, meta_num, pair.first));
+      }
+
+      stmts->push_back(new SSA_Stmt(SSA_PhiStmt, lopd, ropds));
+      final_versions[pair.first] = lopd;
+    }
+
     auto pair = cfg_node->get_ropds();
-    SSA_Opd* ropd1 = cfg_to_ssa_opd(pair.first, std::make_pair(qdef.def.node, qdef.context));
-    SSA_Opd* ropd2 = cfg_to_ssa_opd(pair.second, std::make_pair(qdef.def.node, qdef.context));
+    SSA_Opd* ropd1 = cfg_to_ssa_opd(pair.first, std::make_pair(qdef.def.node, qdef.context), final_versions);
+    SSA_Opd* ropd2 = cfg_to_ssa_opd(pair.second, std::make_pair(qdef.def.node, qdef.context), final_versions);
     stmts->push_back(new SSA_Stmt(SSA_AssignStmt, cfg_node->get_op(), lopd, ropd1, ropd2));
 
-    SSA_Node* node = program->get_ssa_node(qdef.def.node, true);
     node->add_meta(new SSA_Meta(std::make_pair(qdef.def.node, qdef.context), stmts));
   }
 }

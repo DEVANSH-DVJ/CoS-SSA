@@ -16,10 +16,10 @@
 extern Program* program;
 std::string ll_file;
 
-std::unique_ptr<llvm::Module> module = nullptr;
+llvm::Module* module = nullptr;
 
-void llvm_set_in(std::string file) {
-  ll_file = file;
+void llvm_set_in(llvm::Module* llvm_module) {
+  module = llvm_module;
 }
 
 int node_num = 1;
@@ -145,12 +145,6 @@ GlobalInfo get_globals(llvm::Module* module) {
   return globals;
 }
 
-struct RHS {
-  std::string op;
-  CFG_Opd* ropd1;
-  CFG_Opd* ropd2;
-};
-
 bool get_operand_repr(llvm::Value* operand, CFG_Opd** repr, const GlobalInfo& globals) {
   if (llvm::Instruction* inst = llvm::dyn_cast<llvm::Instruction>(operand)) {
     auto it = globals.loads.find(inst);
@@ -161,12 +155,18 @@ bool get_operand_repr(llvm::Value* operand, CFG_Opd** repr, const GlobalInfo& gl
   } else if (llvm::ConstantInt* value = llvm::dyn_cast<llvm::ConstantInt>(operand)) {
     llvm::SmallVector<char> vec;
     value->getValue().toStringSigned(vec);
-    *repr = new CFG_Opd(CFG_OpdType::CFG_NumOpd, std::string(vec.begin(), vec.end()));
+    *repr = new CFG_Opd(CFG_OpdType::CFG_NumOpd, std::atoi(std::string(vec.begin(), vec.end()).c_str()));
     return true;
   }
 
   return false;
 }
+
+struct RHS {
+  std::string op;
+  CFG_Opd* ropd1;
+  CFG_Opd* ropd2;
+};
 
 RHS get_assignment_value(llvm::Value* value, const GlobalInfo& globals) {
   static const std::map<unsigned int, char> ops {
@@ -187,7 +187,7 @@ RHS get_assignment_value(llvm::Value* value, const GlobalInfo& globals) {
         if (get_operand_repr(inst->getOperand(0), &ropd1, globals)) {
           CFG_Opd* ropd2;
           if (get_operand_repr(inst->getOperand(1), &ropd2, globals)) {
-            return {std::to_string(it->second), ropd1, ropd2};
+            return {std::string(1, it->second), ropd1, ropd2};
           }
           delete ropd1;
         }
@@ -226,10 +226,10 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const s
         }
       }
 
-      res.push_back(std::make_pair(
-        new CFG_Node(CFG_NodeType::CFG_AssignNode, node_num++, "=", new CFG_Opd(CFG_OpdType::CFG_UsevarOpd), new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), nullptr),
-        &inst
-      )); // TODO: is this necessary?
+      /*res.push_back(std::make_pair(*/
+      /*  new CFG_Node(CFG_NodeType::CFG_AssignNode, node_num++, "=", new CFG_Opd(CFG_OpdType::CFG_UsevarOpd), new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), nullptr),*/
+      /*  &inst*/
+      /*));*/
       /*res.push_back("USEVAR = " + it->second);*/
     } else {
       auto it = globals.stores.find(&inst);
@@ -331,17 +331,8 @@ void convert_to_proc_cfg(llvm::Function* func, std::map<int, llvm::Value*>* node
 }
 
 std::map<int, llvm::Value*> llvm_parse() {
-  llvm::LLVMContext context;
-  llvm::SMDiagnostic err;
-
-  module = llvm::parseIRFile(ll_file, err, context);
-  if (module == nullptr) {
-    err.print("Failed to parse LLVM IR file: ", llvm::errs());
-    CHECK_INVARIANT(false, "");
-  }
-
   std::map<int, llvm::Value*> node_to_llvm;
-  GlobalInfo globals = get_globals(module.get());
+  GlobalInfo globals = get_globals(module);
   for (auto& func : *module) {
     if (!is_usable_func(&func)) {
       continue;

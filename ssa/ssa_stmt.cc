@@ -2,6 +2,8 @@
 
 using namespace std;
 
+extern fstream *dot_fd;
+
 SSA_Stmt::SSA_Stmt(SSA_StmtType type, string op, SSA_Opd *lopd, SSA_Opd *ropd1,
                    SSA_Opd *ropd2) {
   CHECK_INVARIANT(type == SSA_AssignStmt, "SSA_AssignStmt expected");
@@ -66,6 +68,31 @@ SSA_Stmt::~SSA_Stmt() {
 }
 
 SSA_StmtType SSA_Stmt::get_type() { return this->type; }
+
+void SSA_Stmt::dump() {
+  lopd->dump();
+  *dot_fd << " = ";
+  if (this->type == SSA_AssignStmt) {
+    ropd1->dump();
+    if (this->ropd2 != NULL) {
+      *dot_fd << ' ' << op << ' ';
+      ropd2->dump();
+    }
+    return;
+  }
+
+  *dot_fd << "PHI(";
+  bool first = true;
+  for (SSA_Opd* ropd : *ropds) {
+    if (first) {
+      first = false;
+    } else {
+      *dot_fd << ", ";
+    }
+    ropd->dump();
+  }
+  *dot_fd << ')';
+}
 
 std::string &SSA_Stmt::get_stmt() { return this->stmt; }
 

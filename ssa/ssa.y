@@ -76,6 +76,7 @@
 %type <ssa_node> InputNode
 %type <ssa_node> UsevarNode
 %type <ssa_node> ExprNode
+%type <ssa_node> EmptyNode
 %type <ssa_stmt> PhiStmt
 %type <ssa_opd_list> VarList
 
@@ -433,7 +434,7 @@ VarList
 EmptyNode
   : MetaNum SSA_COLON SSA_EMPTYNODE SSA_EOS
   {
-    SSA_Node *node = new SSA_Node(SSA_EmptyNode, $1);
+    SSA_Node *node = new SSA_Node(SSA_EmptyNode, $1->first);
     $$ = node;
   }
 ;

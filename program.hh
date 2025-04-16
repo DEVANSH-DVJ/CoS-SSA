@@ -4,6 +4,8 @@
 #include "ddg/ddg_context.hh"
 
 #include <llvm/IR/Value.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/Support/SourceMgr.h>
 
 #include <list>
 #include <map>
@@ -48,6 +50,9 @@ class Program {
   std::map<std::pair<int, int>, SSA_Edge *> *ssa_edges;
 
   /* LLVM */
+  std::unique_ptr<llvm::Module> llvm_module;
+  llvm::LLVMContext context;
+  llvm::SMDiagnostic err;
   std::map<int, llvm::Value*> llvm_nodes;
 
   /* Helper functions */
@@ -61,14 +66,22 @@ class Program {
   void construct_ddg();
   // Do constant propagation on the DDG
   void propagate_ddg_constants();
+  // Construct the SSA graph from the DDG
+  void construct_ssa();
+  // Deconstruct the SSA graph into LLVM IR
+  void deconstruct_ssa();
   // Dump the CFG to a file
   void dump_cfg();
   // Visualize CFG graph
   void visualize_cfg();
-  // Visualize SSA graph
-  void visualize_ssa();
   // Visualize the DDG
   void visualize_ddg();
+  // Dump the SSA graph to a file
+  void dump_ssa();
+  // Visualize SSA graph
+  void visualize_ssa();
+  // Dump the LLVM IR to a file
+  void dump_llvm();
 
 public:
   /* Constructors and Destructor */
@@ -111,9 +124,12 @@ public:
   std::map<int, int>::iterator ddg_transitions_end(int node);
   std::map<int, std::set<QNode>>::iterator get_ddg_reverse_transitions(int context);
   std::map<int, std::set<QNode>>::iterator ddg_reverse_transitions_end();
+  bool get_ddg_propagated_value(QDef qdef, int* value);
   int insert_ddg_context(Context context);
   void add_ddg_node(QDef node);
   void add_ddg_edge(QDef src, QDef dest);
+
+  void llvm_init_module();
 
   // Cleanup
   void cleanup();

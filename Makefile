@@ -15,12 +15,12 @@ BASE_OBJ = main.o error.o program.o procedure.o
 BASE_HEADERS = error.hh program.hh procedure.hh
 CFG_OBJ = cfg/cfg.scan.o cfg/cfg.tab.o cfg/cfg_edge.o cfg/cfg_node.o cfg/cfg_opd.o
 CFG_HEADERS = cfg/cfg_edge.hh cfg/cfg_node.hh cfg/cfg_opd.hh
-SSA_OBJ = ssa/ssa.scan.o ssa/ssa.tab.o ssa/ssa_edge.o ssa/ssa_meta.o ssa/ssa_node.o ssa/ssa_opd.o ssa/ssa_stmt.o
-SSA_HEADERS = ssa/ssa_edge.hh ssa/ssa_meta.hh ssa/ssa_node.hh ssa/ssa_opd.hh ssa/ssa_stmt.hh
+SSA_OBJ = ssa/ssa.scan.o ssa/ssa.tab.o ssa/ssa_compute.o ssa/ssa_edge.o ssa/ssa_meta.o ssa/ssa_node.o ssa/ssa_opd.o ssa/ssa_stmt.o
+SSA_HEADERS = ssa/ssa_compute.hh ssa/ssa_edge.hh ssa/ssa_meta.hh ssa/ssa_node.hh ssa/ssa_opd.hh ssa/ssa_stmt.hh
 DDG_OBJ = ddg/ddg_compute.o ddg/ddg_context.o ddg/ddg_edge.o ddg/ddg_node.o ddg/ddg_types.o
 DDG_HEADERS = ddg/ddg_compute.hh ddg/ddg_context.hh ddg/ddg_edge.hh ddg/ddg_node.hh ddg/ddg_types.hh
-LLVM_OBJ = llvm/llvm_parse.o
-LLVM_HEADERS = llvm/llvm_parse.hh
+LLVM_OBJ = llvm/llvm_compute.o llvm/llvm_parse.o
+LLVM_HEADERS = llvm/llvm_compute.hh llvm/llvm_parse.hh
 LLVM_FLAGS = `llvm-config --system-libs --cppflags --ldflags --libs core` 
 
 HEADERS = $(BASE_HEADERS) $(CFG_HEADERS) $(SSA_HEADERS) $(DDG_HEADERS) $(LLVM_HEADERS)

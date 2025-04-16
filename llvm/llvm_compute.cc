@@ -10,12 +10,12 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/InstrTypes.h>
 
-FILE* output_file;
-void set_llvm_out(FILE* file) {
+std::string output_file;
+void llvm_set_out(std::string file) {
   output_file = file;
 }
 
-extern std::unique_ptr<llvm::Module> module;
+extern llvm::Module* module;
 extern Program* program;
 
 constexpr const char* CUR_CONTEXT_NAME = "__cos_ssa_current_context";
@@ -133,6 +133,7 @@ void create_assignment(std::list<SSA_Stmt*>* stmts, llvm::Instruction* insert_be
   defs[llvm::dyn_cast<llvm::GlobalVariable>(store_loc)] = store;
 }
 
+// TODO: handle the case with USEVAR
 void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instruction* assign, llvm::GlobalVariable* cur_context,
                                     std::map<std::string, llvm::GlobalVariable*>& qdef_globals,
                                     std::map<llvm::GlobalVariable*, llvm::StoreInst*>& defs,
@@ -197,7 +198,7 @@ void deconstruct_phi_nodes(std::map<llvm::GlobalVariable*, llvm::StoreInst*>& de
   }
 }
 
-void deconstruct_ssa() {
+void ssa_deconstruct() {
   std::map<std::string, llvm::GlobalVariable*> qdef_globals;
   llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
   llvm::GlobalVariable* cur_context = new llvm::GlobalVariable(int_type, false, llvm::GlobalValue::InternalLinkage,
@@ -226,4 +227,14 @@ void deconstruct_ssa() {
   }
 
   deconstruct_phi_nodes(defs, uses);
+}
+
+void llvm_dump() {
+  std::error_code error;
+  llvm::raw_fd_ostream output = llvm::raw_fd_ostream(output_file, error);
+  if (error) {
+    llvm::errs() << "Failed to open LLVM IR output file: " << error.message() << '\n';
+    CHECK_INVARIANT(false, "");
+  }
+  module->print(output, nullptr);
 }

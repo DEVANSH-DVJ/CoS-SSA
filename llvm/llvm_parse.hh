@@ -4,7 +4,7 @@
 #include <llvm/IR/Value.h>
 #include <map>
 
-void llvm_set_in(std::string file);
+void llvm_set_in(llvm::Module* module);
 std::map<int, llvm::Value*> llvm_parse();
 
 #endif

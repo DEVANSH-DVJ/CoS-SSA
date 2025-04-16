@@ -62,6 +62,8 @@ public:
   void add_meta(SSA_Meta *meta);
 
   /* Helper functions */
+  // Dump the node
+  void dump();
   // Visualize the node
   void visualize();
 };
