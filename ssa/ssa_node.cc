@@ -109,7 +109,7 @@ void SSA_Node::add_meta(SSA_Meta *meta) {
 
 std::map<int, SSA_Meta*>* SSA_Node::get_metas() {
   CHECK_INVARIANT(metas != NULL, "Meta cannot be NULL");
-  CHECK_INVARIANT(metas->size() < 1, "Meta must have at least one element");
+  CHECK_INVARIANT(metas->size() >= 1, "Meta must have at least one element");
   return metas;
 }
 

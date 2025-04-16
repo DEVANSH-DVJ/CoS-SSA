@@ -22,7 +22,9 @@ constexpr const char* CUR_CONTEXT_NAME = "__cos_ssa_current_context";
 
 void set_context_to(llvm::GlobalVariable* cur_context, int new_context, llvm::Instruction* insert_before) {
   llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
+  llvm::Value* old_context = new llvm::LoadInst(int_type, cur_context, "", insert_before);
   new llvm::StoreInst(llvm::ConstantInt::get(int_type, new_context), cur_context, insert_before);
+  new llvm::StoreInst(old_context, cur_context, insert_before->getNextNode());
 }
 
 void deconstruct_context_transition(llvm::CallInst* call, llvm::GlobalVariable* cur_context, std::map<int, int>& transitions) {
@@ -35,6 +37,7 @@ void deconstruct_context_transition(llvm::CallInst* call, llvm::GlobalVariable* 
   }
 
   llvm::BasicBlock* callBB = call->getParent();
+  llvm::Function* func = callBB->getParent();
   llvm::BasicBlock* chainBB = callBB->splitBasicBlockBefore(call);
   chainBB->getTerminator()->eraseFromParent();
   llvm::IRBuilder<> builder (chainBB);
@@ -46,15 +49,15 @@ void deconstruct_context_transition(llvm::CallInst* call, llvm::GlobalVariable* 
   for (auto it = transitions.begin(); it != final_transition; ++it) {
     llvm::Value* cond = builder.CreateICmpEQ(cur_context_value, llvm::ConstantInt::get(int_type, it->first));
 
-    llvm::BasicBlock* trueBB = llvm::BasicBlock::Create(module->getContext(), "true");
-    llvm::BasicBlock* falseBB = llvm::BasicBlock::Create(module->getContext(), "false");
+    llvm::BasicBlock* trueBB = llvm::BasicBlock::Create(module->getContext(), "true", func);
+    llvm::BasicBlock* falseBB = llvm::BasicBlock::Create(module->getContext(), "false", func);
     builder.CreateCondBr(cond, trueBB, falseBB);
 
     builder.SetInsertPoint(trueBB);
     llvm::Instruction* br = builder.CreateBr(callBB);
     set_context_to(cur_context, it->second, br);
     
-    chainBB = falseBB;
+    builder.SetInsertPoint(falseBB);
   }
 
   llvm::Instruction* br = builder.CreateBr(callBB);
@@ -68,6 +71,7 @@ llvm::GlobalVariable* get_global(SSA_Opd* operand, std::map<std::string, llvm::G
     llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
     llvm::GlobalVariable* global = new llvm::GlobalVariable(int_type, false, llvm::GlobalValue::InternalLinkage,
                                                             llvm::ConstantInt::get(int_type, 0), qdef);
+    module->insertGlobalVariable(global);
     qdef_globals[qdef] = global;
     return global;
   }
@@ -78,9 +82,9 @@ llvm::Value* get_value(SSA_Opd* operand, llvm::Instruction* insert_before,
                        std::map<std::string, llvm::GlobalVariable*>& qdef_globals) {
   llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
   switch (operand->get_type()) {
-    case SSA_VarOpd: {
+    case SSA_VarOpd:
+    case SSA_PhiOpd:
       return new llvm::LoadInst(int_type, get_global(operand, qdef_globals), "", insert_before);
-    }
     case SSA_NumOpd:
       return llvm::ConstantInt::get(int_type, operand->get_opd_value());
     default:
@@ -116,21 +120,30 @@ void create_assignment(std::list<SSA_Stmt*>* stmts, llvm::Instruction* insert_be
     llvm::Value* v1 = get_value(operands[0], insert_before, qdef_globals);
     llvm::Value* v2 = get_value(operands[1], insert_before, qdef_globals);
     if (op == "+") {
-      stored_value = llvm::BinaryOperator::CreateAdd(v1, v2);
+      llvm::Instruction* inst = llvm::BinaryOperator::CreateAdd(v1, v2);
+      inst->insertBefore(insert_before);
+      stored_value = inst;
     } else if (op == "-") {
-      stored_value = llvm::BinaryOperator::CreateSub(v1, v2);
+      llvm::Instruction* inst = llvm::BinaryOperator::CreateSub(v1, v2);
+      inst->insertBefore(insert_before);
+      stored_value = inst;
     } else if (op == "*") {
-      stored_value = llvm::BinaryOperator::CreateMul(v1, v2);
+      llvm::Instruction* inst = llvm::BinaryOperator::CreateMul(v1, v2);
+      inst->insertBefore(insert_before);
+      stored_value = inst;
     } else if (op == "/") {
-      stored_value = llvm::BinaryOperator::CreateSDiv(v1, v2);
+      llvm::Instruction* inst = llvm::BinaryOperator::CreateSDiv(v1, v2);
+      inst->insertBefore(insert_before);
+      stored_value = inst;
     } else {
       CHECK_INVARIANT(false, "Control should not reach");
     }
   }
 
   llvm::GlobalVariable* store_loc = get_global((*final_stmt)->get_lhs(), qdef_globals);
+
   llvm::StoreInst* store = new llvm::StoreInst(stored_value, store_loc, insert_before);
-  defs[llvm::dyn_cast<llvm::GlobalVariable>(store_loc)] = store;
+  defs[store_loc] = store;
 }
 
 // TODO: handle the case with USEVAR
@@ -138,7 +151,7 @@ void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instr
                                     std::map<std::string, llvm::GlobalVariable*>& qdef_globals,
                                     std::map<llvm::GlobalVariable*, llvm::StoreInst*>& defs,
                                     std::map<llvm::GlobalVariable*, std::set<llvm::GlobalVariable*>>& uses) {
-  CHECK_INVARIANT(assign != nullptr, "Expected a non null call inst");
+  CHECK_INVARIANT(assign != nullptr, "Expected a non null load/store inst");
   CHECK_INVARIANT(metas->size() > 0, "Expected at least one meta assignment");
 
   if (metas->size() == 1) {
@@ -148,6 +161,7 @@ void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instr
   }
 
   llvm::BasicBlock* assignBB = assign->getParent();
+  llvm::Function* func = assignBB->getParent();
   llvm::BasicBlock* chainBB = assignBB->splitBasicBlockBefore(assign);
   chainBB->getTerminator()->eraseFromParent();
   llvm::IRBuilder<> builder (chainBB);
@@ -159,8 +173,8 @@ void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instr
   for (auto it = metas->begin(); it != final_meta; ++it) {
     llvm::Value* cond = builder.CreateICmpEQ(cur_context_value, llvm::ConstantInt::get(int_type, it->second->get_meta_num().second));
 
-    llvm::BasicBlock* trueBB = llvm::BasicBlock::Create(module->getContext(), "true");
-    llvm::BasicBlock* falseBB = llvm::BasicBlock::Create(module->getContext(), "false");
+    llvm::BasicBlock* trueBB = llvm::BasicBlock::Create(module->getContext(), "true", func);
+    llvm::BasicBlock* falseBB = llvm::BasicBlock::Create(module->getContext(), "false", func);
     builder.CreateCondBr(cond, trueBB, falseBB);
 
     builder.SetInsertPoint(trueBB);
@@ -168,7 +182,7 @@ void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instr
 
     create_assignment(it->second->get_stmts(), br, qdef_globals, defs, uses);
 
-    chainBB = falseBB;
+    builder.SetInsertPoint(falseBB);
   }
 
   llvm::Instruction* br = builder.CreateBr(assignBB);

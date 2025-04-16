@@ -210,7 +210,7 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const s
         if (get_operand_repr(var->getOperand(0), &ropd1, globals)) {
           res.push_back(std::make_pair(
             new CFG_Node(CFG_NodeType::CFG_AssignNode, node_num++, "=", new CFG_Opd(CFG_OpdType::CFG_VarOpd, var->getName().str()), ropd1, nullptr),
-            var));
+            nullptr));
         }
       }
     }

@@ -431,7 +431,7 @@ void Program::run() {
   } else if (this->tool == "all") {
     this->parse_cfg_from_llvm();
     this->construct_ddg();
-    /*this->propagate_ddg_constants();*/
+    this->propagate_ddg_constants();
     this->construct_ssa();
     this->deconstruct_ssa();
     this->dump_llvm();
