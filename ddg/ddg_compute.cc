@@ -8,6 +8,14 @@
 
 extern Program* program;
 
+QDef gen_qdef(CFG_Node* cfg_node, QNode qnode) {
+  const std::string& def = cfg_node->get_def();
+  if (cfg_node->get_rhs_operands()[0]->get_type() == CFG_OpdType::CFG_InputOpd) {
+    return {{def, qnode.node}, 1};
+  }
+  return {{def, qnode.node}, qnode.context};
+}
+
 void ddg_construct() {
   int default_context = program->insert_ddg_context({"main"});
 
@@ -51,9 +59,8 @@ void ddg_construct() {
     }
 
     if (node->get_type() == CFG_NodeType::CFG_AssignNode) {
-      const std::string& def = node->get_def();
       std::set<std::string> uses = node->get_uses();
-      QDef new_qdef = {{def, cur_qnode.node}, cur_qnode.context};
+      QDef new_qdef = gen_qdef(node, cur_qnode);
       program->add_ddg_node(new_qdef);
       for (QDef qdef : rd_in[cur_qnode]) {
         if (uses.find(qdef.def.var_name) != uses.end()) {
@@ -89,7 +96,7 @@ void ddg_construct() {
         }
 
         // Applies rd_gen
-        rd_out[cur_qnode].insert({{killed_var, cur_qnode.node}, cur_qnode.context});
+        rd_out[cur_qnode].insert(gen_qdef(node, cur_qnode));
       }
     }
 

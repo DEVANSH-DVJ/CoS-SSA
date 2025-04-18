@@ -308,8 +308,8 @@ void Program::dump_ssa() {
 }
 
 void Program::visualize_ssa() {
-  string dot_file = input_name + ".ssa.dot";
-  string png_file = input_name + ".ssa.png";
+  string dot_file = input_name + ".out.ssa.dot";
+  string png_file = input_name + ".out.ssa.png";
 
   CHECK_INVARIANT(dot_fd == NULL, "Dot file descriptor must be NULL.");
   dot_fd = new fstream(dot_file.c_str(), ios::out | ios::trunc);
@@ -433,7 +433,6 @@ void Program::run() {
     this->construct_ddg();
     this->propagate_ddg_constants();
     this->construct_ssa();
-    /*this->dump_ssa();*/
     this->deconstruct_ssa();
     this->dump_llvm();
   } else {
