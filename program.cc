@@ -282,7 +282,7 @@ void Program::visualize_ddg() {
 }
 
 void Program::dump_ssa() {
-  string ssa_file = input_name + ".out.ssa";
+  string ssa_file = input_name + ".ssa";
 
   CHECK_INVARIANT(dot_fd == NULL, "Dot file descriptor must be NULL.");
   dot_fd = new fstream(ssa_file.c_str(), ios::out | ios::trunc);
@@ -308,8 +308,8 @@ void Program::dump_ssa() {
 }
 
 void Program::visualize_ssa() {
-  string dot_file = input_name + ".out.ssa.dot";
-  string png_file = input_name + ".out.ssa.png";
+  string dot_file = input_name + ".ssa.dot";
+  string png_file = input_name + ".ssa.png";
 
   CHECK_INVARIANT(dot_fd == NULL, "Dot file descriptor must be NULL.");
   dot_fd = new fstream(dot_file.c_str(), ios::out | ios::trunc);
