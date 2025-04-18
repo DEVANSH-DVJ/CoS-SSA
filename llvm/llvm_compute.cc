@@ -87,7 +87,13 @@ llvm::Value* get_value(SSA_Opd* operand, llvm::Instruction* insert_before,
       return new llvm::LoadInst(int_type, get_global(operand, qdef_globals), "", insert_before);
     case SSA_NumOpd:
       return llvm::ConstantInt::get(int_type, operand->get_opd_value());
+    case SSA_InputOpd: {
+      llvm::Value* value = program->get_llvm_node(operand->get_meta_num().first, true);
+      CHECK_INVARIANT(llvm::isa<llvm::StoreInst>(value), "Expected store inst");
+      return llvm::dyn_cast<llvm::StoreInst>(value)->getValueOperand();
+    }
     default:
+      std::cout << operand->str() << '\n';
       CHECK_INVARIANT(false, "Expected a variable or number operand");
       return nullptr;
   }
