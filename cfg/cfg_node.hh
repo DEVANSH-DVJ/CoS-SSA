@@ -56,6 +56,8 @@ public:
   std::string &get_parent_proc();
 
   /* Update functions */
+  // Set the node id
+  void set_node_id(int node_id);
   // Set the parent procedure
   void set_parent_proc(std::string parent_proc);
   // Add an in edge

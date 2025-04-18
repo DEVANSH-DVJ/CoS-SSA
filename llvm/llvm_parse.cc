@@ -145,6 +145,25 @@ GlobalInfo get_globals(llvm::Module* module) {
   return globals;
 }
 
+void erase_replaceable_operand(llvm::Value* value, std::set<llvm::Value*>& erased_uses) {
+  llvm::LoadInst* load;
+  if ((load = llvm::dyn_cast<llvm::LoadInst>(value)) && load->getNumUses() == 1) {
+    erased_uses.insert(load);
+    load->eraseFromParent();
+  }
+}
+
+void erase_replaceable_inst(llvm::Instruction* inst, std::set<llvm::Value*>& erased_uses) {
+  CHECK_INVARIANT(inst->getNumOperands() == 2, "Expected instruction with two operands");
+  
+  erase_replaceable_operand(inst->getOperand(0), erased_uses);
+  erase_replaceable_operand(inst->getOperand(1), erased_uses);
+
+  if (inst->getNumUses() == 1) {
+    inst->eraseFromParent();
+  }
+}
+
 bool get_operand_repr(llvm::Value* operand, CFG_Opd** repr, const GlobalInfo& globals) {
   if (llvm::Instruction* inst = llvm::dyn_cast<llvm::Instruction>(operand)) {
     auto it = globals.loads.find(inst);
@@ -168,7 +187,7 @@ struct RHS {
   CFG_Opd* ropd2;
 };
 
-RHS get_assignment_value(llvm::Value* value, const GlobalInfo& globals) {
+RHS get_assignment_value(llvm::Value* value, const GlobalInfo& globals, std::set<llvm::Value*>& erased_uses) {
   static const std::map<unsigned int, char> ops {
     {llvm::Instruction::Add, '+'},
     {llvm::Instruction::Sub, '-'},
@@ -178,6 +197,7 @@ RHS get_assignment_value(llvm::Value* value, const GlobalInfo& globals) {
 
   CFG_Opd* ropd1;
   if (get_operand_repr(value, &ropd1, globals)) {
+    erase_replaceable_operand(value, erased_uses);
     return {"=", ropd1, nullptr};
   }
   if (llvm::Instruction* inst = llvm::dyn_cast<llvm::Instruction>(value)) {
@@ -187,6 +207,7 @@ RHS get_assignment_value(llvm::Value* value, const GlobalInfo& globals) {
         if (get_operand_repr(inst->getOperand(0), &ropd1, globals)) {
           CFG_Opd* ropd2;
           if (get_operand_repr(inst->getOperand(1), &ropd2, globals)) {
+            erase_replaceable_inst(inst, erased_uses);
             return {std::string(1, it->second), ropd1, ropd2};
           }
           delete ropd1;
@@ -200,16 +221,17 @@ RHS get_assignment_value(llvm::Value* value, const GlobalInfo& globals) {
 
 std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const std::string& proc, llvm::BasicBlock* bb, const GlobalInfo& globals) {
   std::vector<std::pair<CFG_Node*, llvm::Value*>> res;
+  std::set<llvm::Value*> erased_uses;
 
   if (bb->isEntryBlock()) {
-    res.push_back(std::make_pair(new CFG_Node(CFG_NodeType::CFG_StartNode, node_num++, "START " + proc), nullptr));
+    res.push_back(std::make_pair(new CFG_Node(CFG_NodeType::CFG_StartNode, 0, "START " + proc), nullptr));
 
     if (proc == "main") { // TODO: handle initial values some other way
       for (llvm::GlobalVariable* var : globals.globals) {
         CFG_Opd* ropd1;
         if (get_operand_repr(var->getOperand(0), &ropd1, globals)) {
           res.push_back(std::make_pair(
-            new CFG_Node(CFG_NodeType::CFG_AssignNode, node_num++, "=", new CFG_Opd(CFG_OpdType::CFG_VarOpd, var->getName().str()), ropd1, nullptr),
+            new CFG_Node(CFG_NodeType::CFG_AssignNode, 0, "=", new CFG_Opd(CFG_OpdType::CFG_VarOpd, var->getName().str()), ropd1, nullptr),
             nullptr));
         }
       }
@@ -222,30 +244,30 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const s
       if (llvm::CallInst* call = llvm::dyn_cast<llvm::CallInst>(&inst)) {
         auto it = globals.functions.find(call->getCalledFunction()->getName().str());
         if (it != globals.functions.end()) {
-          res.push_back(std::make_pair(new CFG_Node(CFG_NodeType::CFG_CallNode, node_num++, "CALL " + *it, *it), call));
+          res.push_back(std::make_pair(new CFG_Node(CFG_NodeType::CFG_CallNode, 0, "CALL " + *it, *it), call));
         }
       }
 
-      /*res.push_back(std::make_pair(*/
-      /*  new CFG_Node(CFG_NodeType::CFG_AssignNode, node_num++, "=", new CFG_Opd(CFG_OpdType::CFG_UsevarOpd), new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), nullptr),*/
-      /*  &inst*/
-      /*));*/
+      res.push_back(std::make_pair(
+        new CFG_Node(CFG_NodeType::CFG_AssignNode, 0, "=", new CFG_Opd(CFG_OpdType::CFG_UsevarOpd), new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), nullptr),
+        &inst
+      )); // TODO: only do this if this has a use that we will not track
       /*res.push_back("USEVAR = " + it->second);*/
     } else {
       auto it = globals.stores.find(&inst);
       if (it != globals.stores.end()) {
         if (llvm::StoreInst* store = llvm::dyn_cast<llvm::StoreInst>(&inst)) {
-          RHS rhs = get_assignment_value(store->getValueOperand(), globals);
+          RHS rhs = get_assignment_value(store->getValueOperand(), globals, erased_uses);
           res.push_back(std::make_pair(
-            new CFG_Node(CFG_NodeType::CFG_AssignNode, node_num++, rhs.op, new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), rhs.ropd1, rhs.ropd2),
+            new CFG_Node(CFG_NodeType::CFG_AssignNode, 0, rhs.op, new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), rhs.ropd1, rhs.ropd2),
             store
           ));
           /*res.push_back(it->second + " = " + get_assignment_value(store->getValueOperand(), globals));*/
         } else if (llvm::ReturnInst* ret = llvm::dyn_cast<llvm::ReturnInst>(&inst)) {
           if (ret->getNumOperands() == 1) {
-            RHS rhs = get_assignment_value(ret->getOperand(0), globals);
+            RHS rhs = get_assignment_value(ret->getOperand(0), globals, erased_uses);
             res.push_back(std::make_pair(
-              new CFG_Node(CFG_NodeType::CFG_AssignNode, node_num++, rhs.op, new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), rhs.ropd1, rhs.ropd2),
+              new CFG_Node(CFG_NodeType::CFG_AssignNode, 0, rhs.op, new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), rhs.ropd1, rhs.ropd2),
               store
             ));
             /*res.push_back(it->second + " = " + get_assignment_value(ret->getOperand(0), globals));*/
@@ -256,7 +278,7 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const s
         if (func != nullptr) {
           auto it = globals.functions.find(func->getName().str());
           if (it != globals.functions.end()) {
-            res.push_back(std::make_pair(new CFG_Node(CFG_NodeType::CFG_CallNode, node_num++, "CALL " + *it, *it), call));
+            res.push_back(std::make_pair(new CFG_Node(CFG_NodeType::CFG_CallNode, 0, "CALL " + *it, *it), call));
           }
         }
       }
@@ -264,14 +286,20 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const s
   }
 
   if (res.empty()) {
-    res.push_back(std::make_pair(new CFG_Node(CFG_NodeType::CFG_EmptyNode, node_num++, ""), nullptr));
+    res.push_back(std::make_pair(new CFG_Node(CFG_NodeType::CFG_EmptyNode, 0, ""), nullptr));
   }
 
+  std::vector<std::pair<CFG_Node*, llvm::Value*>> filtered_res;
   for (auto pair : res) {
-    pair.first->set_parent_proc(proc);
+    if (erased_uses.find(pair.second) == erased_uses.end()) {
+      pair.first->set_node_id(node_num++);
+      filtered_res.push_back(pair);
+    } else {
+      delete pair.first;
+    }
   }
 
-  return res;
+  return filtered_res;
 }
 
 void convert_to_proc_cfg(llvm::Function* func, std::map<int, llvm::Value*>* node_to_llvm, const GlobalInfo& globals) {
@@ -280,11 +308,13 @@ void convert_to_proc_cfg(llvm::Function* func, std::map<int, llvm::Value*>* node
   std::map<llvm::BasicBlock*, std::set<llvm::BasicBlock*>> cfg_transitions = construct_llvm_cfg(func);
   std::map<llvm::BasicBlock*, std::pair<int, int>> basic_blocks;
 
-  Procedure* proc = new Procedure(func->getName().str());
+  std::string funcName = func->getName().str();
+  Procedure* proc = new Procedure(funcName);
   for (auto pair : cfg_transitions) {
-    std::vector<std::pair<CFG_Node*, llvm::Value*>> nodes = get_nodes_in_basic_block(func->getName().str(), pair.first, globals);
+    std::vector<std::pair<CFG_Node*, llvm::Value*>> nodes = get_nodes_in_basic_block(funcName, pair.first, globals);
     for (size_t i = 0; i < nodes.size(); ++i) {
       CFG_Node* node = nodes[i].first;
+      node->set_parent_proc(funcName);
       program->add_cfg_node(node);
       proc->add_cfg_node(node);
       (*node_to_llvm)[node_to_llvm->size() + 1] = nodes[i].second;
@@ -301,8 +331,8 @@ void convert_to_proc_cfg(llvm::Function* func, std::map<int, llvm::Value*>* node
     }
   }
 
-  CFG_Node* end_node = new CFG_Node(CFG_NodeType::CFG_EndNode, node_num, "END " + func->getName().str());
-  end_node->set_parent_proc(func->getName().str());
+  CFG_Node* end_node = new CFG_Node(CFG_NodeType::CFG_EndNode, node_num, "END " + funcName);
+  end_node->set_parent_proc(funcName);
   program->add_cfg_node(end_node);
   proc->add_cfg_node(end_node);
   (*node_to_llvm)[node_to_llvm->size() + 1] = nullptr;

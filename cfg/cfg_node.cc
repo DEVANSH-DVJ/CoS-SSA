@@ -97,6 +97,10 @@ int CFG_Node::get_node_id() { return this->node_id; }
 
 string &CFG_Node::get_parent_proc() { return this->parent_proc; }
 
+void CFG_Node::set_node_id(int node_id) {
+  this->node_id = node_id;
+}
+
 void CFG_Node::set_parent_proc(string parent_proc) {
   CHECK_INVARIANT(this->parent_proc == "", "Parent proc already set");
   this->parent_proc = parent_proc;

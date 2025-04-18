@@ -433,6 +433,7 @@ void Program::run() {
     this->construct_ddg();
     this->propagate_ddg_constants();
     this->construct_ssa();
+    /*this->dump_ssa();*/
     this->deconstruct_ssa();
     this->dump_llvm();
   } else {
