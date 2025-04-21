@@ -74,6 +74,11 @@ SSA_NodeType SSA_Node::get_type() { return this->type; }
 
 int SSA_Node::get_node_id() { return this->node_id; }
 
+const std::string& SSA_Node::get_callee() {
+  CHECK_INVARIANT(this->type == SSA_CallNode, "Can't get callee of non call node")
+  return this->callee_proc;
+}
+
 string &SSA_Node::get_parent_proc() { return this->parent_proc; }
 
 void SSA_Node::set_parent_proc(string parent_proc) {

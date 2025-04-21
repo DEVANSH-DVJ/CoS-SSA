@@ -27,7 +27,7 @@ void set_context_to(llvm::GlobalVariable* cur_context, int new_context, llvm::In
   new llvm::StoreInst(old_context, cur_context, insert_before->getNextNode());
 }
 
-void deconstruct_context_transition(llvm::CallInst* call, llvm::GlobalVariable* cur_context, std::map<int, int>& transitions) {
+void deconstruct_context_transition(llvm::CallInst* call, llvm::GlobalVariable* cur_context, const std::map<int, int>& transitions) {
   CHECK_INVARIANT(call != nullptr, "Expected a non null call inst");
   CHECK_INVARIANT(transitions.size() > 0, "Expected at least one context transition");
 
@@ -263,6 +263,17 @@ void ssa_deconstruct() {
   for (llvm::GlobalVariable& global : module->globals()) {
     qdef_globals[global.getName().str()] = &global;
   }
+  std::set<std::string> funcUsesContext;
+  for (auto pair : *program->get_procs()) {
+    for (int node : pair.second->get_ssa_nodes()) {
+      SSA_Node* ssa_node = program->get_ssa_node(node, true);
+      if (ssa_node->get_type() == SSA_AssignNode && ssa_node->get_metas()->size() > 1) {
+        funcUsesContext.insert(pair.first);
+        break;
+      }
+    }
+  }
+
   llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
   llvm::GlobalVariable* cur_context = new llvm::GlobalVariable(int_type, false, llvm::GlobalValue::InternalLinkage,
                                                            llvm::ConstantInt::get(int_type, 0), CUR_CONTEXT_NAME);
@@ -279,7 +290,9 @@ void ssa_deconstruct() {
       }
 
       if (ssa_node->get_type() == SSA_NodeType::SSA_CallNode) {
-        deconstruct_context_transition(llvm::dyn_cast<llvm::CallInst>(value), cur_context, program->get_ddg_transitions(ssa_node->get_node_id()));
+        if (funcUsesContext.find(ssa_node->get_callee()) != funcUsesContext.end()) {
+          deconstruct_context_transition(llvm::dyn_cast<llvm::CallInst>(value), cur_context, program->get_ddg_transitions(ssa_node->get_node_id()));
+        }
         continue;
       }
 

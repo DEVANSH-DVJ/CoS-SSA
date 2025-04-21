@@ -48,6 +48,7 @@ public:
   int get_node_id();
   // Get the parent procedure
   std::string &get_parent_proc();
+  const std::string& get_callee();
   // Get metas
   std::map<int, SSA_Meta*>* get_metas();
 
