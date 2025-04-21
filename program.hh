@@ -42,6 +42,7 @@ class Program {
   std::map<QDef, std::set<QDef>> ddg_edges;
   std::map<QDef, std::set<QDef>> ddg_reverse_edges;
   std::map<QDef, int> ddg_propagated_values;
+  std::set<QDef> ddg_dead_qdefs;
   std::map<int, std::map<int, int>> ddg_context_transitions;
   std::map<int, std::set<QNode>> ddg_reverse_context_transitions;
 
@@ -66,6 +67,8 @@ class Program {
   void construct_ddg();
   // Do constant propagation on the DDG
   void propagate_ddg_constants();
+  // Do dead code elimination on the DDG
+  void detect_dead_ddg_qdefs();
   // Construct the SSA graph from the DDG
   void construct_ssa();
   // Deconstruct the SSA graph into LLVM IR
@@ -125,8 +128,10 @@ public:
   std::map<int, std::set<QNode>>::iterator get_ddg_reverse_transitions(int context);
   std::map<int, std::set<QNode>>::iterator ddg_reverse_transitions_end();
   bool get_ddg_propagated_value(QDef qdef, int* value);
+  bool ddg_is_dead(QDef qdef);
   int insert_ddg_context(Context context);
   void add_ddg_node(QDef node);
+  void remove_ddg_node(QDef node);
   void add_ddg_edge(QDef src, QDef dest);
 
   void llvm_init_module();

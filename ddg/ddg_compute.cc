@@ -225,3 +225,159 @@ std::map<QDef, int> ddg_propagate_constants() {
 
   return propagated_values;
 }
+
+bool tryReduce(Def def, const std::set<int>& contexts) {
+  std::map<Def, std::pair<std::set<int>, int>> prev_versions;
+  bool first = true;
+  for (int context : contexts) {
+    int value;
+    if (program->get_ddg_propagated_value({def, context}, &value)) {
+      if (!prev_versions.empty()) {
+        return false;
+      }
+      first = false;
+      continue;
+    }
+
+    std::set<QDef> other = program->get_ddg_incoming({def, context});
+    std::map<Def, std::pair<std::set<int>, int>> versions;
+    for (QDef use : other) {
+      auto it = versions.find(use.def);
+      if (it == versions.end()) {
+        if (program->get_ddg_propagated_value(use, &value)) {
+          versions[use.def] = std::make_pair(std::set<int>(), value);
+        } else {
+          versions[use.def].first.insert(use.context);
+        }
+      } else {
+        bool res;
+        if ((res = program->get_ddg_propagated_value(use, &value)) != it->second.first.empty()) {
+          return false;
+        }
+        if (res) {
+          if (it->second.second != value) {
+            return false;
+          }
+        } else {
+          it->second.first.insert(use.context);
+        }
+      }
+    }
+
+    if (first) {
+      first = false;
+      prev_versions = versions;
+    } else if (prev_versions != versions) {
+      return false;
+    }
+  }
+
+  std::set<QDef> uses;
+  std::set<QDef> usedBy;
+  first = true;
+  for (int context : contexts) {
+    if (first) {
+      for (QDef src : program->get_ddg_incoming({def, context})) {
+        uses.insert(src);
+      }
+      first = false;
+    }
+    for (QDef dest : program->get_ddg_outgoing({def, context})) {
+      usedBy.insert(dest);
+    }
+    program->remove_ddg_node({def, context});
+  }
+
+  for (QDef src : uses) {
+    program->add_ddg_edge(src, {def, 1});
+  }
+  for (QDef dest : usedBy) {
+    program->add_ddg_edge({def, 1}, dest);
+  }
+  return true;
+}
+
+void updateDeps(QDef qdef, const std::set<Def>& reduced) {
+  for (QDef use : program->get_ddg_incoming(qdef)) {
+    if (reduced.find(use.def) != reduced.end()) {
+      program->add_ddg_edge({use.def, 1}, qdef);
+    }
+  }
+}
+
+void ddg_reduce() {
+  std::map<Def, std::set<int>> qdefs;
+  for (QDef qdef : program->get_ddg_nodes()) {
+    qdefs[qdef.def].insert(qdef.context);
+  }
+
+  std::queue<Def> worklist;
+  std::set<Def> reduced;
+  for (auto pair : qdefs) {
+    if (tryReduce(pair.first, pair.second)) {
+      worklist.push(pair.first);
+      reduced.insert(pair.first);
+    }
+  }
+
+  while (!worklist.empty()) {
+    Def def = worklist.front();
+    worklist.pop();
+    for (int context : qdefs[def]) {
+      for (QDef use : program->get_ddg_outgoing({def, context})) {
+        updateDeps(use, reduced);
+      }
+      if (context != 1) {
+        program->remove_ddg_node({def, context});
+      }
+      for (QDef use : program->get_ddg_outgoing({def, context})) {
+        if (reduced.find({use.def}) == reduced.end()) {
+          if (tryReduce(use.def, qdefs[use.def])) {
+            worklist.push(use.def);
+            reduced.insert(use.def);
+          }
+        }
+      }
+    }
+  }
+}
+
+std::set<QDef> ddg_detect_dead_qdefs() {
+  std::set<QDef> dead_qdefs;
+  std::queue<QDef> worklist;
+  std::map<QDef, int> num_uses;
+  for (QDef qdef : program->get_ddg_nodes()) {
+    int uses = program->get_ddg_outgoing(qdef).size();
+    num_uses[qdef] = uses;
+    if (uses == 0) {
+      worklist.push(qdef);
+      dead_qdefs.insert(qdef);
+    }
+  }
+  for (QDef qdef : program->get_ddg_nodes()) {
+    int value;
+    if (program->get_ddg_propagated_value(qdef, &value)) {
+      worklist.push(qdef);
+      dead_qdefs.insert(qdef);
+      for (QDef incoming : program->get_ddg_incoming(qdef)) {
+        if (--num_uses[incoming] == 0) {
+          worklist.push(incoming);
+          dead_qdefs.insert(incoming);
+        }
+      }
+    }
+  }
+
+  while (!worklist.empty()) {
+    QDef qdef = worklist.front();
+    worklist.pop();
+    for (QDef incoming : program->get_ddg_incoming(qdef)) {
+      if (--num_uses[incoming] == 0) {
+        worklist.push(incoming);
+        dead_qdefs.insert(incoming);
+      }
+    }
+  }
+
+  return dead_qdefs;
+}

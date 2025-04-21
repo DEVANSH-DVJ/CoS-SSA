@@ -248,11 +248,11 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const s
         }
       }
 
+      // If this is actually not used by a USEVAR, this will be removed later
       res.push_back(std::make_pair(
         new CFG_Node(CFG_NodeType::CFG_AssignNode, 0, "=", new CFG_Opd(CFG_OpdType::CFG_UsevarOpd), new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), nullptr),
         &inst
-      )); // TODO: only do this if this has a use that we will not track
-      /*res.push_back("USEVAR = " + it->second);*/
+      ));
     } else {
       auto it = globals.stores.find(&inst);
       if (it != globals.stores.end()) {
@@ -262,7 +262,6 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const s
             new CFG_Node(CFG_NodeType::CFG_AssignNode, 0, rhs.op, new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), rhs.ropd1, rhs.ropd2),
             store
           ));
-          /*res.push_back(it->second + " = " + get_assignment_value(store->getValueOperand(), globals));*/
         } else if (llvm::ReturnInst* ret = llvm::dyn_cast<llvm::ReturnInst>(&inst)) {
           if (ret->getNumOperands() == 1) {
             RHS rhs = get_assignment_value(ret->getOperand(0), globals, erased_uses);
@@ -270,7 +269,6 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const s
               new CFG_Node(CFG_NodeType::CFG_AssignNode, 0, rhs.op, new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), rhs.ropd1, rhs.ropd2),
               store
             ));
-            /*res.push_back(it->second + " = " + get_assignment_value(ret->getOperand(0), globals));*/
           }
         }
       } else if (llvm::CallInst* call = llvm::dyn_cast<llvm::CallInst>(&inst)) {

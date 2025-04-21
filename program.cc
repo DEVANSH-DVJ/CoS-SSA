@@ -186,6 +186,8 @@ void Program::construct_ddg() { ddg_construct(); }
 
 void Program::propagate_ddg_constants() { ddg_propagated_values = ddg_propagate_constants(); }
 
+void Program::detect_dead_ddg_qdefs() { ddg_dead_qdefs = ddg_detect_dead_qdefs(); }
+
 void Program::construct_ssa() {
   ssa_construct();
 }
@@ -396,12 +398,30 @@ bool Program::get_ddg_propagated_value(QDef qdef, int* value) {
   return false;
 }
 
+bool Program::ddg_is_dead(QDef qdef) {
+  return ddg_dead_qdefs.find(qdef) != ddg_dead_qdefs.end();
+}
+
 int Program::insert_ddg_context(Context context) {
   return ddg_context_table.insert_context(context);
 }
 
 void Program::add_ddg_node(QDef node) {
   ddg_nodes.insert(node);
+}
+
+void Program::remove_ddg_node(QDef node) {
+  CHECK_INVARIANT(ddg_nodes.find(node) != ddg_nodes.end(), "QDef is not an existing node");
+
+  ddg_nodes.erase(ddg_nodes.find(node));
+  for (QDef dest : ddg_edges[node]) {
+    ddg_reverse_edges[dest].erase(ddg_reverse_edges[dest].find(node));
+  }
+  ddg_edges.erase(ddg_edges.find(node));
+  for (QDef src : ddg_reverse_edges[node]) {
+    ddg_edges[src].erase(ddg_edges[src].find(node));
+  }
+  ddg_reverse_edges.erase(ddg_reverse_edges.find(node));
 }
 
 void Program::add_ddg_edge(QDef src, QDef dest) {

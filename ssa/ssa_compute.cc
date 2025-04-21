@@ -69,7 +69,7 @@ void ssa_construct() {
   }
 
   for (QDef qdef : program->get_ddg_nodes()) {
-    if (qdef.def.node == 0) {
+    if (qdef.def.node == 0 || program->ddg_is_dead(qdef)) {
       continue;
     }
 
@@ -117,5 +117,14 @@ void ssa_construct() {
     stmts->push_back(new SSA_Stmt(SSA_AssignStmt, cfg_node->get_op(), lopd, ropd1, ropd2));
 
     node->add_meta(new SSA_Meta(std::make_pair(qdef.def.node, qdef.context), stmts));
+  }
+
+  for (auto pair : *program->get_procs()) {
+    for (int node : pair.second->get_ssa_nodes()) {
+      SSA_Node* ssa_node = program->get_ssa_node(node, true);
+      if (ssa_node->get_metas()->size() == 0) {
+        *ssa_node = SSA_Node(SSA_EmptyNode, ssa_node->get_node_id());
+      }
+    }
   }
 }

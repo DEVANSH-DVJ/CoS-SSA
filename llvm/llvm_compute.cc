@@ -65,24 +65,31 @@ void deconstruct_context_transition(llvm::CallInst* call, llvm::GlobalVariable* 
 }
 
 llvm::GlobalVariable* get_global(SSA_Opd* operand, std::map<std::string, llvm::GlobalVariable*>& qdef_globals) {
-  std::string qdef = operand->str();
-  auto it = qdef_globals.find(qdef);
-  if (it == qdef_globals.end()) {
-    llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
-    llvm::GlobalVariable* global = new llvm::GlobalVariable(int_type, false, llvm::GlobalValue::InternalLinkage,
-                                                            llvm::ConstantInt::get(int_type, 0), qdef);
-    module->insertGlobalVariable(global);
-    qdef_globals[qdef] = global;
-    return global;
-  }
-  return it->second;
+  return qdef_globals[operand->get_opd_var()];
+  /*std::string qdef = operand->str();*/
+  /*auto it = qdef_globals.find(qdef);*/
+  /*if (it == qdef_globals.end()) {*/
+  /*  llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);*/
+  /*  llvm::GlobalVariable* global = new llvm::GlobalVariable(int_type, false, llvm::GlobalValue::InternalLinkage,*/
+  /*                                                          llvm::ConstantInt::get(int_type, 0), qdef);*/
+  /*  module->insertGlobalVariable(global);*/
+  /*  qdef_globals[qdef] = global;*/
+  /*  return global;*/
+  /*}*/
+  /*return it->second;*/
 }
 
 llvm::Value* get_value(SSA_Opd* operand, llvm::Instruction* insert_before,
                        std::map<std::string, llvm::GlobalVariable*>& qdef_globals) {
   llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
   switch (operand->get_type()) {
-    case SSA_VarOpd:
+    case SSA_VarOpd: {
+      std::pair<int, int> meta = operand->get_meta_num();
+      int value;
+      if (program->get_ddg_propagated_value({{operand->get_opd_var(), meta.first}, meta.second}, &value)) {
+        return llvm::ConstantInt::get(int_type, value);
+      }
+    }
     case SSA_PhiOpd:
       return new llvm::LoadInst(int_type, get_global(operand, qdef_globals), "", insert_before);
     case SSA_NumOpd:
@@ -243,6 +250,9 @@ void deconstruct_phi_nodes(std::map<llvm::GlobalVariable*, llvm::StoreInst*>& de
 
 void ssa_deconstruct() {
   std::map<std::string, llvm::GlobalVariable*> qdef_globals;
+  for (llvm::GlobalVariable& global : module->globals()) {
+    qdef_globals[global.getName().str()] = &global;
+  }
   llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
   llvm::GlobalVariable* cur_context = new llvm::GlobalVariable(int_type, false, llvm::GlobalValue::InternalLinkage,
                                                            llvm::ConstantInt::get(int_type, 0), CUR_CONTEXT_NAME);
