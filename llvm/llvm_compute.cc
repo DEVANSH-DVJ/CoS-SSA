@@ -106,7 +106,7 @@ llvm::Value* get_value(SSA_Opd* operand, llvm::Instruction* insert_before,
   }
 }
 
-void create_assignment(std::list<SSA_Stmt*>* stmts, llvm::Instruction* insert_before,
+void create_assignment(std::list<SSA_Stmt*>* stmts, llvm::Instruction* insert_before, bool keepAsReg,
                        std::map<std::string, llvm::GlobalVariable*>& qdef_globals,
                        std::map<llvm::GlobalVariable*, llvm::StoreInst*>& defs,
                        std::map<llvm::GlobalVariable*, std::set<llvm::GlobalVariable*>>& uses,
@@ -155,7 +155,7 @@ void create_assignment(std::list<SSA_Stmt*>* stmts, llvm::Instruction* insert_be
   }
 
   SSA_Opd* lhs = (*final_stmt)->get_lhs();
-  if (lhs->get_type() == SSA_UsevarOpd) {
+  if (lhs->get_type() == SSA_UsevarOpd || keepAsReg) {
     phi_node_incoming.push_back(std::make_pair(stored_value, insert_before->getParent()));
     return;
   }
@@ -173,17 +173,22 @@ void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instr
   CHECK_INVARIANT(assign != nullptr, "Expected a non null load/store inst");
   CHECK_INVARIANT(metas->size() > 0, "Expected at least one meta assignment");
 
+  bool defsReturnVariable = llvm::isa<llvm::ReturnInst>(assign);
+  llvm::BasicBlock* assignBB = assign->getParent();
   std::vector<std::pair<llvm::Value*, llvm::BasicBlock*>> phi_node_incoming;
   if (metas->size() == 1) {
-    create_assignment(metas->begin()->second->get_stmts(), assign, qdef_globals, defs, uses, phi_node_incoming);
+    create_assignment(metas->begin()->second->get_stmts(), assign, defsReturnVariable, qdef_globals, defs, uses, phi_node_incoming);
     if (llvm::isa<llvm::LoadInst>(assign)) {
       assign->replaceAllUsesWith(phi_node_incoming[0].first);
     }
     assign->eraseFromParent();
+    if (defsReturnVariable) {
+      llvm::IRBuilder<> builder (assignBB);
+      builder.CreateRet(phi_node_incoming[0].first);
+    }
     return;
   }
 
-  llvm::BasicBlock* assignBB = assign->getParent();
   llvm::Function* func = assignBB->getParent();
   llvm::BasicBlock* chainBB = assignBB->splitBasicBlockBefore(assign);
   chainBB->getTerminator()->eraseFromParent();
@@ -203,25 +208,30 @@ void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instr
     builder.SetInsertPoint(trueBB);
     llvm::Instruction* br = builder.CreateBr(assignBB);
 
-    create_assignment(it->second->get_stmts(), br, qdef_globals, defs, uses, phi_node_incoming);
+    create_assignment(it->second->get_stmts(), br, defsReturnVariable, qdef_globals, defs, uses, phi_node_incoming);
+    if (defsReturnVariable) {
+      br->eraseFromParent();
+      builder.CreateRet(phi_node_incoming.back().first);
+    }
 
     builder.SetInsertPoint(falseBB);
   }
 
   llvm::Instruction* br = builder.CreateBr(assignBB);
-  create_assignment(final_meta->second->get_stmts(), br, qdef_globals, defs, uses, phi_node_incoming);
+  create_assignment(final_meta->second->get_stmts(), br, defsReturnVariable, qdef_globals, defs, uses, phi_node_incoming);
+  if (defsReturnVariable) {
+    assign->eraseFromParent();
+    builder.CreateRet(phi_node_incoming.back().first);
+    return;
+  }
 
-  if (llvm::LoadInst* load = llvm::dyn_cast<llvm::LoadInst>(assign)) {
+  if (llvm::LoadInst* load = llvm::dyn_cast<llvm::LoadInst>(assign)) { // OR if this is a store to a "return variable"
     llvm::PHINode* phi = llvm::PHINode::Create(int_type, phi_node_incoming.size());
     phi->insertBefore(assignBB->getFirstNonPHI());
     for (auto pair : phi_node_incoming) {
       phi->addIncoming(pair.first, pair.second);
     }
     load->replaceAllUsesWith(phi);
-    std::cout << "Created phi ";
-    std::cout.flush();
-    phi->print(llvm::outs());
-    std::cout << '\n';
   }
 
   assign->eraseFromParent();
