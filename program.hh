@@ -2,6 +2,7 @@
 #define _PROGRAM_HH_
 
 #include "ddg/ddg_context.hh"
+#include "cfg/cfg_opd.hh"
 
 #include <llvm/IR/Value.h>
 #include <llvm/IR/LLVMContext.h>
@@ -56,6 +57,9 @@ class Program {
   llvm::SMDiagnostic err;
   std::map<int, llvm::Value*> llvm_nodes;
 
+  std::vector<std::set<std::string>> partitions;
+  size_t cur_partition;
+
   /* Helper functions */
   // Parse CFG graph from a file
   void parse_cfg();
@@ -86,6 +90,7 @@ class Program {
   // Dump the LLVM IR to a file
   void dump_llvm();
 
+  void partition_globals();
 public:
   /* Constructors and Destructor */
   Program(std::string tool, std::string input_file);
@@ -133,6 +138,8 @@ public:
   void add_ddg_node(QDef node);
   void remove_ddg_node(QDef node);
   void add_ddg_edge(QDef src, QDef dest);
+
+  bool is_in_cur_partition(CFG_Opd* opd);
 
   void llvm_init_module();
 

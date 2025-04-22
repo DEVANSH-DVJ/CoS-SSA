@@ -8,12 +8,15 @@
 
 extern Program* program;
 
+extern std::string USEVAR;
 QDef gen_qdef(CFG_Node* cfg_node, QNode qnode) {
   const std::string& def = cfg_node->get_def();
   if (cfg_node->get_rhs_operands()[0]->get_type() == CFG_OpdType::CFG_InputOpd) {
     return {{def, qnode.node}, 1};
+  } else if (program->is_in_cur_partition(cfg_node->get_lopd())) {
+    return {{def, qnode.node}, qnode.context};
   }
-  return {{def, qnode.node}, qnode.context};
+  return {{USEVAR, 0}, 1};
 }
 
 void ddg_construct() {
@@ -26,6 +29,7 @@ void ddg_construct() {
     rd_in[{start_main, default_context}].insert({var_name, 0, default_context});
     program->add_ddg_node({var_name, 0, default_context});
   }
+  program->add_ddg_node({{USEVAR, 0}, 1});
   std::map<QNode, std::set<QDef>> rd_out;
 
   std::queue<QNode> worklist;
@@ -82,7 +86,7 @@ void ddg_construct() {
       updated_transition = program->create_ddg_transition(cur_qnode, Context::gen_context(node->get_callee(), rd_in[cur_qnode]));
     } else {
       rd_out[cur_qnode] = rd_in[cur_qnode];
-      if (node->get_type() == CFG_NodeType::CFG_AssignNode) {
+      if (node->get_type() == CFG_NodeType::CFG_AssignNode && program->is_in_cur_partition(node->get_lopd())) {
         std::string killed_var = node->get_def();
         // Applies rd_kill
         std::vector<QDef> to_remove;

@@ -1,9 +1,11 @@
 #include "program.hh"
 #include "headers.hh"
 
-#include <algorithm>
 #include <llvm/IRReader/IRReader.h>
 #include <llvm/IR/Module.h>
+
+#include <queue>
+#include <algorithm>
 
 using namespace std;
 
@@ -333,6 +335,103 @@ void Program::visualize_ssa() {
 
 void Program::dump_llvm() {
   llvm_dump();
+}
+
+const std::string& get_most_interactions(const std::map<std::string, int>& globals) {
+  CHECK_INVARIANT(globals.size() > 0, "Cannot partition empty globals");
+  const std::string* var;
+  int max_interactions = -1;
+  for (auto pair : globals) {
+    if (pair.second > max_interactions) {
+      var = &pair.first;
+      max_interactions = pair.second;
+    }
+  }
+  return *var;
+}
+
+constexpr int MAX_PARTITION_SIZE = 10;
+std::set<std::string> create_partition(std::map<std::string, int>& globals,
+                                       std::map<std::string, std::map<std::string, int>>& interactions) {
+  CHECK_INVARIANT(globals.size() > 0, "Cannot partition empty globals");
+  std::set<std::string> partition;
+
+  auto cmp = [](const std::pair<std::string, int>& l, const std::pair<std::string, int>& r) {
+    return l.second > r.second;
+  };
+  std::priority_queue<std::pair<std::string, int>, std::vector<std::pair<std::string, int>>, decltype(cmp)> queue(cmp);
+
+  std::map<std::string, int> seen_interactions;
+  for (int i = 0; i < MAX_PARTITION_SIZE; ++i) {
+    if (globals.empty()) {
+      return partition;
+    }
+
+    std::string cur;
+    bool found = false;
+    while (!queue.empty()) {
+      cur = queue.top().first;
+      queue.pop();
+      if (partition.find(cur) == partition.end()) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      cur = get_most_interactions(globals);
+    }
+
+    partition.insert(cur);
+    globals.erase(globals.find(cur));
+
+    for (auto pair : interactions[cur]) {
+      globals[pair.first] -= pair.second;
+      interactions[pair.first].erase(interactions[pair.first].find(cur));
+      seen_interactions[pair.first] += pair.second;
+      queue.push(std::make_pair(pair.first, seen_interactions[pair.first]));
+    }
+    interactions.erase(interactions.find(cur));
+  }
+
+  return partition;
+}
+
+void Program::partition_globals() {
+  std::map<std::string, int> globals;
+  std::map<std::string, std::map<std::string, int>> interactions;
+  for (auto pair : *cfg_nodes) {
+    if (pair.second->get_type() != CFG_NodeType::CFG_AssignNode) {
+      continue;
+    }
+    CFG_Opd* lopd = pair.second->get_lopd();
+    std::string def = "";
+    if (lopd->get_type() == CFG_OpdType::CFG_VarOpd) {
+      def = lopd->get_opd_var();
+      if (globals.find(def) == globals.end()) {
+        globals[def] = 0;
+      }
+    }
+    for (const std::string& use : pair.second->get_uses()) {
+      if (def != "") {
+        ++globals[def];
+        ++globals[use];
+        ++interactions[def][use];
+        ++interactions[use][def];
+      } else if (globals.find(use) == globals.end()) {
+        globals[use] = 0;
+      }
+    }
+  }
+
+  while (!globals.empty()) {
+    partitions.push_back(create_partition(globals, interactions));
+  }
+  cur_partition = 0;
+}
+
+bool Program::is_in_cur_partition(CFG_Opd* opd) {
+  return opd->get_type() == CFG_OpdType::CFG_VarOpd
+      && partitions[cur_partition].find(opd->get_opd_var()) != partitions[cur_partition].end();
 }
 
 std::set<std::string> Program::get_globals() {

@@ -2,7 +2,7 @@
 
 extern Program* program;
 
-SSA_Opd* cfg_to_ssa_opd(CFG_Opd* cfg_opd, std::pair<int, int> meta_num, std::map<std::string, SSA_Opd*>& final_versions) {
+SSA_Opd* cfg_to_ssa_opd(CFG_Opd* cfg_opd, std::pair<int, int> meta_num, bool is_def, std::map<std::string, SSA_Opd*>& final_versions) {
   if (cfg_opd == nullptr) {
     return nullptr;
   }
@@ -11,6 +11,9 @@ SSA_Opd* cfg_to_ssa_opd(CFG_Opd* cfg_opd, std::pair<int, int> meta_num, std::map
     case CFG_OpdType::CFG_NumOpd:
       return new SSA_Opd(SSA_NumOpd, cfg_opd->get_opd_value());
     case CFG_OpdType::CFG_VarOpd: {
+      if (!program->is_in_cur_partition(cfg_opd)) {
+        return new SSA_Opd(is_def ? SSA_UsevarOpd : SSA_InputOpd, meta_num);
+      }
       std::string var = cfg_opd->get_opd_var();
       auto it = final_versions.find(var);
       if (it != final_versions.end()) {
@@ -83,7 +86,7 @@ void ssa_construct() {
     }
 
     SSA_Node* node = program->get_ssa_node(qdef.def.node, true);
-    SSA_Opd* lopd = cfg_to_ssa_opd(cfg_node->get_lopd(), std::make_pair(qdef.def.node, qdef.context), final_versions);
+    SSA_Opd* lopd = cfg_to_ssa_opd(cfg_node->get_lopd(), std::make_pair(qdef.def.node, qdef.context), true, final_versions);
     int value;
     if (program->get_ddg_propagated_value(qdef, &value)) {
       // Use the propogated value
@@ -112,8 +115,8 @@ void ssa_construct() {
     }
 
     auto pair = cfg_node->get_ropds();
-    SSA_Opd* ropd1 = cfg_to_ssa_opd(pair.first, std::make_pair(qdef.def.node, qdef.context), final_versions);
-    SSA_Opd* ropd2 = cfg_to_ssa_opd(pair.second, std::make_pair(qdef.def.node, qdef.context), final_versions);
+    SSA_Opd* ropd1 = cfg_to_ssa_opd(pair.first, std::make_pair(qdef.def.node, qdef.context), false, final_versions);
+    SSA_Opd* ropd2 = cfg_to_ssa_opd(pair.second, std::make_pair(qdef.def.node, qdef.context), false, final_versions);
     stmts->push_back(new SSA_Stmt(SSA_AssignStmt, cfg_node->get_op(), lopd, ropd1, ropd2));
 
     node->add_meta(new SSA_Meta(std::make_pair(qdef.def.node, qdef.context), stmts));

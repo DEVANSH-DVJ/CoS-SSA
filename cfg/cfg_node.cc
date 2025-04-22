@@ -156,7 +156,7 @@ const std::string& CFG_Node::get_op() {
   return op;
 }
 
-static std::string USEVAR = "$USEVAR$";
+std::string USEVAR = "$USEVAR$";
 const std::string& CFG_Node::get_def() {
   CHECK_INVARIANT(type == CFG_NodeType::CFG_AssignNode, "Can not get def of non assignment statement");
   return lopd->get_type() == CFG_OpdType::CFG_UsevarOpd ? USEVAR : lopd->get_opd_var();
