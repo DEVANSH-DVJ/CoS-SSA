@@ -125,7 +125,7 @@ void ssa_construct() {
   for (auto pair : *program->get_procs()) {
     for (int node : pair.second->get_ssa_nodes()) {
       SSA_Node* ssa_node = program->get_ssa_node(node, true);
-      if (ssa_node->get_metas()->size() == 0) {
+      if (ssa_node->get_type() == SSA_AssignNode && ssa_node->get_metas()->size() == 0) {
         *ssa_node = SSA_Node(SSA_EmptyNode, ssa_node->get_node_id());
       }
     }

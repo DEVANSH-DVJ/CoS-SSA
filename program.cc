@@ -188,6 +188,10 @@ void Program::construct_ddg() { ddg_construct(); }
 
 void Program::propagate_ddg_constants() { ddg_propagated_values = ddg_propagate_constants(); }
 
+void Program::reduce_ddg() {
+  ddg_reduce();
+}
+
 void Program::detect_dead_ddg_qdefs() { ddg_dead_qdefs = ddg_detect_dead_qdefs(); }
 
 void Program::construct_ssa() {
@@ -430,8 +434,8 @@ void Program::partition_globals() {
 }
 
 bool Program::is_in_cur_partition(CFG_Opd* opd) {
-  return opd->get_type() == CFG_OpdType::CFG_VarOpd
-      && partitions[cur_partition].find(opd->get_opd_var()) != partitions[cur_partition].end();
+  return opd->get_type() == CFG_OpdType::CFG_VarOpd;
+      /*&& partitions[cur_partition].find(opd->get_opd_var()) != partitions[cur_partition].end();*/
 }
 
 std::set<std::string> Program::get_globals() {
@@ -530,6 +534,11 @@ void Program::add_ddg_edge(QDef src, QDef dest) {
   ddg_reverse_edges[dest].insert(src);
 }
 
+void Program::remove_ddg_edge(QDef src, QDef dest) {
+  ddg_edges[src].erase(ddg_edges[src].find(dest));
+  ddg_reverse_edges[dest].erase(ddg_reverse_edges[dest].find(src));
+}
+
 void Program::cleanup() {}
 
 void Program::run() {
@@ -551,6 +560,8 @@ void Program::run() {
     this->parse_cfg_from_llvm();
     this->construct_ddg();
     this->propagate_ddg_constants();
+    this->reduce_ddg();
+    this->detect_dead_ddg_qdefs();
     this->construct_ssa();
     this->deconstruct_ssa();
     this->dump_llvm();

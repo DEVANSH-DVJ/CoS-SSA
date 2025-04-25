@@ -289,6 +289,13 @@ void ssa_deconstruct() {
         continue;
       }
 
+      if (ssa_node->get_type() == SSA_NodeType::SSA_EmptyNode) {
+        if (llvm::Instruction* inst = llvm::dyn_cast<llvm::Instruction>(value)) {
+          inst->eraseFromParent();
+        }
+        continue;
+      }
+
       if (ssa_node->get_type() == SSA_NodeType::SSA_CallNode) {
         if (funcUsesContext.find(ssa_node->get_callee()) != funcUsesContext.end()) {
           deconstruct_context_transition(llvm::dyn_cast<llvm::CallInst>(value), cur_context, program->get_ddg_transitions(ssa_node->get_node_id()));

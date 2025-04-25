@@ -71,6 +71,8 @@ class Program {
   void construct_ddg();
   // Do constant propagation on the DDG
   void propagate_ddg_constants();
+  // Reduce reduncancy in the DDG
+  void reduce_ddg();
   // Do dead code elimination on the DDG
   void detect_dead_ddg_qdefs();
   // Construct the SSA graph from the DDG
@@ -138,6 +140,7 @@ public:
   void add_ddg_node(QDef node);
   void remove_ddg_node(QDef node);
   void add_ddg_edge(QDef src, QDef dest);
+  void remove_ddg_edge(QDef src, QDef dest);
 
   bool is_in_cur_partition(CFG_Opd* opd);
 

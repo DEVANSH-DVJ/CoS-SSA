@@ -16,7 +16,7 @@ QDef gen_qdef(CFG_Node* cfg_node, QNode qnode) {
   } else if (program->is_in_cur_partition(cfg_node->get_lopd())) {
     return {{def, qnode.node}, qnode.context};
   }
-  return {{USEVAR, 0}, 1};
+  return {{USEVAR, qnode.node}, 1};
 }
 
 void ddg_construct() {
@@ -29,7 +29,6 @@ void ddg_construct() {
     rd_in[{start_main, default_context}].insert({var_name, 0, default_context});
     program->add_ddg_node({var_name, 0, default_context});
   }
-  program->add_ddg_node({{USEVAR, 0}, 1});
   std::map<QNode, std::set<QDef>> rd_out;
 
   std::queue<QNode> worklist;
@@ -100,7 +99,9 @@ void ddg_construct() {
         }
 
         // Applies rd_gen
-        rd_out[cur_qnode].insert(gen_qdef(node, cur_qnode));
+        if (node->get_lopd()->get_type() != CFG_OpdType::CFG_UsevarOpd) {
+          rd_out[cur_qnode].insert(gen_qdef(node, cur_qnode));
+        }
       }
     }
 
@@ -142,10 +143,9 @@ void ddg_construct() {
 
 bool get_operand_value(CFG_Opd* opd, int* opd_value, QDef qdef, std::map<QDef, int>& propagated_values) {
   switch (opd->get_type()) {
-    case CFG_OpdType::CFG_NumOpd: {
+    case CFG_OpdType::CFG_NumOpd:
       *opd_value = opd->get_opd_value();
       return true;
-    }
     case CFG_OpdType::CFG_VarOpd: {
       bool found = false;
       for (QDef dependency : program->get_ddg_incoming(qdef)) {
@@ -161,6 +161,15 @@ bool get_operand_value(CFG_Opd* opd, int* opd_value, QDef qdef, std::map<QDef, i
           *opd_value = it->second;
         }
       }
+
+      if (found) {
+        for (QDef incoming : program->get_ddg_incoming(qdef)) {
+          if (incoming.def.var_name == opd->get_opd_var()) {
+            program->remove_ddg_edge(incoming, qdef);
+          }
+        }
+      }
+
       return found;
     }
     default: return false;
@@ -187,8 +196,9 @@ bool propagate_value(QDef qdef, std::map<QDef, int>& propagated_values) {
 
   CHECK_INVARIANT(operands.size() == 2, "Expected 2 operands");
   int v1, v2;
-  if (get_operand_value(operands[0], &v1, qdef, propagated_values)
-      && get_operand_value(operands[1], &v2, qdef, propagated_values)) {
+  bool f1 = get_operand_value(operands[0], &v1, qdef, propagated_values);
+  bool f2 = get_operand_value(operands[1], &v2, qdef, propagated_values);
+  if (f1 && f2) {
     if (op == "+") {
       propagated_values[qdef] = v1 + v2;
       return true;
@@ -301,14 +311,6 @@ bool tryReduce(Def def, const std::set<int>& contexts) {
   return true;
 }
 
-void updateDeps(QDef qdef, const std::set<Def>& reduced) {
-  for (QDef use : program->get_ddg_incoming(qdef)) {
-    if (reduced.find(use.def) != reduced.end()) {
-      program->add_ddg_edge({use.def, 1}, qdef);
-    }
-  }
-}
-
 void ddg_reduce() {
   std::map<Def, std::set<int>> qdefs;
   for (QDef qdef : program->get_ddg_nodes()) {
@@ -318,7 +320,9 @@ void ddg_reduce() {
   std::queue<Def> worklist;
   std::set<Def> reduced;
   for (auto pair : qdefs) {
-    if (tryReduce(pair.first, pair.second)) {
+    if (pair.second.size() == 1) {
+      reduced.insert(pair.first);
+    } else if (tryReduce(pair.first, pair.second)) {
       worklist.push(pair.first);
       reduced.insert(pair.first);
     }
@@ -327,19 +331,14 @@ void ddg_reduce() {
   while (!worklist.empty()) {
     Def def = worklist.front();
     worklist.pop();
-    for (int context : qdefs[def]) {
-      for (QDef use : program->get_ddg_outgoing({def, context})) {
-        updateDeps(use, reduced);
-      }
-      if (context != 1) {
-        program->remove_ddg_node({def, context});
-      }
-      for (QDef use : program->get_ddg_outgoing({def, context})) {
-        if (reduced.find({use.def}) == reduced.end()) {
-          if (tryReduce(use.def, qdefs[use.def])) {
-            worklist.push(use.def);
-            reduced.insert(use.def);
-          }
+    if (reduced.find(def) != reduced.end()) {
+      continue;
+    }
+    for (QDef use : program->get_ddg_outgoing({def, 1})) {
+      if (reduced.find({use.def}) == reduced.end()) {
+        if (tryReduce(use.def, qdefs[use.def])) {
+          worklist.push(use.def);
+          reduced.insert(use.def);
         }
       }
     }
@@ -351,24 +350,14 @@ std::set<QDef> ddg_detect_dead_qdefs() {
   std::queue<QDef> worklist;
   std::map<QDef, int> num_uses;
   for (QDef qdef : program->get_ddg_nodes()) {
+    if (qdef.def.var_name == USEVAR) {
+      continue;
+    }
     int uses = program->get_ddg_outgoing(qdef).size();
     num_uses[qdef] = uses;
     if (uses == 0) {
       worklist.push(qdef);
       dead_qdefs.insert(qdef);
-    }
-  }
-  for (QDef qdef : program->get_ddg_nodes()) {
-    int value;
-    if (program->get_ddg_propagated_value(qdef, &value)) {
-      worklist.push(qdef);
-      dead_qdefs.insert(qdef);
-      for (QDef incoming : program->get_ddg_incoming(qdef)) {
-        if (--num_uses[incoming] == 0) {
-          worklist.push(incoming);
-          dead_qdefs.insert(incoming);
-        }
-      }
     }
   }
 
