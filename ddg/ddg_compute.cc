@@ -346,28 +346,31 @@ void ddg_reduce() {
 }
 
 std::set<QDef> ddg_detect_dead_qdefs() {
-  std::set<QDef> dead_qdefs;
+  std::set<QDef> dead_qdefs = program->get_ddg_nodes();
   std::queue<QDef> worklist;
-  std::map<QDef, int> num_uses;
   for (QDef qdef : program->get_ddg_nodes()) {
     if (qdef.def.var_name == USEVAR) {
-      continue;
-    }
-    int uses = program->get_ddg_outgoing(qdef).size();
-    num_uses[qdef] = uses;
-    if (uses == 0) {
-      worklist.push(qdef);
-      dead_qdefs.insert(qdef);
+      dead_qdefs.erase(dead_qdefs.find(qdef));
+      for (QDef use : program->get_ddg_incoming(qdef)) {
+        auto it = dead_qdefs.find(use);
+        if (it != dead_qdefs.end()) {
+          std::cout << use.def.var_name << '_' << use.def.node << '_' << use.context << " is used\n";
+          dead_qdefs.erase(it);
+          worklist.push(use);
+        }
+      }
     }
   }
 
   while (!worklist.empty()) {
     QDef qdef = worklist.front();
     worklist.pop();
-    for (QDef incoming : program->get_ddg_incoming(qdef)) {
-      if (--num_uses[incoming] == 0) {
-        worklist.push(incoming);
-        dead_qdefs.insert(incoming);
+    for (QDef use : program->get_ddg_incoming(qdef)) {
+      auto it = dead_qdefs.find(use);
+      if (it != dead_qdefs.end()) {
+        std::cout << use.def.var_name << '_' << use.def.node << '_' << use.context << " is used by non usevar\n";
+        dead_qdefs.erase(it);
+        worklist.push(use);
       }
     }
   }
