@@ -61,6 +61,8 @@ public:
   void add_out_edge(SSA_Edge *edge);
   // Add a meta
   void add_meta(SSA_Meta *meta);
+  // Changes an assign node to an empty node
+  void make_empty();
 
   /* Helper functions */
   // Dump the node

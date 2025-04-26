@@ -18,7 +18,7 @@ void llvm_set_out(std::string file) {
 extern llvm::Module* module;
 extern Program* program;
 
-constexpr const char* CUR_CONTEXT_NAME = "__cos_ssa_current_context";
+constexpr const char* CUR_CONTEXT_NAME = "__cos_ssa_current_context_";
 
 void set_context_to(llvm::GlobalVariable* cur_context, int new_context, llvm::Instruction* insert_before) {
   llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
@@ -66,17 +66,6 @@ void deconstruct_context_transition(llvm::CallInst* call, llvm::GlobalVariable* 
 
 llvm::GlobalVariable* get_global(SSA_Opd* operand, std::map<std::string, llvm::GlobalVariable*>& qdef_globals) {
   return qdef_globals[operand->get_opd_var()];
-  /*std::string qdef = operand->str();*/
-  /*auto it = qdef_globals.find(qdef);*/
-  /*if (it == qdef_globals.end()) {*/
-  /*  llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);*/
-  /*  llvm::GlobalVariable* global = new llvm::GlobalVariable(int_type, false, llvm::GlobalValue::InternalLinkage,*/
-  /*                                                          llvm::ConstantInt::get(int_type, 0), qdef);*/
-  /*  module->insertGlobalVariable(global);*/
-  /*  qdef_globals[qdef] = global;*/
-  /*  return global;*/
-  /*}*/
-  /*return it->second;*/
 }
 
 llvm::Value* get_value(SSA_Opd* operand, llvm::Instruction* insert_before,
@@ -100,7 +89,6 @@ llvm::Value* get_value(SSA_Opd* operand, llvm::Instruction* insert_before,
       return llvm::dyn_cast<llvm::StoreInst>(value)->getValueOperand();
     }
     default:
-      std::cout << operand->str() << '\n';
       CHECK_INVARIANT(false, "Expected a variable or number operand");
       return nullptr;
   }
@@ -258,11 +246,7 @@ void deconstruct_phi_nodes(std::map<llvm::GlobalVariable*, llvm::StoreInst*>& de
   }
 }
 
-void ssa_deconstruct() {
-  std::map<std::string, llvm::GlobalVariable*> qdef_globals;
-  for (llvm::GlobalVariable& global : module->globals()) {
-    qdef_globals[global.getName().str()] = &global;
-  }
+void deconstruct_single_partition(std::map<std::string, llvm::GlobalVariable*>& qdef_globals, const std::string& context_var_name) {
   std::set<std::string> funcUsesContext;
   for (auto pair : *program->get_procs()) {
     for (int node : pair.second->get_ssa_nodes()) {
@@ -276,7 +260,8 @@ void ssa_deconstruct() {
 
   llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
   llvm::GlobalVariable* cur_context = new llvm::GlobalVariable(int_type, false, llvm::GlobalValue::InternalLinkage,
-                                                           llvm::ConstantInt::get(int_type, 0), CUR_CONTEXT_NAME);
+                                                           llvm::ConstantInt::get(int_type, 0), context_var_name);
+  module->insertGlobalVariable(cur_context);
 
   std::map<llvm::GlobalVariable*, llvm::StoreInst*> defs;
   std::map<llvm::GlobalVariable*, std::set<llvm::GlobalVariable*>> uses;
@@ -290,9 +275,6 @@ void ssa_deconstruct() {
       }
 
       if (ssa_node->get_type() == SSA_NodeType::SSA_EmptyNode) {
-        if (llvm::Instruction* inst = llvm::dyn_cast<llvm::Instruction>(value)) {
-          inst->eraseFromParent();
-        }
         continue;
       }
 
@@ -310,6 +292,19 @@ void ssa_deconstruct() {
   }
 
   deconstruct_phi_nodes(defs, uses);
+}
+
+void ssa_deconstruct() {
+  std::map<std::string, llvm::GlobalVariable*> qdef_globals;
+  for (llvm::GlobalVariable& global : module->globals()) {
+    qdef_globals[global.getName().str()] = &global;
+  }
+
+  int num_partitions = program->get_num_partitions();
+  for (int cur_partition = 0; cur_partition < num_partitions; ++cur_partition) {
+    program->set_cur_partition(cur_partition);
+    deconstruct_single_partition(qdef_globals, CUR_CONTEXT_NAME + std::to_string(cur_partition));
+  }
 }
 
 void llvm_dump() {

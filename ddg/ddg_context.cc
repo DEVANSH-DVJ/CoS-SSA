@@ -66,7 +66,11 @@ bool ContextTable::update_context(int repr, const Context& context) {
   }
 
   std::set<int>& reprs = context_to_int[it->second];
-  reprs.erase(reprs.find(it->first));
+  if (reprs.size() == 1) {
+    context_to_int.erase(context_to_int.find(it->second));
+  } else {
+    reprs.erase(reprs.find(it->first));
+  }
 
   context_map[repr] = context;
   context_to_int[context].insert(repr);

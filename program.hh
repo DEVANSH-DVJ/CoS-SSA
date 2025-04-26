@@ -22,8 +22,6 @@ class ContextTable;
 class SSA_Edge;
 class SSA_Node;
 
-class Program;
-
 class Program {
   /* State */
   std::string tool;
@@ -38,14 +36,20 @@ class Program {
   std::map<std::pair<int, int>, CFG_Edge *> *cfg_edges;
 
   /* DDG */
-  std::set<QDef> ddg_nodes;
-  ContextTable ddg_context_table;
-  std::map<QDef, std::set<QDef>> ddg_edges;
-  std::map<QDef, std::set<QDef>> ddg_reverse_edges;
-  std::map<QDef, int> ddg_propagated_values;
-  std::set<QDef> ddg_dead_qdefs;
-  std::map<int, std::map<int, int>> ddg_context_transitions;
-  std::map<int, std::set<QNode>> ddg_reverse_context_transitions;
+  struct DDG {
+    std::set<QDef> nodes;
+    ContextTable context_table;
+    std::map<QDef, std::set<QDef>> edges;
+    std::map<QDef, std::set<QDef>> reverse_edges;
+    std::map<QDef, int> propagated_values;
+    std::set<QDef> dead_qdefs;
+    std::map<int, std::map<int, int>> context_transitions;
+    std::map<int, std::set<QNode>> reverse_context_transitions;
+  };
+  std::vector<DDG> ddgs;
+
+  std::vector<std::set<std::string>> partitions;
+  size_t cur_partition;
 
   /* SSA Graph */
   std::map<int, SSA_Node *> *ssa_nodes;
@@ -56,9 +60,6 @@ class Program {
   llvm::LLVMContext context;
   llvm::SMDiagnostic err;
   std::map<int, llvm::Value*> llvm_nodes;
-
-  std::vector<std::set<std::string>> partitions;
-  size_t cur_partition;
 
   /* Helper functions */
   // Parse CFG graph from a file
@@ -75,8 +76,12 @@ class Program {
   void reduce_ddg();
   // Do dead code elimination on the DDG
   void detect_dead_ddg_qdefs();
-  // Construct the SSA graph from the DDG
-  void construct_ssa();
+  // Initialized the SSA graph
+  void init_ssa();
+  // Construct the SSA graph from the current DDG
+  void construct_ssa_partition();
+  // Finalizes the SSA graph by converting empty assignments to empty nodes
+  void finalize_ssa();
   // Deconstruct the SSA graph into LLVM IR
   void deconstruct_ssa();
   // Dump the CFG to a file
@@ -142,6 +147,8 @@ public:
   void add_ddg_edge(QDef src, QDef dest);
   void remove_ddg_edge(QDef src, QDef dest);
 
+  void set_cur_partition(int partition);
+  int get_num_partitions();
   bool is_in_cur_partition(CFG_Opd* opd);
 
   void llvm_init_module();

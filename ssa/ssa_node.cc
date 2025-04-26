@@ -112,6 +112,12 @@ void SSA_Node::add_meta(SSA_Meta *meta) {
   this->metas->insert(make_pair(meta_id, meta));
 }
 
+void SSA_Node::make_empty() {
+  CHECK_INVARIANT(this->type == SSA_AssignNode, "Can not make an Assignment node empty");
+  this->type = SSA_EmptyNode;
+  this->stmt = "EMPTY";
+}
+
 std::map<int, SSA_Meta*>* SSA_Node::get_metas() {
   CHECK_INVARIANT(metas != NULL, "Meta cannot be NULL");
   return metas;

@@ -62,6 +62,8 @@ public:
   void dump_ssa();
   // Visualize SSA graph
   void visualize_ssa();
+
+  void forget_ssa();
 };
 
 #endif

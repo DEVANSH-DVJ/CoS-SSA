@@ -26,8 +26,11 @@ void ddg_construct() {
   std::map<QNode, std::set<QDef>> rd_in;
   rd_in[{start_main, default_context}] = std::set<QDef>();
   for (const std::string& var_name : program->get_globals()) {
-    rd_in[{start_main, default_context}].insert({var_name, 0, default_context});
-    program->add_ddg_node({var_name, 0, default_context});
+    CFG_Opd opd = CFG_Opd(CFG_OpdType::CFG_VarOpd, var_name);
+    if (program->is_in_cur_partition(&opd)) {
+      rd_in[{start_main, default_context}].insert({var_name, 0, default_context});
+      program->add_ddg_node({var_name, 0, default_context});
+    }
   }
   std::map<QNode, std::set<QDef>> rd_out;
 
@@ -354,7 +357,6 @@ std::set<QDef> ddg_detect_dead_qdefs() {
       for (QDef use : program->get_ddg_incoming(qdef)) {
         auto it = dead_qdefs.find(use);
         if (it != dead_qdefs.end()) {
-          std::cout << use.def.var_name << '_' << use.def.node << '_' << use.context << " is used\n";
           dead_qdefs.erase(it);
           worklist.push(use);
         }
@@ -368,7 +370,6 @@ std::set<QDef> ddg_detect_dead_qdefs() {
     for (QDef use : program->get_ddg_incoming(qdef)) {
       auto it = dead_qdefs.find(use);
       if (it != dead_qdefs.end()) {
-        std::cout << use.def.var_name << '_' << use.def.node << '_' << use.context << " is used by non usevar\n";
         dead_qdefs.erase(it);
         worklist.push(use);
       }

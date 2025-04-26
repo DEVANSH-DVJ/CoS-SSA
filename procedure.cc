@@ -158,3 +158,8 @@ void Procedure::visualize_ssa() {
   }
   *dot_fd << "\t}\n";
 }
+
+void Procedure::forget_ssa() {
+  ssa_nodes->clear();
+  ssa_edges->clear();
+}

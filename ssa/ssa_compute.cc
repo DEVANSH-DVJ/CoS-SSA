@@ -1,35 +1,9 @@
+#include "ssa_compute.hh"
 #include "../headers.hh"
 
 extern Program* program;
 
-SSA_Opd* cfg_to_ssa_opd(CFG_Opd* cfg_opd, std::pair<int, int> meta_num, bool is_def, std::map<std::string, SSA_Opd*>& final_versions) {
-  if (cfg_opd == nullptr) {
-    return nullptr;
-  }
-
-  switch (cfg_opd->get_type()) {
-    case CFG_OpdType::CFG_NumOpd:
-      return new SSA_Opd(SSA_NumOpd, cfg_opd->get_opd_value());
-    case CFG_OpdType::CFG_VarOpd: {
-      if (!program->is_in_cur_partition(cfg_opd)) {
-        return new SSA_Opd(is_def ? SSA_UsevarOpd : SSA_InputOpd, meta_num);
-      }
-      std::string var = cfg_opd->get_opd_var();
-      auto it = final_versions.find(var);
-      if (it != final_versions.end()) {
-        return it->second;
-      }
-      return new SSA_Opd(SSA_VarOpd, meta_num, var);
-    }
-    case CFG_OpdType::CFG_InputOpd:
-      return new SSA_Opd(SSA_InputOpd, meta_num);
-    case CFG_OpdType::CFG_UsevarOpd:
-      return new SSA_Opd(SSA_UsevarOpd, meta_num);
-  }
-  return nullptr;
-}
-
-void ssa_construct() {
+void ssa_init() {
   // Create SSA nodes
   for (auto pair : *program->get_procs()) {
     for (int node : pair.second->get_cfg_nodes()) {
@@ -70,7 +44,36 @@ void ssa_construct() {
       }
     }
   }
+}
 
+SSA_Opd* cfg_to_ssa_opd(CFG_Opd* cfg_opd, std::pair<int, int> meta_num, bool is_def, std::map<std::string, SSA_Opd*>& final_versions) {
+  if (cfg_opd == nullptr) {
+    return nullptr;
+  }
+
+  switch (cfg_opd->get_type()) {
+    case CFG_OpdType::CFG_NumOpd:
+      return new SSA_Opd(SSA_NumOpd, cfg_opd->get_opd_value());
+    case CFG_OpdType::CFG_VarOpd: {
+      if (!program->is_in_cur_partition(cfg_opd)) {
+        return new SSA_Opd(is_def ? SSA_UsevarOpd : SSA_InputOpd, meta_num);
+      }
+      std::string var = cfg_opd->get_opd_var();
+      auto it = final_versions.find(var);
+      if (it != final_versions.end()) {
+        return it->second;
+      }
+      return new SSA_Opd(SSA_VarOpd, meta_num, var);
+    }
+    case CFG_OpdType::CFG_InputOpd:
+      return new SSA_Opd(SSA_InputOpd, meta_num);
+    case CFG_OpdType::CFG_UsevarOpd:
+      return new SSA_Opd(SSA_UsevarOpd, meta_num);
+  }
+  return nullptr;
+}
+
+void ssa_construct_partition() {
   for (QDef qdef : program->get_ddg_nodes()) {
     if (qdef.def.node == 0 || program->ddg_is_dead(qdef)) {
       continue;
@@ -103,30 +106,36 @@ void ssa_construct() {
       }
       CHECK_INVARIANT(pair.second.size() >= 2, "Expected at least two incoming defs");
 
-      SSA_Opd* lopd = new SSA_Opd(SSA_PhiOpd, std::make_pair(qdef.def.node, qdef.context), pair.first);
-
       std::list<SSA_Opd*>* ropds = new std::list<SSA_Opd*>();
       for (auto meta_num : pair.second) {
         ropds->push_back(new SSA_Opd(SSA_VarOpd, meta_num, pair.first));
       }
 
-      stmts->push_back(new SSA_Stmt(SSA_PhiStmt, lopd, ropds));
-      final_versions[pair.first] = lopd;
+      stmts->push_back(new SSA_Stmt(SSA_PhiStmt, new SSA_Opd(SSA_PhiOpd, std::make_pair(qdef.def.node, qdef.context), pair.first), ropds));
+      final_versions[pair.first] = new SSA_Opd(SSA_PhiOpd, std::make_pair(qdef.def.node, qdef.context), pair.first);
     }
 
     auto pair = cfg_node->get_ropds();
     SSA_Opd* ropd1 = cfg_to_ssa_opd(pair.first, std::make_pair(qdef.def.node, qdef.context), false, final_versions);
     SSA_Opd* ropd2 = cfg_to_ssa_opd(pair.second, std::make_pair(qdef.def.node, qdef.context), false, final_versions);
+    if (lopd->get_type() == SSA_UsevarOpd && ropd1->get_type() == SSA_InputOpd) {
+      delete lopd;
+      delete ropd1;
+      delete stmts;
+      continue;
+    }
     stmts->push_back(new SSA_Stmt(SSA_AssignStmt, cfg_node->get_op(), lopd, ropd1, ropd2));
 
     node->add_meta(new SSA_Meta(std::make_pair(qdef.def.node, qdef.context), stmts));
   }
+}
 
+void ssa_finalize() {
   for (auto pair : *program->get_procs()) {
     for (int node : pair.second->get_ssa_nodes()) {
       SSA_Node* ssa_node = program->get_ssa_node(node, true);
       if (ssa_node->get_type() == SSA_AssignNode && ssa_node->get_metas()->size() == 0) {
-        *ssa_node = SSA_Node(SSA_EmptyNode, ssa_node->get_node_id());
+        ssa_node->make_empty();
       }
     }
   }

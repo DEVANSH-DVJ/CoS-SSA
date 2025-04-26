@@ -1,5 +1,6 @@
 #include "program.hh"
 #include "headers.hh"
+#include "ssa/ssa_compute.hh"
 
 #include <llvm/IRReader/IRReader.h>
 #include <llvm/IR/Module.h>
@@ -186,16 +187,24 @@ void Program::parse_ssa() { ssa_parse(); }
 
 void Program::construct_ddg() { ddg_construct(); }
 
-void Program::propagate_ddg_constants() { ddg_propagated_values = ddg_propagate_constants(); }
+void Program::propagate_ddg_constants() { ddgs[cur_partition].propagated_values = ddg_propagate_constants(); }
 
 void Program::reduce_ddg() {
   ddg_reduce();
 }
 
-void Program::detect_dead_ddg_qdefs() { ddg_dead_qdefs = ddg_detect_dead_qdefs(); }
+void Program::detect_dead_ddg_qdefs() { ddgs[cur_partition].dead_qdefs = ddg_detect_dead_qdefs(); }
 
-void Program::construct_ssa() {
-  ssa_construct();
+void Program::init_ssa() {
+  ssa_init();
+}
+
+void Program::construct_ssa_partition() {
+  ssa_construct_partition();
+}
+
+void Program::finalize_ssa() {
+  ssa_finalize();
 }
 
 void Program::deconstruct_ssa() {
@@ -259,31 +268,32 @@ void print_qdef(QDef node, const std::map<QDef, int>& propagated_values) {
 }
 
 void Program::visualize_ddg() {
-  std::cout << ddg_context_table.to_string() << '\n';
+  DDG& ddg = ddgs[cur_partition];
+  std::cout << ddg.context_table.to_string() << '\n';
 
-  for (auto pair : ddg_context_transitions) {
+  for (auto pair : ddg.context_transitions) {
     for (auto subpair : pair.second) {
       std::cout << "Context transition at node " << pair.first << ": " << subpair.first << " -> " << subpair.second << '\n';
     }
   }
   std::cout << '\n';
 
-  std::vector<QDef> nodes (ddg_nodes.begin(), ddg_nodes.end());
+  std::vector<QDef> nodes (ddg.nodes.begin(), ddg.nodes.end());
   std::sort(nodes.begin(), nodes.end(), [](QDef l, QDef r) {
     return l.def.node < r.def.node;
   });
 
   for (QDef node : nodes) {
-    print_qdef(node, ddg_propagated_values);
+    print_qdef(node, ddg.propagated_values);
     std::cout << " <- ";
     bool first = true;
-    for (QDef incoming : ddg_reverse_edges[node]) {
+    for (QDef incoming : ddg.reverse_edges[node]) {
       if (first) {
         first = false;
       } else {
         std::cout << ", ";
       }
-      print_qdef(incoming, ddg_propagated_values);
+      print_qdef(incoming, ddg.propagated_values);
     }
     std::cout << '\n';
   }
@@ -341,68 +351,36 @@ void Program::dump_llvm() {
   llvm_dump();
 }
 
-const std::string& get_most_interactions(const std::map<std::string, int>& globals) {
-  CHECK_INVARIANT(globals.size() > 0, "Cannot partition empty globals");
-  const std::string* var;
-  int max_interactions = -1;
-  for (auto pair : globals) {
-    if (pair.second > max_interactions) {
-      var = &pair.first;
-      max_interactions = pair.second;
-    }
-  }
-  return *var;
-}
-
 constexpr int MAX_PARTITION_SIZE = 10;
-std::set<std::string> create_partition(std::map<std::string, int>& globals,
-                                       std::map<std::string, std::map<std::string, int>>& interactions) {
+std::set<std::string> create_partition(std::set<std::string>& globals,
+                                       std::map<std::string, std::set<std::string>>& interactions) {
   CHECK_INVARIANT(globals.size() > 0, "Cannot partition empty globals");
   std::set<std::string> partition;
+  std::queue<std::string> worklist;
 
-  auto cmp = [](const std::pair<std::string, int>& l, const std::pair<std::string, int>& r) {
-    return l.second > r.second;
-  };
-  std::priority_queue<std::pair<std::string, int>, std::vector<std::pair<std::string, int>>, decltype(cmp)> queue(cmp);
-
-  std::map<std::string, int> seen_interactions;
-  for (int i = 0; i < MAX_PARTITION_SIZE; ++i) {
-    if (globals.empty()) {
-      return partition;
-    }
-
-    std::string cur;
-    bool found = false;
-    while (!queue.empty()) {
-      cur = queue.top().first;
-      queue.pop();
-      if (partition.find(cur) == partition.end()) {
-        found = true;
-        break;
+  auto it = globals.begin();
+  worklist.push(*it);
+  partition.insert(*it);
+  globals.erase(it);
+  while (!worklist.empty()) {
+    std::string cur = worklist.front();
+    worklist.pop();
+    for (const std::string& neighbor : interactions[cur]) {
+      auto it = globals.find(neighbor);
+      if (it != globals.end()) {
+        worklist.push(neighbor);
+        partition.insert(neighbor);
+        globals.erase(it);
       }
     }
-    if (!found) {
-      cur = get_most_interactions(globals);
-    }
-
-    partition.insert(cur);
-    globals.erase(globals.find(cur));
-
-    for (auto pair : interactions[cur]) {
-      globals[pair.first] -= pair.second;
-      interactions[pair.first].erase(interactions[pair.first].find(cur));
-      seen_interactions[pair.first] += pair.second;
-      queue.push(std::make_pair(pair.first, seen_interactions[pair.first]));
-    }
-    interactions.erase(interactions.find(cur));
   }
 
   return partition;
 }
 
 void Program::partition_globals() {
-  std::map<std::string, int> globals;
-  std::map<std::string, std::map<std::string, int>> interactions;
+  std::set<std::string> globals;
+  std::map<std::string, std::set<std::string>> interactions;
   for (auto pair : *cfg_nodes) {
     if (pair.second->get_type() != CFG_NodeType::CFG_AssignNode) {
       continue;
@@ -412,17 +390,17 @@ void Program::partition_globals() {
     if (lopd->get_type() == CFG_OpdType::CFG_VarOpd) {
       def = lopd->get_opd_var();
       if (globals.find(def) == globals.end()) {
-        globals[def] = 0;
+        globals.insert(def);
       }
     }
     for (const std::string& use : pair.second->get_uses()) {
-      if (def != "") {
-        ++globals[def];
-        ++globals[use];
-        ++interactions[def][use];
-        ++interactions[use][def];
-      } else if (globals.find(use) == globals.end()) {
-        globals[use] = 0;
+      globals.insert(use);
+      if (def != "" && def != use) {
+        if (def == use) {
+          continue;
+        }
+        interactions[def].insert(use);
+        interactions[use].insert(def);
       }
     }
   }
@@ -430,12 +408,27 @@ void Program::partition_globals() {
   while (!globals.empty()) {
     partitions.push_back(create_partition(globals, interactions));
   }
-  cur_partition = 0;
+
+  for (auto& partition : partitions) {
+    std::cout << "{ ";
+    for (auto& var : partition) {
+      std::cout << var << ' ';
+    }
+    std::cout << "}\n";
+  }
+}
+
+void Program::set_cur_partition(int partition) {
+  cur_partition = partition;
+}
+
+int Program::get_num_partitions() {
+  return partitions.size();
 }
 
 bool Program::is_in_cur_partition(CFG_Opd* opd) {
-  return opd->get_type() == CFG_OpdType::CFG_VarOpd;
-      /*&& partitions[cur_partition].find(opd->get_opd_var()) != partitions[cur_partition].end();*/
+  return opd->get_type() == CFG_OpdType::CFG_VarOpd
+      && partitions[cur_partition].find(opd->get_opd_var()) != partitions[cur_partition].end();
 }
 
 std::set<std::string> Program::get_globals() {
@@ -449,52 +442,54 @@ std::set<std::string> Program::get_globals() {
 }
 
 std::set<QDef> Program::get_ddg_nodes() {
-  return ddg_nodes;
+  return ddgs[cur_partition].nodes;
 }
 
 std::set<QDef> Program::get_ddg_incoming(QDef node) {
-  return ddg_reverse_edges[node];
+  return ddgs[cur_partition].reverse_edges[node];
 }
 
 std::set<QDef> Program::get_ddg_outgoing(QDef node) {
-  return ddg_edges[node];
+  return ddgs[cur_partition].edges[node];
 }
 
 bool Program::create_ddg_transition(QNode from_qnode, const Context& to_context) {
-  auto it = ddg_context_transitions[from_qnode.node].find(from_qnode.context);
-  if (it != ddg_context_transitions[from_qnode.node].end()) {
-    return ddg_context_table.update_context(it->second, to_context);
+  DDG& ddg = ddgs[cur_partition];
+  auto it = ddg.context_transitions[from_qnode.node].find(from_qnode.context);
+  if (it != ddg.context_transitions[from_qnode.node].end()) {
+    return ddg.context_table.update_context(it->second, to_context);
   }
 
-  int context = ddg_context_table.insert_context(to_context);
-  ddg_context_transitions[from_qnode.node][from_qnode.context] = context;
-  ddg_reverse_context_transitions[context].insert(from_qnode);
+  int context = ddg.context_table.insert_context(to_context);
+  ddg.context_transitions[from_qnode.node][from_qnode.context] = context;
+  ddg.reverse_context_transitions[context].insert(from_qnode);
   return true;
 }
 
 std::map<int, int>::iterator Program::get_ddg_transition(QNode from_qnode) {
-  return ddg_context_transitions[from_qnode.node].find(from_qnode.context);
+  return ddgs[cur_partition].context_transitions[from_qnode.node].find(from_qnode.context);
 }
 
 std::map<int, int>& Program::get_ddg_transitions(int node) {
-  return ddg_context_transitions[node];
+  return ddgs[cur_partition].context_transitions[node];
 }
 
 std::map<int, int>::iterator Program::ddg_transitions_end(int node) {
-  return ddg_context_transitions[node].end();
+  return ddgs[cur_partition].context_transitions[node].end();
 }
 
 std::map<int, std::set<QNode>>::iterator Program::get_ddg_reverse_transitions(int to_context) {
-  return ddg_reverse_context_transitions.find(to_context);
+  return ddgs[cur_partition].reverse_context_transitions.find(to_context);
 }
 
   std::map<int, std::set<QNode>>::iterator Program::ddg_reverse_transitions_end() {
-  return ddg_reverse_context_transitions.end();
+  return ddgs[cur_partition].reverse_context_transitions.end();
 }
 
 bool Program::get_ddg_propagated_value(QDef qdef, int* value) {
-  auto it = ddg_propagated_values.find(qdef);
-  if (it != ddg_propagated_values.end()) {
+  DDG& ddg = ddgs[cur_partition];
+  auto it = ddg.propagated_values.find(qdef);
+  if (it != ddg.propagated_values.end()) {
     *value = it->second;
     return true;
   }
@@ -502,41 +497,45 @@ bool Program::get_ddg_propagated_value(QDef qdef, int* value) {
 }
 
 bool Program::ddg_is_dead(QDef qdef) {
-  return ddg_dead_qdefs.find(qdef) != ddg_dead_qdefs.end();
+  DDG& ddg = ddgs[cur_partition];
+  return ddg.dead_qdefs.find(qdef) != ddg.dead_qdefs.end();
 }
 
 int Program::insert_ddg_context(Context context) {
-  return ddg_context_table.insert_context(context);
+  return ddgs[cur_partition].context_table.insert_context(context);
 }
 
 void Program::add_ddg_node(QDef node) {
-  ddg_nodes.insert(node);
+  ddgs[cur_partition].nodes.insert(node);
 }
 
 void Program::remove_ddg_node(QDef node) {
-  CHECK_INVARIANT(ddg_nodes.find(node) != ddg_nodes.end(), "QDef is not an existing node");
+  DDG& ddg = ddgs[cur_partition];
+  CHECK_INVARIANT(ddg.nodes.find(node) != ddg.nodes.end(), "QDef is not an existing node");
 
-  ddg_nodes.erase(ddg_nodes.find(node));
-  for (QDef dest : ddg_edges[node]) {
-    ddg_reverse_edges[dest].erase(ddg_reverse_edges[dest].find(node));
+  ddg.nodes.erase(ddg.nodes.find(node));
+  for (QDef dest : ddg.edges[node]) {
+    ddg.reverse_edges[dest].erase(ddg.reverse_edges[dest].find(node));
   }
-  ddg_edges.erase(ddg_edges.find(node));
-  for (QDef src : ddg_reverse_edges[node]) {
-    ddg_edges[src].erase(ddg_edges[src].find(node));
+  ddg.edges.erase(ddg.edges.find(node));
+  for (QDef src : ddg.reverse_edges[node]) {
+    ddg.edges[src].erase(ddg.edges[src].find(node));
   }
-  ddg_reverse_edges.erase(ddg_reverse_edges.find(node));
+  ddg.reverse_edges.erase(ddg.reverse_edges.find(node));
 }
 
 void Program::add_ddg_edge(QDef src, QDef dest) {
-  ddg_nodes.insert(src);
-  ddg_nodes.insert(dest);
-  ddg_edges[src].insert(dest);
-  ddg_reverse_edges[dest].insert(src);
+  DDG& ddg = ddgs[cur_partition];
+  ddg.nodes.insert(src);
+  ddg.nodes.insert(dest);
+  ddg.edges[src].insert(dest);
+  ddg.reverse_edges[dest].insert(src);
 }
 
 void Program::remove_ddg_edge(QDef src, QDef dest) {
-  ddg_edges[src].erase(ddg_edges[src].find(dest));
-  ddg_reverse_edges[dest].erase(ddg_reverse_edges[dest].find(src));
+  DDG& ddg = ddgs[cur_partition];
+  ddg.edges[src].erase(ddg.edges[src].find(dest));
+  ddg.reverse_edges[dest].erase(ddg.reverse_edges[dest].find(src));
 }
 
 void Program::cleanup() {}
@@ -558,11 +557,18 @@ void Program::run() {
     this->dump_cfg();
   } else if (this->tool == "all") {
     this->parse_cfg_from_llvm();
-    this->construct_ddg();
-    this->propagate_ddg_constants();
-    this->reduce_ddg();
-    this->detect_dead_ddg_qdefs();
-    this->construct_ssa();
+    this->partition_globals();
+
+    this->init_ssa();
+    for (cur_partition = 0; cur_partition < partitions.size(); ++cur_partition) {
+      this->construct_ddg();
+      this->propagate_ddg_constants();
+      this->reduce_ddg();
+      this->detect_dead_ddg_qdefs();
+      this->construct_ssa_partition();
+    }
+    this->finalize_ssa();
+
     this->deconstruct_ssa();
     this->dump_llvm();
   } else {
