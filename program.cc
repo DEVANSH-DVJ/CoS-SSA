@@ -571,6 +571,7 @@ void Program::run() {
     this->parse_cfg();
     this->construct_ddg();
     this->propagate_ddg_constants();
+    this->reduce_ddg();
     this->visualize_ddg();
   } else if (this->tool == "llvm") {
     this->parse_cfg_from_llvm();
