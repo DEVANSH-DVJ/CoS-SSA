@@ -3,6 +3,7 @@
 
 #include "ddg/ddg_context.hh"
 #include "cfg/cfg_opd.hh"
+#include "ddg/ddg_types.hh"
 
 #include <llvm/IR/Value.h>
 #include <llvm/IR/LLVMContext.h>
@@ -150,6 +151,7 @@ public:
   void set_cur_partition(int partition);
   int get_num_partitions();
   bool is_in_cur_partition(CFG_Opd* opd);
+  bool is_part_of_other_partition(int node);
 
   void llvm_init_module();
 

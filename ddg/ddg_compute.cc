@@ -11,12 +11,12 @@ extern Program* program;
 extern std::string USEVAR;
 QDef gen_qdef(CFG_Node* cfg_node, QNode qnode) {
   const std::string& def = cfg_node->get_def();
-  if (cfg_node->get_rhs_operands()[0]->get_type() == CFG_OpdType::CFG_InputOpd) {
+  if (!program->is_in_cur_partition(cfg_node->get_lopd())) {
+    return {{USEVAR, qnode.node}, 1};
+  } else if (cfg_node->get_rhs_operands()[0]->get_type() == CFG_OpdType::CFG_InputOpd) {
     return {{def, qnode.node}, 1};
-  } else if (program->is_in_cur_partition(cfg_node->get_lopd())) {
-    return {{def, qnode.node}, qnode.context};
   }
-  return {{USEVAR, qnode.node}, 1};
+  return {{def, qnode.node}, qnode.context};
 }
 
 void ddg_construct() {
@@ -224,7 +224,7 @@ std::map<QDef, int> ddg_propagate_constants() {
   std::map<QDef, int> propagated_values; // Also serves as an "in_list"
   std::queue<QDef> worklist;
   for (QDef qdef : program->get_ddg_nodes()) {
-    if (propagate_value(qdef, propagated_values)) {
+    if (!program->is_part_of_other_partition(qdef.def.node) && propagate_value(qdef, propagated_values)) {
       worklist.push(qdef);
     }
   }
@@ -234,7 +234,7 @@ std::map<QDef, int> ddg_propagate_constants() {
     worklist.pop();
 
     for (QDef outgoing : program->get_ddg_outgoing(qdef)) {
-      if (propagate_value(outgoing, propagated_values)) {
+      if (!program->is_part_of_other_partition(outgoing.def.node) && propagate_value(outgoing, propagated_values)) {
         worklist.push(outgoing);
       }
     }

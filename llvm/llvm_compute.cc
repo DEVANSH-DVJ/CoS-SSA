@@ -96,21 +96,10 @@ llvm::Value* get_value(SSA_Opd* operand, llvm::Instruction* insert_before,
 
 void create_assignment(std::list<SSA_Stmt*>* stmts, llvm::Instruction* insert_before, bool keepAsReg,
                        std::map<std::string, llvm::GlobalVariable*>& qdef_globals,
-                       std::map<llvm::GlobalVariable*, llvm::StoreInst*>& defs,
-                       std::map<llvm::GlobalVariable*, std::set<llvm::GlobalVariable*>>& uses,
                        std::vector<std::pair<llvm::Value*, llvm::BasicBlock*>>& phi_node_incoming) {
   CHECK_INVARIANT(stmts->size() > 0, "Expected at least one statement for each metamorphic assignment");
   auto final_stmt = --stmts->end();
   CHECK_INVARIANT((*final_stmt)->get_type() == SSA_AssignStmt, "Expected final stmt to be an assign stmt");
-  for (auto it = stmts->begin(); it != final_stmt; ++it) {
-    // PHI nodes will be deconstructed in a second pass
-    CHECK_INVARIANT((*it)->get_type() == SSA_PhiStmt, "Expected PHI stmt");
-    llvm::GlobalVariable* lhs = get_global((*it)->get_lhs(), qdef_globals);
-    for (SSA_Opd* use : *(*it)->get_phi_uses()) {
-      llvm::GlobalVariable* rhs = get_global(use, qdef_globals);
-      uses[rhs].insert(lhs);
-    }
-  }
 
   std::vector<SSA_Opd*> operands = (*final_stmt)->get_rhs();
   std::string op = (*final_stmt)->get_op();
@@ -150,14 +139,11 @@ void create_assignment(std::list<SSA_Stmt*>* stmts, llvm::Instruction* insert_be
 
   llvm::GlobalVariable* store_loc = get_global((*final_stmt)->get_lhs(), qdef_globals);
 
-  llvm::StoreInst* store = new llvm::StoreInst(stored_value, store_loc, insert_before);
-  defs[store_loc] = store;
+  new llvm::StoreInst(stored_value, store_loc, insert_before);
 }
 
 void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instruction* assign, llvm::GlobalVariable* cur_context,
-                                    std::map<std::string, llvm::GlobalVariable*>& qdef_globals,
-                                    std::map<llvm::GlobalVariable*, llvm::StoreInst*>& defs,
-                                    std::map<llvm::GlobalVariable*, std::set<llvm::GlobalVariable*>>& uses) {
+                                    std::map<std::string, llvm::GlobalVariable*>& qdef_globals) {
   CHECK_INVARIANT(assign != nullptr, "Expected a non null load/store inst");
   CHECK_INVARIANT(metas->size() > 0, "Expected at least one meta assignment");
 
@@ -165,7 +151,7 @@ void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instr
   llvm::BasicBlock* assignBB = assign->getParent();
   std::vector<std::pair<llvm::Value*, llvm::BasicBlock*>> phi_node_incoming;
   if (metas->size() == 1) {
-    create_assignment(metas->begin()->second->get_stmts(), assign, defsReturnVariable, qdef_globals, defs, uses, phi_node_incoming);
+    create_assignment(metas->begin()->second->get_stmts(), assign, defsReturnVariable, qdef_globals, phi_node_incoming);
     if (llvm::isa<llvm::LoadInst>(assign)) {
       assign->replaceAllUsesWith(phi_node_incoming[0].first);
     }
@@ -196,7 +182,7 @@ void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instr
     builder.SetInsertPoint(trueBB);
     llvm::Instruction* br = builder.CreateBr(assignBB);
 
-    create_assignment(it->second->get_stmts(), br, defsReturnVariable, qdef_globals, defs, uses, phi_node_incoming);
+    create_assignment(it->second->get_stmts(), br, defsReturnVariable, qdef_globals, phi_node_incoming);
     if (defsReturnVariable) {
       br->eraseFromParent();
       builder.CreateRet(phi_node_incoming.back().first);
@@ -206,7 +192,7 @@ void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instr
   }
 
   llvm::Instruction* br = builder.CreateBr(assignBB);
-  create_assignment(final_meta->second->get_stmts(), br, defsReturnVariable, qdef_globals, defs, uses, phi_node_incoming);
+  create_assignment(final_meta->second->get_stmts(), br, defsReturnVariable, qdef_globals, phi_node_incoming);
   if (defsReturnVariable) {
     assign->eraseFromParent();
     builder.CreateRet(phi_node_incoming.back().first);
@@ -223,27 +209,6 @@ void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instr
   }
 
   assign->eraseFromParent();
-}
-
-void deconstruct_phi_nodes(std::map<llvm::GlobalVariable*, llvm::StoreInst*>& defs,
-                           std::map<llvm::GlobalVariable*, std::set<llvm::GlobalVariable*>>& uses) {
-  for (auto pair : uses) {
-    auto it = defs.find(pair.first);
-    if (it == defs.end()) {
-      // All phi node uses depend on the default value, so set their default value to be the same as this
-      CHECK_INVARIANT(pair.first->getNumOperands() == 1, "Expected a global variable with a single operand");
-      llvm::Value* default_value = pair.first->getOperand(0);
-      for (llvm::GlobalVariable* use : pair.second) {
-        use->setOperand(0, default_value);
-      }
-      continue;
-    }
-
-    llvm::StoreInst* store = it->second;
-    for (llvm::GlobalVariable* use : pair.second) {
-      new llvm::StoreInst(store->getValueOperand(), use, store);
-    }
-  }
 }
 
 void deconstruct_single_partition(std::map<std::string, llvm::GlobalVariable*>& qdef_globals, const std::string& context_var_name) {
@@ -263,11 +228,12 @@ void deconstruct_single_partition(std::map<std::string, llvm::GlobalVariable*>& 
                                                            llvm::ConstantInt::get(int_type, 0), context_var_name);
   module->insertGlobalVariable(cur_context);
 
-  std::map<llvm::GlobalVariable*, llvm::StoreInst*> defs;
-  std::map<llvm::GlobalVariable*, std::set<llvm::GlobalVariable*>> uses;
-
   for (auto pair : *program->get_procs()) {
     for (int node : pair.second->get_ssa_nodes()) {
+      if (program->is_part_of_other_partition(node)) {
+        continue;
+      }
+
       SSA_Node* ssa_node = program->get_ssa_node(node, true);
       llvm::Value* value = program->get_llvm_node(node, true);
       if (value == nullptr) {
@@ -275,6 +241,14 @@ void deconstruct_single_partition(std::map<std::string, llvm::GlobalVariable*>& 
       }
 
       if (ssa_node->get_type() == SSA_NodeType::SSA_EmptyNode) {
+        if (llvm::Instruction* inst = llvm::dyn_cast<llvm::Instruction>(value)) {
+          inst->replaceAllUsesWith(llvm::ConstantInt::get(int_type, 0));
+          if (!inst->getParent()) {
+            inst->print(llvm::outs());
+            llvm::outs() << '\n';
+          }
+          inst->eraseFromParent();
+        }
         continue;
       }
 
@@ -287,11 +261,9 @@ void deconstruct_single_partition(std::map<std::string, llvm::GlobalVariable*>& 
 
       CHECK_INVARIANT(ssa_node->get_type() == SSA_NodeType::SSA_AssignNode, "Expected assign node");
       std::map<int, SSA_Meta*>* metas = ssa_node->get_metas();
-      deconstruct_metamorphic_assign(metas, llvm::dyn_cast<llvm::Instruction>(value), cur_context, qdef_globals, defs, uses);
+      deconstruct_metamorphic_assign(metas, llvm::dyn_cast<llvm::Instruction>(value), cur_context, qdef_globals);
     }
   }
-
-  deconstruct_phi_nodes(defs, uses);
 }
 
 void ssa_deconstruct() {

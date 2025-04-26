@@ -408,6 +408,7 @@ void Program::partition_globals() {
   while (!globals.empty()) {
     partitions.push_back(create_partition(globals, interactions));
   }
+  ddgs.resize(partitions.size());
 
   for (auto& partition : partitions) {
     std::cout << "{ ";
@@ -429,6 +430,25 @@ int Program::get_num_partitions() {
 bool Program::is_in_cur_partition(CFG_Opd* opd) {
   return opd->get_type() == CFG_OpdType::CFG_VarOpd
       && partitions[cur_partition].find(opd->get_opd_var()) != partitions[cur_partition].end();
+}
+
+bool Program::is_part_of_other_partition(int node) {
+  if (node == 0) {
+    return false;
+  }
+  CFG_Node* cfg_node = get_cfg_node(node, true);
+  if (cfg_node->get_type() != CFG_AssignNode) {
+    return false;
+  }
+  if (cfg_node->get_lopd()->get_type() == CFG_OpdType::CFG_VarOpd) {
+    return partitions[cur_partition].find(cfg_node->get_def()) == partitions[cur_partition].end();
+  }
+  for (const std::string& def : cfg_node->get_uses()) {
+    if (partitions[cur_partition].find(def) == partitions[cur_partition].end()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 std::set<std::string> Program::get_globals() {

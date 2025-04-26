@@ -75,7 +75,7 @@ SSA_Opd* cfg_to_ssa_opd(CFG_Opd* cfg_opd, std::pair<int, int> meta_num, bool is_
 
 void ssa_construct_partition() {
   for (QDef qdef : program->get_ddg_nodes()) {
-    if (qdef.def.node == 0 || program->ddg_is_dead(qdef)) {
+    if (qdef.def.node == 0 || program->is_part_of_other_partition(qdef.def.node) || program->ddg_is_dead(qdef)) {
       continue;
     }
 
@@ -92,7 +92,7 @@ void ssa_construct_partition() {
     SSA_Opd* lopd = cfg_to_ssa_opd(cfg_node->get_lopd(), std::make_pair(qdef.def.node, qdef.context), true, final_versions);
     int value;
     if (program->get_ddg_propagated_value(qdef, &value)) {
-      // Use the propogated value
+      // Use the propagated value
       stmts->push_back(new SSA_Stmt(SSA_AssignStmt, "=", lopd, new SSA_Opd(SSA_NumOpd, value), nullptr));
       node->add_meta(new SSA_Meta(std::make_pair(qdef.def.node, qdef.context), stmts));
       continue;
