@@ -396,7 +396,7 @@ std::string get_most_interactions(const std::map<std::string, int>& globals) {
   return var;
 }
 
-constexpr int MAX_PARTITION_SIZE = 3;
+constexpr int MAX_PARTITION_SIZE = 10;
 void create_partition(std::map<std::string, int>& globals,
                                        std::map<std::string, std::map<std::string, int>>& interactions,
                                        DisjointSets& partitions) {
