@@ -168,17 +168,13 @@ void erase_removable_operand(llvm::Value* value) {
   }
 }
 
-void erase_removable_rhs(llvm::Value* value) {
-  if (llvm::Instruction* inst = llvm::dyn_cast<llvm::Instruction>(value)) {
-    erase_removable_operand(inst->getOperand(0));
-    erase_removable_operand(inst->getOperand(1));
-    if (inst->getNumUses() == 1) {
-      llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
-      inst->replaceAllUsesWith(llvm::ConstantInt::get(int_type, 0));
-      inst->eraseFromParent();
-    }
-  } else {
-    erase_removable_operand(value);
+void erase_removable_rhs(llvm::Instruction* inst) {
+  erase_removable_operand(inst->getOperand(0));
+  erase_removable_operand(inst->getOperand(1));
+  if (inst->getNumUses() == 1) {
+    llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
+    inst->replaceAllUsesWith(llvm::ConstantInt::get(int_type, 0));
+    inst->eraseFromParent();
   }
 }
 
@@ -523,7 +519,12 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> split_node(CFG_Node* node, llvm:
       }
     }
     if (value != nullptr) {
-      erase_removable_rhs(llvm::dyn_cast<llvm::StoreInst>(value)->getValueOperand());
+      llvm::Value* operand = llvm::dyn_cast<llvm::StoreInst>(value)->getValueOperand();
+      if (node->get_op() == "=") {
+        erase_removable_operand(value);
+      } else {
+        erase_removable_rhs(llvm::dyn_cast<llvm::Instruction>(operand));
+      }
     }
   }
 

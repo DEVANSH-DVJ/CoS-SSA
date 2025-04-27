@@ -98,7 +98,7 @@ class Program {
   // Dump the LLVM IR to a file
   void dump_llvm();
 
-  void partition_globals();
+  void partition_globals(bool single_partition = false);
 public:
   /* Constructors and Destructor */
   Program(std::string tool, std::string input_file);

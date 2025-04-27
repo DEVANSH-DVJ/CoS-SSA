@@ -378,7 +378,7 @@ std::set<std::string> create_partition(std::set<std::string>& globals,
   return partition;
 }
 
-void Program::partition_globals() {
+void Program::partition_globals(bool single_partition) {
   std::set<std::string> globals;
   std::map<std::string, std::set<std::string>> interactions;
   for (auto pair : *cfg_nodes) {
@@ -405,18 +405,16 @@ void Program::partition_globals() {
     }
   }
 
+  if (single_partition) {
+    partitions.push_back(globals);
+    ddgs.resize(1);
+    return;
+  }
+
   while (!globals.empty()) {
     partitions.push_back(create_partition(globals, interactions));
   }
   ddgs.resize(partitions.size());
-
-  for (auto& partition : partitions) {
-    std::cout << "{ ";
-    for (auto& var : partition) {
-      std::cout << var << ' ';
-    }
-    std::cout << "}\n";
-  }
 }
 
 void Program::set_cur_partition(int partition) {
@@ -477,7 +475,18 @@ bool Program::create_ddg_transition(QNode from_qnode, const Context& to_context)
   DDG& ddg = ddgs[cur_partition];
   auto it = ddg.context_transitions[from_qnode.node].find(from_qnode.context);
   if (it != ddg.context_transitions[from_qnode.node].end()) {
-    return ddg.context_table.update_context(it->second, to_context);
+    int new_context = it->second;
+    bool updated = ddg.context_table.update_context(&new_context, to_context);
+    if (new_context != it->second) {
+      // If we have a new context, the old context is still in use
+      ddg.context_transitions[from_qnode.node][from_qnode.context] = new_context;
+      auto transitionIt = ddg.reverse_context_transitions[it->second].find(from_qnode);
+      if (transitionIt != ddg.reverse_context_transitions[it->second].end()) {
+        ddg.reverse_context_transitions[it->second].erase(ddg.reverse_context_transitions[it->second].find(from_qnode));
+      }
+      ddg.reverse_context_transitions[new_context].insert(from_qnode);
+    }
+    return updated;
   }
 
   int context = ddg.context_table.insert_context(to_context);
@@ -569,6 +578,8 @@ void Program::run() {
     this->visualize_ssa();
   } else if (this->tool == "ddg") {
     this->parse_cfg();
+    this->partition_globals(true);
+    cur_partition = 0;
     this->construct_ddg();
     this->propagate_ddg_constants();
     this->reduce_ddg();

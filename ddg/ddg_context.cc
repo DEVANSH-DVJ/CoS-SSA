@@ -48,32 +48,37 @@ Context* ContextTable::get_context(int context) {
 }
 
 int ContextTable::insert_context(const Context& context) {
-  auto it = context_to_int.find(context);
-  if (it == context_to_int.end()) {
+  auto it = context_to_repr.find(context);
+  if (it == context_to_repr.end()) {
     context_map[next_context] = context;
-    context_to_int[context].insert(next_context);
+    context_to_repr[context][next_context] = 1;
     return next_context++;
   }
-  return *it->second.begin();
+  auto repr = it->second.begin();
+  ++repr->second;
+  return repr->first;
 }
 
-bool ContextTable::update_context(int repr, const Context& context) {
-  auto it = context_map.find(repr);
+bool ContextTable::update_context(int* repr, const Context& context) {
+  auto it = context_map.find(*repr);
   CHECK_INVARIANT(it != context_map.end(), "Context represented by integer does not exist");
 
-  if(it->second == context) {
+  if (it->second == context) {
     return false;
   }
 
-  std::set<int>& reprs = context_to_int[it->second];
-  if (reprs.size() == 1) {
-    context_to_int.erase(context_to_int.find(it->second));
-  } else {
-    reprs.erase(reprs.find(it->first));
-  }
+  auto context_repr = context_to_repr[it->second].find(*repr);
+  if (--context_repr->second == 0) {
+    context_to_repr[it->second].erase(context_repr);
+    if (context_to_repr[it->second].empty()) {
+      context_to_repr.erase(context_to_repr.find(it->second));
+    }
 
-  context_map[repr] = context;
-  context_to_int[context].insert(repr);
+    context_map[*repr] = context;
+    context_to_repr[context][*repr] = 1;
+  } else {
+    *repr = insert_context(context);
+  }
 
   return true;
 }

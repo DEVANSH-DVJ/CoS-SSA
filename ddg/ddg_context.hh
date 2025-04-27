@@ -28,12 +28,12 @@ public:
 
   int insert_context(const Context& context);
 
-  bool update_context(int repr, const Context& context);
+  bool update_context(int* repr, const Context& context);
 
   std::string to_string();
 private:
   std::map<int, Context> context_map;
-  std::map<Context, std::set<int>> context_to_int;
+  std::map<Context, std::map<int, int>> context_to_repr;
   int next_context = 1;
 };
 
