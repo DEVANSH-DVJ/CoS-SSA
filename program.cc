@@ -25,7 +25,7 @@ Program::Program(string tool, string input_name) {
   this->tool = tool;
   this->input_name = input_name;
 
-  if (this->tool == "cfg" || this->tool == "ddg") {
+  if (this->tool == "cfg" || this->tool == "ddg" || this->tool == "cfg-to-ssa") {
     string cfg_file = this->input_name + ".cfg";
     cfg_set_in(fopen(cfg_file.c_str(), "r"));
     cfg_set_out(fopen("/dev/null", "w"));
@@ -584,6 +584,21 @@ void Program::run() {
     this->propagate_ddg_constants();
     this->reduce_ddg();
     this->visualize_ddg();
+  } else if (this->tool == "cfg-to-ssa") {
+    this->parse_cfg();
+    this->partition_globals();
+
+    this->init_ssa();
+    for (cur_partition = 0; cur_partition < partitions.size(); ++cur_partition) {
+      this->construct_ddg();
+      this->propagate_ddg_constants();
+      this->reduce_ddg();
+      this->detect_dead_ddg_qdefs();
+      this->construct_ssa_partition();
+    }
+    this->finalize_ssa();
+
+    this->dump_ssa();
   } else if (this->tool == "llvm") {
     this->parse_cfg_from_llvm();
     this->dump_cfg();

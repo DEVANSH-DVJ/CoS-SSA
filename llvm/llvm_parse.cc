@@ -132,12 +132,12 @@ GlobalInfo get_globals(llvm::Module* module) {
         /*  }*/
         // TODO: handle parameters
         // "Promote" returns to globals
-        /*} else if (llvm::CallInst* call = llvm::dyn_cast<llvm::CallInst>(&inst)) {*/
-        /*  if (is_usable_func(call->getCalledFunction())) {*/
-        /*    globals.loads[&inst] = func_ret_to_global(call->getCalledFunction());*/
-        /*  }*/
-        /*} else if (llvm::isa<llvm::ReturnInst>(&inst)) {*/
-        /*  globals.stores[&inst] = func_ret_to_global(&func);*/
+        } else if (llvm::CallInst* call = llvm::dyn_cast<llvm::CallInst>(&inst)) {
+          if (is_usable_func(call->getCalledFunction())) {
+            globals.loads[&inst] = func_ret_to_global(call->getCalledFunction());
+          }
+        } else if (llvm::isa<llvm::ReturnInst>(&inst) && func.getName().str() != "main") {
+          globals.stores[&inst] = func_ret_to_global(&func);
         }
       }
     }
@@ -260,13 +260,13 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> get_nodes_in_basic_block(const s
         if (it != globals.functions.end()) {
           res.push_back(std::make_pair(new CFG_Node(CFG_NodeType::CFG_CallNode, 0, "CALL " + *it, *it), call));
         }
+      } else {
+        // If this is actually not used by a USEVAR, this will be removed later
+        res.push_back(std::make_pair(
+          new CFG_Node(CFG_NodeType::CFG_AssignNode, 0, "=", new CFG_Opd(CFG_OpdType::CFG_UsevarOpd), new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), nullptr),
+          &inst
+        ));
       }
-
-      // If this is actually not used by a USEVAR, this will be removed later
-      res.push_back(std::make_pair(
-        new CFG_Node(CFG_NodeType::CFG_AssignNode, 0, "=", new CFG_Opd(CFG_OpdType::CFG_UsevarOpd), new CFG_Opd(CFG_OpdType::CFG_VarOpd, it->second), nullptr),
-        &inst
-      ));
     } else {
       auto it = globals.stores.find(&inst);
       if (it != globals.stores.end()) {
@@ -519,7 +519,14 @@ std::vector<std::pair<CFG_Node*, llvm::Value*>> split_node(CFG_Node* node, llvm:
       }
     }
     if (value != nullptr) {
-      llvm::Value* operand = llvm::dyn_cast<llvm::StoreInst>(value)->getValueOperand();
+      llvm::Value* operand = nullptr;
+      if (llvm::StoreInst* store = llvm::dyn_cast<llvm::StoreInst>(value)) {
+        operand = store->getValueOperand();
+      } else if (llvm::ReturnInst* ret = llvm::dyn_cast<llvm::ReturnInst>(value)) {
+        operand = ret->getOperand(0);
+      } else {
+        CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Expected a store or return instruction");
+      }
       if (node->get_op() == "=") {
         erase_removable_operand(value);
       } else {

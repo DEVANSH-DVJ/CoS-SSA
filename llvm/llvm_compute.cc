@@ -68,7 +68,32 @@ llvm::GlobalVariable* get_global(SSA_Opd* operand, std::map<std::string, llvm::G
   return qdef_globals[operand->get_opd_var()];
 }
 
-llvm::Value* get_value(SSA_Opd* operand, llvm::Instruction* insert_before,
+llvm::CallInst* extract_ret_var_operand(llvm::Value* operand, int operand_num) {
+  if (llvm::isa<llvm::LoadInst>(operand)) { // Variable passed to a USEVAR
+    return nullptr;
+  }
+
+  llvm::Value* rhs;
+
+  if (llvm::StoreInst* store = llvm::dyn_cast<llvm::StoreInst>(operand)) {
+    rhs = store->getValueOperand();
+  } else if (llvm::ReturnInst* ret = llvm::dyn_cast<llvm::ReturnInst>(operand)) {
+    rhs = ret->getOperand(0);
+  } else {
+    CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Expected store or return inst");
+  }
+
+  llvm::CallInst* call;
+  if (operand_num == 0 && (call = llvm::dyn_cast<llvm::CallInst>(rhs))) {
+    return call;
+  } else if (llvm::Instruction* inst = llvm::dyn_cast<llvm::Instruction>(rhs)) {
+    return llvm::dyn_cast<llvm::CallInst>(inst->getOperand(operand_num));
+  }
+
+  return nullptr;
+}
+
+llvm::Value* get_value(SSA_Opd* operand, int operand_num, int node_num, llvm::Instruction* insert_before,
                        std::map<std::string, llvm::GlobalVariable*>& qdef_globals) {
   llvm::Type* int_type = llvm::IntegerType::get(module->getContext(), 32);
   switch (operand->get_type()) {
@@ -78,6 +103,10 @@ llvm::Value* get_value(SSA_Opd* operand, llvm::Instruction* insert_before,
       if (program->get_ddg_propagated_value({{operand->get_opd_var(), meta.first}, meta.second}, &value)) {
         return llvm::ConstantInt::get(int_type, value);
       }
+      if (llvm::CallInst* call = extract_ret_var_operand(program->get_llvm_node(node_num, true), operand_num)) {
+        return call;
+      }
+      // Else fall down to the SSA_PhiOpd case
     }
     case SSA_PhiOpd:
       return new llvm::LoadInst(int_type, get_global(operand, qdef_globals), "", insert_before);
@@ -85,8 +114,12 @@ llvm::Value* get_value(SSA_Opd* operand, llvm::Instruction* insert_before,
       return llvm::ConstantInt::get(int_type, operand->get_opd_value());
     case SSA_InputOpd: {
       llvm::Value* value = program->get_llvm_node(operand->get_meta_num().first, true);
-      CHECK_INVARIANT(llvm::isa<llvm::StoreInst>(value), "Expected store inst");
-      return llvm::dyn_cast<llvm::StoreInst>(value)->getValueOperand();
+      if (llvm::StoreInst* store = llvm::dyn_cast<llvm::StoreInst>(value)) {
+        return store->getValueOperand();
+      } else if (llvm::ReturnInst* ret = llvm::dyn_cast<llvm::ReturnInst>(value)) {
+        return ret->getOperand(0);
+      }
+      CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Expected store or return inst");
     }
     default:
       CHECK_INVARIANT(false, "Expected a variable or number operand");
@@ -103,13 +136,14 @@ void create_assignment(std::list<SSA_Stmt*>* stmts, llvm::Instruction* insert_be
 
   std::vector<SSA_Opd*> operands = (*final_stmt)->get_rhs();
   std::string op = (*final_stmt)->get_op();
+  int node_num = (*final_stmt)->get_lhs()->get_meta_num().first;
   llvm::Value* stored_value;
   if (op == "=") {
     CHECK_INVARIANT(operands.size() == 1, "Expected 1 operand");
-    stored_value = get_value(operands[0], insert_before, qdef_globals);
+    stored_value = get_value(operands[0], 0, node_num, insert_before, qdef_globals);
   } else {
-    llvm::Value* v1 = get_value(operands[0], insert_before, qdef_globals);
-    llvm::Value* v2 = get_value(operands[1], insert_before, qdef_globals);
+    llvm::Value* v1 = get_value(operands[0], 0, node_num, insert_before, qdef_globals);
+    llvm::Value* v2 = get_value(operands[1], 1, node_num, insert_before, qdef_globals);
     if (op == "+") {
       llvm::Instruction* inst = llvm::BinaryOperator::CreateAdd(v1, v2);
       inst->insertBefore(insert_before);
@@ -199,7 +233,7 @@ void deconstruct_metamorphic_assign(std::map<int, SSA_Meta*>* metas, llvm::Instr
     return;
   }
 
-  if (llvm::LoadInst* load = llvm::dyn_cast<llvm::LoadInst>(assign)) { // OR if this is a store to a "return variable"
+  if (llvm::LoadInst* load = llvm::dyn_cast<llvm::LoadInst>(assign)) {
     llvm::PHINode* phi = llvm::PHINode::Create(int_type, phi_node_incoming.size());
     phi->insertBefore(assignBB->getFirstNonPHI());
     for (auto pair : phi_node_incoming) {
@@ -241,12 +275,11 @@ void deconstruct_single_partition(std::map<std::string, llvm::GlobalVariable*>& 
       }
 
       if (ssa_node->get_type() == SSA_NodeType::SSA_EmptyNode) {
+        if (llvm::isa<llvm::ReturnInst>(value)) {
+          continue;
+        }
         if (llvm::Instruction* inst = llvm::dyn_cast<llvm::Instruction>(value)) {
           inst->replaceAllUsesWith(llvm::ConstantInt::get(int_type, 0));
-          if (!inst->getParent()) {
-            inst->print(llvm::outs());
-            llvm::outs() << '\n';
-          }
           inst->eraseFromParent();
         }
         continue;
@@ -263,6 +296,10 @@ void deconstruct_single_partition(std::map<std::string, llvm::GlobalVariable*>& 
       std::map<int, SSA_Meta*>* metas = ssa_node->get_metas();
       deconstruct_metamorphic_assign(metas, llvm::dyn_cast<llvm::Instruction>(value), cur_context, qdef_globals);
     }
+  }
+
+  if (cur_context->getNumUses() == 0) {
+    cur_context->eraseFromParent();
   }
 }
 

@@ -46,6 +46,12 @@ int main(int argc, char **argv) {
     program = new Program("ddg", input_file.substr(0, input_file.length() - 4));
     program->run();
     break;
+  case TOOL_CFG_TO_SSA:
+    CHECK_INPUT_AND_ABORT(input_file.substr(input_file.length() - 4) == ".cfg",
+                          "Input file must be a .cfg file");
+    program = new Program("cfg-to-ssa", input_file.substr(0, input_file.length() - 4));
+    program->run();
+    break;
   case TOOL_LLVM:
     CHECK_INPUT_AND_ABORT(input_file.substr(input_file.length() - 3) == ".ll",
                           "Input file must be a .ll file");
